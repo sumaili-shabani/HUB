@@ -2,7 +2,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="">
-<meta name="author" content="Boutique">
+<meta name="author" content="Hub">
 
 <title><?php echo($title) ?></title>
 
@@ -18,7 +18,19 @@
 <!-- Custom styles for this page -->
 <link href="<?php echo(base_url())?>js/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 <!-- Fav Icon  -->
-<link rel="shortcut icon" href="<?php echo(base_url()) ?>upload/annumation/logo.jpg">
+<link rel="shortcut icon" href="<?php echo(base_url()) ?>upload/annumation/hub.png">
+
+<!-- font awason icon -->
+<link rel="stylesheet" type="text/css" href="<?= base_url('js/assets/font-awesome/css/font-awesome.css')?>">
+<!-- sweetalert -->
+<link rel="stylesheet" type="text/css" href="<?= base_url('js/sweetalert/sweetalert.css')?>">
+<link rel="stylesheet" href="<?= base_url('js/assets/summernote/summernote-bs4.css')?>">
+
+<link rel="stylesheet" href="<?= base_url('js/assets/fullcalendar/fullcalendar.min.css')?>">
+<link rel="stylesheet" type="text/css" href="<?= base_url('js/js/toast/jquery.toast.min.css')?>">
+
+<!-- Custom styles for this template canavas-->
+<link href="<?php echo(base_url())?>js/css/canvas.css" rel="stylesheet">
 
 <style>  
      body  
@@ -35,7 +47,18 @@
           border:1px solid #ccc;  
           border-radius:5px;  
           margin-top:10px;  
-     }  
+     }
+     .hub{
+      background-color: rgb(220, 68, 5);
+     } 
+     .bg-hub{
+      background-color: rgb(220, 68, 5);
+      color:white;
+     } 
+     .btn-hub{
+      background-color: rgb(220, 68, 5);
+      color:white;
+     } 
 </style>  
 
 <style>

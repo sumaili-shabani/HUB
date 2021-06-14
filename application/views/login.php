@@ -7,7 +7,7 @@
 
 </head>
 
-<body class="bg-gradient-secondary">
+<body class="bg-gradient-hub hub">
 
     <div class="container">
 
