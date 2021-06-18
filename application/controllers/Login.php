@@ -2,31 +2,48 @@
 defined('BASEPATH') OR exit('No direct script access allowed');  
 class login extends CI_Controller
 {
-
+	protected $email_sites;
+	protected $logos_sites;
+	
 	public function __construct()
 	{
 	  parent::__construct();
 	  $this->load->library('form_validation');
 	  $this->load->library('encryption');
 	  $this->load->model('crud_model'); 
+	  $this->email_sites = $this->crud_model->get_email_du_site();
+	  $this->logos_sites = $this->crud_model->get_logo_du_site();
+	  
+	}
+
+
+	public function get_image(){
+		$icone = $this->crud_model->get_logo_du_site();
+		$iconev = base_url()."upload/tbl_info/".$icone;
+		return $iconev;
 	}
 
 
 	public function index(){
 		$data["title"] = "Connexion au système Gestion galerie nord kivu";  
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
 		$this->load->view('login', $data);
 		// $this->load->view('panel', $data);
 	}
 	public function register(){
 		$data["title"] = "Devenez de à présent membre au système ";  
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
 		$this->load->view('register', $data);
 	}
 	public function forgot(){
-		$data["title"] = "Avez-vous oublié votre mot de passe au système Gestion galerie nord kivu professionnel";  
+		$data["title"] = "Avez-vous oublié votre mot de passe au système 
+		Gestion galerie nord kivu professionnel";  
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
 		$this->load->view('forgot', $data);
 	}
 	public function accueil(){
 		echo("bonjour dans le codeigner");
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
 	}
 
 	function validation()
@@ -119,11 +136,7 @@ class login extends CI_Controller
 	      
 	}
 
-	function panel(){
-		$data['title']="mon profile";
-		$this->load->view('backend/apprenant/panel', $data);
 
-	}
 
 	function register_validation()
   	 {
@@ -259,6 +272,7 @@ class login extends CI_Controller
 
 	function recupere_secure(){
 		$data["title"] = "Récupération mot de passe";  
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
 		$this->load->view('forgot', $data);
 	}
 
@@ -267,6 +281,7 @@ class login extends CI_Controller
     function change_secure($param1='', $param2='',$param3='')
     {
         $data['title'] = "recupération de mot de passe";
+        $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
         $data['verification_key'] = $param1;
         $req = $this->db->where('verification_key', $param1);
         $req = $this->db->get('recupere');
@@ -340,15 +355,72 @@ class login extends CI_Controller
             if($result == '')
             {
                 $code=str_shuffle(substr("1f-èh_çà234567890+6@-?[K89ZTY\J0-T9*h#+/@THSBJ98461700221VPEHI?S&8!}\|", 0,10));
+
                 $verification_key = md5(rand());
                 $mail    = $this->input->post('user_email');
-                $website = "info@congoback.com";
+                $website = $this->email_sites;
 
                 $to =$this->input->post('user_email');
+
+                $info = "<div class='text-center' style='
+	                	text-align: center !important;
+		                '>
+		                	<h1 class='h4 text-gray-900 mb-4' style='
+			                	color: #3a3b45 !important;
+			                	margin-bottom: 1.5rem !important;
+		                	'>Reinitialisation de mot de passe</h1>
+							vous êtes au bout de réunitialisation de mot de passe; prière d'entrer les bonnes bonnes informations secretes.
+	                </div>"
+                ;
+
                 $subject = "votre mot de passe de recupération au compte system Ets yetu";
-                $message2 = "
-                <p>Salut!!! voici votre code de recupération de votre mot de passe au système de Ets yetu  ".$verification_key." cliquer sur ce lien pour changer votre nouveau mot de passe <a href='".base_url()."login/change_secure/".$verification_key."'>changer mon mot de passe</a>.</p>
+                $message2 = "<div class='col-md-12' style='
+					          position: relative;
+							  display: flex;
+							  flex-direction: column;
+							  min-width: 0;
+							  word-wrap: break-word;
+							  background-color: #fff;
+							  background-clip: border-box;
+							  border: 1px solid #e3e6f0;
+							  border-radius: 0.35rem;
+							  position: relative;
+							  width: 100%;
+							  padding-right: 0.75rem;
+							  padding-left: 0.75rem;
+                '>
+                <div class='card-header' style='
+                	  flex: 1 1 auto;
+					  min-height: 1px;
+					  padding: 1.25rem;
+					  border-radius: calc(0.35rem - 1px) calc(0.35rem - 1px) 0 0;
+                '>
+                		".$info."
+                </div>
+                <div class='card-body' style='flex: 1 1 auto;
+				  min-height: 1px;
+				  padding: 1.25rem;
+				  '>
+               			 <p>
+	               			 <img src='".$this->get_image()."' style='
+	               			 	float: left; margin-right: 10px;
+	               			 	padding: .25rem;
+							    background-color: #fff;
+							    border: 1px solid #dddfeb;
+							    border-radius: .35rem;
+							    max-width: 100%;
+							    height: auto;
+							    vertical-align: middle;
+    							border-style: none;
+    						'
+	               			 > 
+	               			 Salut!!! voici votre code de recupération de votre mot de passe au système de Ets yetu  ".$verification_key." cliquer sur ce lien pour changer votre nouveau mot de passe 
+	               			 <a href='".base_url()."login/change_secure/".$verification_key."'>
+	               			 changer mon mot de passe</a>.
+               			 </p>
                
+                </div>
+                </div>
                 ";
 
                 $headers= "MIME Version 1.0\r\n";

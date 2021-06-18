@@ -25,6 +25,13 @@
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <div class="text-center">
+                                        <div class="col-md-12">
+                                             <!-- Sidebar - Brand -->
+                                            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo(base_url()) ?>">
+                                                <img src="<?php echo($icone_info) ?>" class="img-responsive img-thumbnail" style="height: 70px;">
+                                                
+                                            </a>
+                                        </div>
                                         <h1 class="h4 text-gray-900 mb-4">Recupération mot de passe</h1>
                                        <span>
                                     		Si vous avez oublié votre mot de passe, nous vous enverrons par e-mail des instructions pour réinitialiser votre mot de passe.

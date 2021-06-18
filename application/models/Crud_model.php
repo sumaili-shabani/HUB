@@ -2679,6 +2679,44 @@ class crud_model extends CI_Model{
       $this->db->delete("padding_users");
     }
 
+     // retourner les numéros  
+    function get_email_du_site(){
+      $this->db->limit(1);
+      $nom = $this->db->get("tbl_info");
+      $numeros = '';
+      if ($nom->num_rows() > 0) {
+        foreach ($nom->result_array() as $key) {
+          $numeros = $key["email"];
+          
+        }
+      }
+      else{
+         $numeros ="info@gmail.com";
+      }
+      return $numeros ;
+      
+
+    }
+
+     // retourner les numéros  
+    function get_logo_du_site(){
+      $this->db->limit(1);
+      $nom = $this->db->get("tbl_info");
+      $numeros = '';
+      if ($nom->num_rows() > 0) {
+        foreach ($nom->result_array() as $key) {
+          $numeros = $key["icone"];
+          
+        }
+      }
+      else{
+         $numeros ="";
+      }
+      return $numeros ;
+      
+
+    }
+
     
 
 
