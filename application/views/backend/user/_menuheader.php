@@ -168,7 +168,7 @@
                                    ?>
 
                                 
-                                <a class="dropdown-item text-center small text-gray-500" href="<?php echo(base_url()) ?>entreprise/notification">Voir toutes les notifications</a>
+                                <a class="dropdown-item text-center small text-gray-500" href="<?php echo(base_url()) ?>user/notification">Voir toutes les notifications</a>
                             </div>
                         </li>
 

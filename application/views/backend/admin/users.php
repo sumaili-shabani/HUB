@@ -28,15 +28,8 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <div class="col-md-12 card">
-                       <div class="row card-body">
-                           <!-- mes scripts commencent -->
-                          
-                          	<div id="load_data"></div>
-	                          <div id="load_data_message"></div>
-	                    	  <?php include("__users_.php") ?>
-                           <!-- fin de mes scripts commencent -->
-                       </div>
+                    <div class="col-md-12">
+                       <?php include("__users_.php") ?>
                    </div>
                      <!-- Fin Page Heading -->
 

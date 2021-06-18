@@ -29,11 +29,11 @@
 
                    <div class="col-md-12 card">
                        <div class="row card-body">
-                          <!-- mes scripts commencent -->
-                          <div class="col-sm-12">
-                            <?php include("component/_allProjet.php") ?>
-                          </div>
-                          <!-- fin de mes scripts commencent -->
+                           <!-- mes scripts commencent -->
+                            <div class="col-md-12">
+                              <?php include("component/_allVisiteur.php") ?>
+                            </div>
+                           <!-- fin de mes scripts commencent -->
                        </div>
                    </div>
 

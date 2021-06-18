@@ -40,7 +40,7 @@
 	            		<div class="col-md-5"></div>
 	            		<div class="col-md-2">
 	            			<div class="float-right">
-	                			<a href="#" role="button" data-toggle="modal" data-target="#modalcanavas" class="btn btn-secondary btn-sm btn-block">
+	                			<a href="#" role="button" data-toggle="modal" data-target="#modalcanavas" class="btn btn-hub btn-sm btn-block">
 	                				<i class="fa fa-plus"></i>Ajouter les données</a>
 	            			</div>
 	            		</div>

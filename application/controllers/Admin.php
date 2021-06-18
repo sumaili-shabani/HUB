@@ -157,6 +157,15 @@ class admin extends CI_Controller
 	    ========================================================
 	    */
 
+	    function visiteur(){
+	        $data['title']="Les visiteurs en attente d'activation";
+	        $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	        $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	        $data['padding'] = $this->crud_model->fetch_all_visiteur();
+
+	        $this->load->view('backend/admin/visiteur', $data);
+		}
+
 	    function pays(){
 
 			$data['title']="Paramètrage pays ";
@@ -2334,6 +2343,91 @@ class admin extends CI_Controller
       echo $output;
 
   }
+
+  function valider_visiteur($param1=''){
+
+      if ($param1 !='') {
+
+        $query = $this->crud_model->fetch_tag_visiteur($param1);
+        if ($query->num_rows() > 0) {
+          # code...
+          foreach ($query->result_array() as $key) {
+            
+            // debit 
+            $insert_data = array( 
+                   'first_name'   =>     $key['first_name'],
+                   'image'        =>     $key['image'],
+                   'passwords'    =>     $key['passwords'],
+                   'email'        =>     $key['email'],
+                   'idrole'       =>     3
+            );
+
+            $query2 = $this->crud_model->insert_user($insert_data);
+            if ($query2 > 0) {
+            	# code...
+
+            	$this->session->set_flashdata('message', "Félicitation!!!! ".$key['first_name']." vient d'intégrer l'incubateur avec succès!!!📘");
+                $this->delete_visiteur($param1);
+                redirect('admin/visiteur','refresh');
+            }
+            else{
+            	redirect('admin/visiteur','refresh');
+            }
+
+            // fin
+
+          }
+        }
+        else{
+          redirect('admin/visiteur','refresh');
+        }
+
+        # code...
+      }
+      else{
+        redirect('admin/visiteur','refresh');
+      }
+
+      
+      
+      
+    }
+
+    function delete_visiteur($param1=''){
+
+        if ($param1 !='') {
+
+          $query = $this->crud_model->fetch_tag_visiteur($param1);
+          if ($query->num_rows() > 0) {
+            # code...
+            foreach ($query->result_array() as $key) {
+              
+              // debit 
+              $this->crud_model->delete_visiteur($param1);
+
+              // $this->session->set_flashdata('message', "Succès!!!! ".$key['first_name']." vient d'être rejeté avec succès!!!🆗");
+
+              redirect('admin/visiteur','refresh');
+              // fin
+            }
+
+          }
+          else{
+            redirect('admin/visiteur','refresh');
+          }
+          # code...
+          
+        }
+        else{
+
+          redirect('admin/visiteur','refresh');
+
+        }
+
+        
+      
+    }
+
 
 
 

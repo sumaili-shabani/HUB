@@ -30,26 +30,15 @@
                    <div class="col-md-12 card">
                        <div class="row card-body">
                            <!-- mes scripts commencent -->
-                           <div class="row">
-	                            <div class="col-md-12">
-	                                <div class="col-md-12">
-	                                   
-	                                    <div class="row">
-	                                    	<div class="col-md-12 mb-2">
-	                                    		<a href="" class="btn btn-outline-secondary pull-left"><i class="fa fa-refresh"></i> actualisez</a>
-	                                    	</div>
+                            <div class="col-md-12 mb-2">
+	                    		<a href="" class="btn btn-outline-secondary pull-left"><i class="fa fa-refresh"></i> actualisez</a>
+	                    	</div>
 
-	                                    	<!-- mes scripts commencent -->
-	                                    	<div class="col-sm-12">
-	                                    		<?php include("component/padding_paie.php") ?>
-		                                    </div>
-	                                    	<!-- fin de mes scripts -->
-	                                        
-	                                    </div>
-	                                </div>
-
-	                            </div>
+	                    	<!-- mes scripts commencent -->
+	                    	<div class="col-sm-12">
+	                    		<?php include("component/padding_paie.php") ?>
 	                        </div>
+	                    	<!-- fin de mes scripts -->
                            <!-- fin de mes scripts commencent -->
                        </div>
                    </div>

@@ -169,7 +169,7 @@
 
 
             <div class="col-md-12 mb-4">
-            	<button type="submit" class="btn btn-secondary float-right action">Ajouter</button>
+            	<button type="submit" class="btn btn-hub float-right action">Ajouter</button>
 
             </div>
             <div style="margin-top: 50px;"></div>
@@ -226,7 +226,7 @@
 
 				                            	<input type="hidden" name="idswot" id="idswot" />
              									        <input type="hidden" name="operation" id="operation" />
-			                    				     <input type="submit" name="action" id="action" class="btn btn-secondary btn-lg" value="Modifier" />
+			                    				     <input type="submit" name="action" id="action" class="btn btn-hub btn-lg" value="Modifier" />
 				                            </div>
 				                            <div class="pt-3">
 				                                <a href="javascript:void(0);" data-dismiss="modal" class="link link-danger">Annuler l'opération</a>

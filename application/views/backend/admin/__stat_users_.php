@@ -96,7 +96,7 @@
 			<div class="row">
 				<div class="col-md-6 mb-2">
 					<div class="card">
-						<div class="card-header bg-secondary text-white text-center">
+						<div class="card-header bg-hub text-white text-center">
 							Statistiques des utilisateurs par rapport à leurs sexe
 						</div>
 						<div class="card-body">
@@ -107,7 +107,7 @@
 
 				<div class="col-md-6">
 					<div class="card">
-						<div class="card-header bg-secondary text-white text-center">
+						<div class="card-header bg-hub text-white text-center">
 							Statistiques des utilisateurs par rapport à leurs sexe
 						</div>
 						<div class="card-body">

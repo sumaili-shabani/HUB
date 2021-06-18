@@ -156,12 +156,10 @@ foreach ($my_entrep->result_array() as $key) {
                 <!-- Begin Page Content -->
                 <div class="container-fluid mb-4">
 
-                   <div class="col-md-12 card">
-                       <div class="row card-body">
-                           <!-- mes scripts commencent -->
-                           <?php include('my_profile_entrep.php') ?>
-                           <!-- fin de mes scripts commencent -->
-                       </div>
+                  <div class="col-md-12">
+                       <!-- mes scripts commencent -->
+                       <?php include('my_profile_entrep.php') ?>
+                       <!-- fin de mes scripts commencent -->
                    </div>
 
                 </div>

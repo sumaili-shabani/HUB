@@ -1268,6 +1268,15 @@ class user extends CI_Controller
         $this->load->view('backend/user/evaluation', $data);
   }
 
+  function visiteur(){
+        $data['title']="Les visiteurs en attente d'activation";
+        $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+        $data['users'] = $this->crud_model->fetch_connected($this->connected);
+        $data['padding'] = $this->crud_model->fetch_all_visiteur();
+
+        $this->load->view('backend/user/visiteur', $data);
+  }
+
   function compterendu(){
       $data['title']="Liste entière de mes comptes rendus";
       $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
@@ -1422,6 +1431,118 @@ class user extends CI_Controller
       $query = $this->crud_model->update_swot_canavas2($idswot,$data);
       echo("modification avec succès!! ");
 
+    }
+
+
+    function valider_visiteur($param1=''){
+
+      if ($param1 !='') {
+
+        $query = $this->crud_model->fetch_tag_visiteur($param1);
+        if ($query->num_rows() > 0) {
+          # code...
+          foreach ($query->result_array() as $key) {
+            
+            // debit 
+            $insert_data = array( 
+                   'first_name'   =>     $key['first_name'],
+                   'image'        =>     $key['image'],
+                   'passwords'    =>     $key['passwords'],
+                   'email'        =>     $key['email'],
+                   'idrole'       =>     3
+            );
+
+            $query2 = $this->crud_model->insert_user($insert_data);
+
+            if($query2 > 0)
+            {
+
+                    $users_cool = $this->crud_model->get_info_user();
+                    foreach ($users_cool as $key) {
+
+                        if ($key['idrole'] == 1) {
+                            $url ="admin/users";
+
+                            $id_user_recever = $key['id'];
+
+                            $nom   = $this->crud_model->get_name_user($this->connected);
+                            // $nom = $this->input->post('first_name');
+                            $message =$nom." Vient d'activer un visiteur ";
+
+                            $notification = array(
+                              'titre'     =>    "Nouvelle acceptation",
+                              'icone'     =>    "fa fa-group",
+                              'message'   =>     $message,
+                              'url'       =>     $url,
+                              'id_user'   =>     $id_user_recever
+                            );
+                            
+                            $not = $this->crud_model->insert_notification($notification);
+
+                        }
+
+                        # code...
+                    }
+
+                    $this->session->set_flashdata('message', "Félicitation!!!! ".$key['first_name']." vient d'intégrer l'incubateur avec succès!!!📘");
+
+
+                    $this->delete_visiteur($param1);
+                    redirect('user/visiteur','refresh');
+            }
+
+            // fin
+
+          }
+        }
+        else{
+          redirect('user/visiteur','refresh');
+        }
+
+        # code...
+      }
+      else{
+        redirect('user/visiteur','refresh');
+      }
+
+      
+      
+      
+    }
+
+    function delete_visiteur($param1=''){
+
+        if ($param1 !='') {
+
+          $query = $this->crud_model->fetch_tag_visiteur($param1);
+          if ($query->num_rows() > 0) {
+            # code...
+            foreach ($query->result_array() as $key) {
+              
+              // debit 
+              $this->crud_model->delete_visiteur($param1);
+
+              // $this->session->set_flashdata('message', "Succès!!!! ".$key['first_name']." vient d'être rejeté avec succès!!!🆗");
+
+              redirect('user/visiteur','refresh');
+              // fin
+            }
+
+          }
+          else{
+            redirect('user/visiteur','refresh');
+          }
+          # code...
+          
+        }
+        else{
+
+          redirect('user/visiteur','refresh');
+
+        }
+
+        
+      
     }
 
 

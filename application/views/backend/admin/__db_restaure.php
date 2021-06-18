@@ -30,7 +30,7 @@
 		<!-- bloc 1 -->
 		<div class="col-md-6" style="margin-top: 10px;">
 			<div class="card">
-				<div class="card-header text-center text-uppercase bg-secondary  text-white">
+				<div class="card-header text-center text-uppercase bg-hub  text-white">
 					<i class="fa fa-download"></i>&nbsp;Generer la sauvergarde des données(backup)
 				</div>
 				<div class="card-body">
@@ -52,7 +52,7 @@
 							</div>
 							<div class="col-md-12 text-center">
 
-								<a href="<?php echo(base_url()) ?>admin/database/create" class="btn btn-secondary btn-round">
+								<a href="<?php echo(base_url()) ?>admin/database/create" class="btn btn-hub btn-round">
 									<i class="fa fa-download"></i>&nbsp; Sauvegarder la base des données
 								</a>
 							</div>
@@ -67,7 +67,7 @@
 		<!-- bloc 1 -->
 		<div class="col-md-6" style="margin-top: 10px;">
 			<div class="card">
-				<div class="card-header text-center text-uppercase bg-secondary text-white">
+				<div class="card-header text-center text-uppercase bg-hub text-white">
 					<i class="fa fa-download"></i>&nbsp;Importer la sauvergarde des données(backup)
 				</div>
 				<div class="card-body">
@@ -90,7 +90,7 @@
 								    </div>
 
 								    <div class="col-12" style="margin-top: 10px;">
-										<button type="submit" class="btn btn-secondary btn-round"><i class="fa fa-download"></i>&nbsp; importer la base des données</button>
+										<button type="submit" class="btn btn-hub btn-round"><i class="fa fa-download"></i>&nbsp; importer la base des données</button>
 								    </div>
 								
 								</form>

@@ -62,10 +62,25 @@ class crud_model extends CI_Model{
       $this->db->limit(1);
       return $this->db->get_where('users', array('email' => $email));
   }
+
+  // test_email si existe
+  function get_users_email_padding_user($email)
+  {
+      $this->db->limit(1);
+      return $this->db->get_where('padding_users', array('email' => $email));
+  }
 // utilisateur connecte
   function fetch_connected($id){
       $this->db->where('id',$id);
+      $this->db->limit(1);
       return $this->db->get('users')->result_array();
+  }
+
+  // utilisateur visiteur
+  function fetch_tag_visiteur($id){
+      $this->db->where('id',$id);
+      $this->db->limit(1);
+      return $this->db->get('padding_users');
   }
   // online 
   function insert_online($data){
@@ -75,6 +90,13 @@ class crud_model extends CI_Model{
   function insert_user($data)
   {
     $this->db->insert('users', $data);
+    return $this->db->insert_id();
+  } 
+
+  // creation de compte
+  function insert_padding_user($data)
+  {
+    $this->db->insert('padding_users', $data);
     return $this->db->insert_id();
   } 
 
@@ -1091,6 +1113,12 @@ class crud_model extends CI_Model{
       function fetch_all_projects(){
           $this->db->order_by('created_at',"desc");
           return $this->db->get('profile_projet');
+      }
+
+       // tous les projets 
+      function fetch_all_visiteur(){
+          $this->db->order_by('id',"desc");
+          return $this->db->get('padding_users');
       }
 
        // tous les projets 
@@ -2644,6 +2672,14 @@ class crud_model extends CI_Model{
       
         return $output;
     }
+
+    // suppression visiteur en ligne 
+    function delete_visiteur($id){
+      $this->db->where('id', $id);
+      $this->db->delete("padding_users");
+    }
+
+    
 
 
 

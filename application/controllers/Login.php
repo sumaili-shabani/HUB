@@ -132,7 +132,7 @@ class login extends CI_Controller
   		  $this->form_validation->set_rules('first_name', 'first name', 'required|trim');
   		  $this->form_validation->set_rules('mail_ok', 'email', 'required|trim|valid_email|is_unique[users.email]');
   		  $this->form_validation->set_rules('user_password', 'password', 'required');
-  		  $users_exits = $this->crud_model->get_users_email($this->input->post('mail_ok'));
+  		  $users_exits = $this->crud_model->get_users_email_padding_user($this->input->post('mail_ok'));
   		  if ($users_exits->num_rows() > 0) {
 
   		  	  $this->session->set_flashdata('message2', 'Erreur!!! Cette adresse mail existe déjà veillez vérifier les informations requises🔕');
@@ -151,17 +151,17 @@ class login extends CI_Controller
 	  			    'idrole' 			    => 2,
 	  			    'image'           		=> $avatar
 	  			   );
-	  		   	   $id = $this->crud_model->insert_user($data);
+	  		   	   $id = $this->crud_model->insert_padding_user($data);
 	  			   if($id > 0)
 	  			   {
 
-	  			    $this->session->set_flashdata('message', 'votre compte a été créé avec succès, vous pouvez déjà vous connecter '.$this->input->post('first_name'));
+	  			    $this->session->set_flashdata('message', "votre compte a été créé avec succès mais necessite une validation de l'administrateur du système pour être opérationnel, prière de patienter un peu  ".$this->input->post('first_name'));
 
 	  			        $users_cool = $this->crud_model->get_info_user();
 			            foreach ($users_cool as $key) {
 
 			                if ($key['idrole'] == 1) {
-				                $url ="admin/users";
+				                $url ="admin/visiteur";
 
 				                $id_user_recever = $key['id'];
 
@@ -179,7 +179,28 @@ class login extends CI_Controller
 				                
 				                $not = $this->crud_model->insert_notification($notification);
 
-				              }
+				            }
+
+				            if ($key['idrole'] == 2) {
+				                $url ="user/visiteur";
+
+				                $id_user_recever = $key['id'];
+
+				                // $nom   = $this->crud_model->get_name_user($idpersonne);
+				                $nom = $this->input->post('first_name');
+				                $message =$nom." Vient de rejoindre la plateforme ";
+
+				                $notification = array(
+				                  'titre'     =>    "Nouvelle inscription",
+				                  'icone'     =>    "fa fa-user",
+				                  'message'   =>     $message,
+				                  'url'       =>     $url,
+				                  'id_user'   =>     $id_user_recever
+				                );
+				                
+				                $not = $this->crud_model->insert_notification($notification);
+
+				            }
 			              
 			                # code...
 			            }

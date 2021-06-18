@@ -14,7 +14,7 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Nombre Total des clients</div>
+                                    Nombre Total des membres</div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo($nombre_client); ?></div>
                             </div>
                             <div class="col-auto">
