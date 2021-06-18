@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : sam. 19 juin 2021 à 00:22
+-- Généré le : sam. 19 juin 2021 à 01:34
 -- Version du serveur :  10.4.19-MariaDB
 -- Version de PHP : 7.4.19
 
@@ -280,13 +280,6 @@ CREATE TABLE `online` (
   `id_user` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Déchargement des données de la table `online`
---
-
-INSERT INTO `online` (`id`, `id_user`, `created_at`) VALUES
-(52, 13, '2021-06-19 00:06:31');
 
 -- --------------------------------------------------------
 
@@ -625,6 +618,27 @@ INSERT INTO `province` (`idp`, `nomp`, `created_at`) VALUES
 (24, 'Tanganyika', '2020-07-14 15:31:40'),
 (25, 'Tshopo', '2020-07-14 15:31:53'),
 (26, 'Tshuapa', '2020-07-14 15:32:02');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `recupere`
+--
+
+CREATE TABLE `recupere` (
+  `id` int(11) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `verification_key` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Déchargement des données de la table `recupere`
+--
+
+INSERT INTO `recupere` (`id`, `email`, `verification_key`) VALUES
+(1, 'sumailiroger681@gmail.com', '425d74164e0b87678446663c72b36f78'),
+(2, 'sumailiroger681@gmail.com', 'c6b93ea45c172adcb09c35c92fabd1c1'),
+(3, 'sumailiroger681@gmail.com', '00a2177a561f2235d91c949479d44c7d');
 
 -- --------------------------------------------------------
 
@@ -1025,6 +1039,12 @@ ALTER TABLE `province`
   ADD PRIMARY KEY (`idp`);
 
 --
+-- Index pour la table `recupere`
+--
+ALTER TABLE `recupere`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `role`
 --
 ALTER TABLE `role`
@@ -1120,7 +1140,7 @@ ALTER TABLE `notification`
 -- AUTO_INCREMENT pour la table `online`
 --
 ALTER TABLE `online`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT pour la table `padding_users`
@@ -1151,6 +1171,12 @@ ALTER TABLE `projet`
 --
 ALTER TABLE `province`
   MODIFY `idp` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT pour la table `recupere`
+--
+ALTER TABLE `recupere`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT pour la table `role`
