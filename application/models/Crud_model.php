@@ -56,6 +56,11 @@ class crud_model extends CI_Model{
       return $this->db->query('SELECT * FROM tbl_info  LIMIT 1');
   }
 
+  // messagerie
+  function insert_message($data){
+      $this->db->insert('messagerie', $data);
+  }
+
 // test_email si existe
   function get_users_email($email)
   {
@@ -111,6 +116,12 @@ class crud_model extends CI_Model{
     $this->db->delete("online");
   }
 
+  // pagination des utilisateurs connectés
+  function fetch_pagination_online(){
+    $query = $this->db->get("profile_online");
+    return $query->num_rows();
+  }
+
   //modification des utilisateurs
   function update_user($email, $data)
   {
@@ -147,6 +158,13 @@ class crud_model extends CI_Model{
       $this->db->limit(50);
       return $this->db->get('role');
   }
+
+  function fetch_single_message($code)  
+  {  
+       $this->db->where("code", $code);  
+       $query=$this->db->get('messagerie');  
+       return $query->result();  
+  } 
 
  
 
@@ -2698,6 +2716,26 @@ class crud_model extends CI_Model{
 
     }
 
+
+    function update_messagerie($code, $data)  
+    {  
+         $this->db->where("code", $code);  
+         $this->db->update("messagerie", $data);  
+    }
+
+    function delete_messagerie($code)  
+    {  
+         $this->db->where("code", $code);  
+         $this->db->delete("messagerie");  
+    }
+
+     // suppression de messages 
+    function delete_message_tag($idmessage){
+      $this->db->where('idmessage', $idmessage);
+        $this->db->delete('messagerie');
+    }
+
+
      // retourner les numéros  
     function get_logo_du_site(){
       $this->db->limit(1);
@@ -2716,6 +2754,208 @@ class crud_model extends CI_Model{
       
 
     }
+
+
+    // recherche des utilisateurs par fultres
+    function fetch_data_search_online_user_follow($query)
+    {
+        $this->db->select("*");
+        $this->db->from("users");
+        $this->db->limit(9);
+        if($query != '')
+        {
+         $this->db->like('id', $query);
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('full_adresse', $query);
+         $this->db->or_like('telephone', $query);
+
+        }
+        $this->db->order_by('first_name', 'ASC');
+        return $this->db->get();
+    }
+
+    // pagination des utilisateurs connectés
+    function fetch_pagination_ti_followe_count(){
+      $query = $this->db->get("users");
+      return $query->num_rows();
+    }
+
+    // pagination des utilisateurs connecters
+  function fetch_details_pagination_to_users_count($limit, $start){
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("users");
+      $this->db->order_by("first_name", "ASC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+
+      $id = $this->session->userdata('admin_login');
+      $etat = '';
+      $url = '';
+      
+      foreach($query->result() as $row)
+      {
+
+         
+          
+          if ($row->id != $id) {
+            $url = base_url().'admin/detail_users_profile/'.$row->id;
+                $etat = '<div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
+                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                    </a> 
+                  </span></div>';
+          }
+          else{
+                $url = base_url().'admin/profile';
+                $etat = '
+
+                <span class="message">
+                  <a href="'.base_url().'admin/profile" class="text-warning">
+                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                    </a> 
+                  </span>
+
+                ';
+          }
+
+
+        
+       $output .= '
+       
+
+
+        <div class="col-md-12 media text-muted pt-3 mb-2">
+                        
+          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+              <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+            <san class="text-info">'.$row->email.'</span>
+              '.$etat.'
+            
+          </div>
+          
+      </div>
+
+
+
+
+       ';
+      }
+      
+      return $output;
+  }
+  // fin pagination
+
+
+   // recherche des produits par fultres
+   function fetch_data_search_online_user($query)
+   {
+    $this->db->select("*");
+    $this->db->from("users");
+    $this->db->limit(9);
+    if($query != '')
+    {
+     $this->db->like('id', $query);
+     $this->db->or_like('first_name', $query);
+     $this->db->or_like('last_name', $query);
+     $this->db->or_like('full_adresse', $query);
+     $this->db->or_like('telephone', $query);
+
+    }
+    $this->db->order_by('first_name', 'ASC');
+    return $this->db->get();
+   }
+
+   // pagination des utilisateurs connecters
+      function fetch_details_pagination_online_connected($limit, $start){
+          $output = '';
+        $this->db->select("*");
+        $this->db->from("profile_online");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('admin_login');
+        $etat = '';
+        $url='';
+        
+        foreach($query->result() as $row)
+        {
+            if ($row->id_user != $id) {
+              $url= $url = base_url().'admin/detail_users_profile/'.$row->id_user;
+              $etat = '<div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id_user.'">
+                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span></div>';
+            }
+            else{
+                $url = $url = base_url().'admin/profile';
+                $etat = '
+
+                <div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'admin/profile" class="text-warning">
+                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span>
+                  </div>
+
+                ';
+
+                
+             }
+
+
+
+            $output .= '
+
+             <li class="online">
+                  <a href="'.$url.'">
+                      <div class="media">
+                          <div class="avtar-pic w35 bg-red">
+                            <span>
+                            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle" style="width: 50px; height: 40px; border-radius: 70%;">
+                              </span>
+
+                          </div>
+
+                          <div class="contacts-list-info">
+                              <span class="contacts-list-name">
+                                <span class="name text-info">&nbsp;&nbsp;@'.$row->first_name.' '.substr($row->last_name, 0,25).' </span><br>
+                              '.$etat.'
+
+
+                              </span>
+
+
+                              
+                          </div>
+
+                          
+                      </div>
+                  </a>
+              </li>
+              
+
+            ';
+          
+        }
+        
+        return $output;
+      }
+
+
+
+
+
+
+
+
 
     
 

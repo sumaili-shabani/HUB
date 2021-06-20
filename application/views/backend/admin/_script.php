@@ -37,6 +37,9 @@
 <script src="<?= base_url('js/typeahead.bundle.js')?>"></script>
 <!-- fin -->
 
+ <!-- AdminLTE App -->
+ <script src="<?= base_url('js/dist/js/adminlte.min.js')?>"></script>
+
 
 <script>
   $(function () {

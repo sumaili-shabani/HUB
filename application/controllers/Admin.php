@@ -262,6 +262,24 @@ class admin extends CI_Controller
 	    ========================================================
 	    */
 
+	    function message(){
+	      $data['title']="mes messages admin";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      // $this->load->view('backend/admin/viewx', $data);
+	      $this->load->view('backend/admin/message', $data);
+	    }
+
+	    function chat_admin($param1, $param2){
+		    $data['title']="Discution instantané";
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+		    $data['id_user']= $param1;
+		    $data['id_recever']= $param2;
+		    $data['id_recever2']= $param2;
+		    $data['users'] = $this->crud_model->fetch_connected($this->connected);
+		    $this->load->view('backend/admin/messagerie', $data);
+		}
+
 
 	     function operationCompteRendu($param1='',$param2=''){
         if ($param1=="ajout") {
@@ -2427,6 +2445,358 @@ class admin extends CI_Controller
         
       
     }
+
+
+
+    /*====================================
+    *les code messagerie
+    // script de chat
+    =======================================
+    **
+    */
+
+    // pour les follower
+   function pagination_users_on_to()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->fetch_pagination_ti_followe_count();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link' => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_details_pagination_to_users_count($config["per_page"], $start)
+    );
+    echo json_encode($output);
+   }
+
+
+
+   // recherche de formations des produits
+   function fetch_search_user_follow_pagination()
+   {
+      $output = '';
+      $query = '';
+      if($this->input->post('query'))
+      {
+       $query = $this->input->post('query');
+      }
+      $data = $this->crud_model->fetch_data_search_online_user_follow($query);
+      
+      if($data->num_rows() > 0)
+      {
+
+        $id = $this->connected;
+        $etat = '';
+        $etat2 = '';
+        $url='';
+
+        foreach($data->result() as $row)
+        {
+
+
+          	$id = $this->connected;
+	        
+	        if ($row->id != $id) {
+	            $url = base_url().'admin/detail_users_profile/'.$row->id;
+	                $etat = '<div class="col-md-12"><span class="message">
+	                  <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
+	                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+	                    </a> 
+	                  </span></div>';
+	        }
+	        else{
+	                $url = base_url().'admin/profile';
+	                $etat = '
+
+	                <span class="message">
+	                  <a href="'.base_url().'admin/profile" class="text-warning">
+	                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+	                    </a> 
+	                  </span>
+
+	                ';
+	        }
+
+
+            
+
+           $output .= '
+	           
+	            <div class="col-md-12 media text-muted pt-3 mb-2">
+                        
+		          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+		          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+		              <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+		            <san class="text-info">'.$row->email.'</span>
+
+		            '.$etat.'
+		          </div>
+		          
+		        </div>
+           ';
+          }
+
+         
+      }
+      else
+      {
+          $output .= '
+            <div class="media text-muted pt-3">
+                <img data-src="holder.js/32x32?theme=thumb&amp;bg=007bff&amp;fg=007bff&amp;size=1" alt="32x32" class="mr-2 rounded" style="width: 100%; height: auto;" src="data:'.base_url().'upload/annumation/a.gif" srcset="'.base_url().'upload/annumation/a.gif" data-holder-rendered="true">
+                
+              </div>
+          ';
+          // $this->db->pagination_information();
+      }
+
+      echo $output;
+   }
+
+
+    // pagination information sur les produits
+    function pagination_users_on_line()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->fetch_pagination_online();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link' => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_details_pagination_online_connected($config["per_page"], $start)
+    );
+    echo json_encode($output);
+   }
+
+
+
+
+   // recherche de formations des produits
+   function fetch_search_user_online_pagination2()
+   {
+      $output = '';
+      $query = '';
+      $url='';
+      if($this->input->post('query'))
+      {
+       $query = $this->input->post('query');
+      }
+      $data = $this->crud_model->fetch_data_search_online_user($query);
+      
+      if($data->num_rows() > 0)
+      {
+
+        $id = $this->connected;
+        $etat = '';
+
+         foreach($data->result() as $row)
+         {
+
+          if ($row->id != $id) {
+          	$url= $url = base_url().'admin/detail_users_profile/'.$row->id;
+            $etat = '<div class="col-md-12"><span class="message">
+                <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
+              &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                  </a> 
+                </span></div>';
+          }
+          else{
+          	  $url = $url = base_url().'admin/profile';
+              $etat = '
+
+              <div class="col-md-12"><span class="message">
+                <a href="'.base_url().'admin/profile" class="text-warning">
+              &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                  </a> 
+                </span>
+                </div>
+
+              ';
+
+              
+           }
+
+
+
+          $output .= '
+
+           <li class="online">
+                <a href="'.$url.'">
+                    <div class="media">
+                        <div class="avtar-pic w35 bg-red">
+                          <span>
+                          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle" style="width: 50px; height: 40px; border-radius: 70%;">
+                            </span>
+                        </div>
+
+                        <div class="contacts-list-info">
+                            <span class="contacts-list-name">
+                              <span class="name text-info">&nbsp;&nbsp;@'.$row->first_name.' '.substr($row->last_name, 0,25).' </span><br>
+                            '.$etat.'
+                              
+                            </span>
+                            
+                        </div>
+
+                        
+                    </div>
+                </a>
+            </li>
+            
+
+          ';
+         }
+      }
+      else
+      {
+          $output .= '
+            <div class="media text-muted pt-3">
+                <img data-src="holder.js/32x32?theme=thumb&amp;bg=007bff&amp;fg=007bff&amp;size=1" alt="32x32" class="mr-2 rounded" style="width: 100%; height: auto;" src="data:'.base_url().'upload/annumation/b.gif" srcset="'.base_url().'upload/annumation/b.gif" data-holder-rendered="true">
+                
+              </div>
+          ';
+          // $this->db->pagination_information();
+      }
+
+      echo $output;
+   }
+
+
+   function chat_local_view($param1, $param2){
+      $data['title']="Discution instantané";
+      $data['id_user']= $param1;
+      $data['id_recever']= $param2;
+
+      $code = substr(md5(rand(100000000, 200000000)), 0, 10);
+
+      if ($this->input->post('Message_text') !='') {
+
+        $chat['id_user'] = $param1;
+        $chat['id_recever'] = $param2;
+        $chat['message'] = htmlspecialchars($this->input->post('Message_text'));
+        $chat['code'] = $code;
+
+        $md5 = md5(date('d-m-y H:i:s'));
+
+
+        
+        if($_FILES['user_image']['size'] > 0){
+
+          $chat['fichier'] =  $md5.str_replace(' ', '', $_FILES['user_image']['name']);
+
+                // $chat['fichier'] = $this->upload_image_chat_envoie();
+                move_uploaded_file($_FILES['user_image']['tmp_name'], 'upload/groupe/fichier/' . $md5.str_replace(' ', '', $_FILES['user_image']['name']));
+        }
+
+        $this->crud_model->insert_message($chat);
+        
+        redirect('admin/chat_admin/'.$param1.'/'.$param2);
+      }
+      else{
+        redirect('admin/chat_admin/'.$param1.'/'.$param2);
+      }
+      
+      
+    }
+
+
+    function detail_users_profile($param1=''){
+    	$data['title']="Détail de profile utilisateur";
+	    $data['user_search'] =$param1;
+	    $data['users'] = $this->crud_model->fetch_connected($param1);
+	    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+	    $this->load->view('backend/admin/detail_users_profile', $data);
+    }
+
+
+    function fetch_single_message()  
+	{  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_message($this->input->post('code'));  
+	       foreach($data as $row)  
+	       {  
+	            $output['nom'] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));  
+	           
+	            $output['text_description']   ='
+	              <textarea class="form-control textarea" name="message" id="message">
+	                  '. html_entity_decode($row->message).'
+	              </textarea>
+	            ';
+
+
+	       }  
+	       echo json_encode($output);  
+	}
+
+
+	function modification_message(){
+
+	    $updated_data = array(  
+	       'message'    =>     htmlspecialchars($this->input->post("message"))
+	    );  
+
+	    $this->crud_model->update_messagerie($this->input->post("code"), $updated_data);
+	    // echo("modification avec succès");
+	}
+
+	function supression_message(){
+
+      $this->crud_model->delete_messagerie($this->input->post("code"));
+	    
+	}
+
+
+
 
 
 
