@@ -27,6 +27,10 @@
 <!--/ calender javascripts -->
 <!-- fin -->
 <script src="<?= base_url('js/plugins/summernote/summernote-bs4.min.js')?>"></script>
+
+<!-- AdminLTE App -->
+<script src="<?= base_url('js/dist/js/adminlte.min.js')?>"></script>
+
 <script>
   $(function () {
     // Summernote

@@ -1,0 +1,64 @@
+.clearfix::after {
+    display: block;
+    clear: both;
+    content: "";
+}
+
+.mail-inbox .mail-right .mail-list ul li .md-right img {
+    float: left;
+    width: 68px;
+}
+.rounded {
+    border-radius: .25rem!important;
+}
+img {
+    vertical-align: middle;
+    border-style: none;
+}
+
+.list-unstyled {
+    padding-left: 0;
+    list-style: none;
+}
+
+.clearfix::after {
+    display: block;
+    clear: both;
+    content: "";
+}
+
+.clearfix::after {
+    display: block;
+    clear: both;
+    content: "";
+}
+
+.clearfix::after {
+    display: block;
+    clear: both;
+    content: "";
+}
+
+@media screen and (max-width: 768px)
+.mail-inbox .mail-right .mail-list ul li .md-left {
+    width: 45px;
+}
+
+.mail-inbox .mail-right .mail-list ul li .md-left {
+    max-width: 60px;
+    width: 60px;
+    position: relative;
+    margin-top: 8px;
+}
+.mail-inbox .mail-right .mail-list ul li .md-left, .mail-inbox .mail-right .mail-list ul li .md-right {
+    float: left;
+}
+
+.bg-transparent {
+    background-color: transparent!important;
+}
+
+.d-flex {
+    display: -ms-flexbox!important;
+    display: flex!important;
+}

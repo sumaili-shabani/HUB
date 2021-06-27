@@ -166,10 +166,25 @@ class crud_model extends CI_Model{
        return $query->result();  
   } 
 
+  function fetch_single_chat_groupe($idgroupe)  
+  {  
+       $this->db->where("idgroupe", $idgroupe);  
+       $query=$this->db->get('groupe');  
+       return $query->result();  
+  } 
+
  
 
   function get_info_user(){
       $nom = $this->db->get("users")->result_array();
+      return $nom;
+  }
+
+  function get_info_user_tag($id){
+      $this->db->limit(1);
+      $nom = $this->db->get_where("users", array(
+        'id'  =>  $id
+      ))->result_array();
       return $nom;
   }
 
@@ -1153,6 +1168,17 @@ class crud_model extends CI_Model{
           return $this->db->get('profile_compte_rendu');
          
       }
+
+       // tous les projets 
+      function fetch_tag_users_chat($id){
+        
+          return $this->db->get_where("groupe_chat", array(
+            'id_users'  =>  $id
+          ));
+         
+      }
+
+
 
       function get_info_paiement_transaction($idp){
           $nom = $this->db->get_where("paiement", array(
@@ -2729,6 +2755,19 @@ class crud_model extends CI_Model{
          $this->db->delete("messagerie");  
     }
 
+    // chat groupe 
+    function update_chat_messagerie($idgroupe, $data)  
+    {  
+         $this->db->where("idgroupe", $idgroupe);  
+         $this->db->update("groupe", $data);  
+    }
+
+    function delete_chat_messagerie($idgroupe)  
+    {  
+         $this->db->where("idgroupe", $idgroupe);  
+         $this->db->delete("groupe");  
+    }
+
      // suppression de messages 
     function delete_message_tag($idmessage){
       $this->db->where('idmessage', $idmessage);
@@ -2782,71 +2821,139 @@ class crud_model extends CI_Model{
     }
 
     // pagination des utilisateurs connecters
-  function fetch_details_pagination_to_users_count($limit, $start){
-      $output = '';
-      $this->db->select("*");
-      $this->db->from("users");
-      $this->db->order_by("first_name", "ASC");
-      $this->db->limit($limit, $start);
-      $query = $this->db->get();
+    function fetch_details_pagination_to_users_count($limit, $start){
+        $output = '';
+        $this->db->select("*");
+        $this->db->from("users");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
 
-      $id = $this->session->userdata('admin_login');
-      $etat = '';
-      $url = '';
-      
-      foreach($query->result() as $row)
-      {
-
-         
-          
-          if ($row->id != $id) {
-            $url = base_url().'admin/detail_users_profile/'.$row->id;
-                $etat = '<div class="col-md-12"><span class="message">
-                  <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
-                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
-                    </a> 
-                  </span></div>';
-          }
-          else{
-                $url = base_url().'admin/profile';
-                $etat = '
-
-                <span class="message">
-                  <a href="'.base_url().'admin/profile" class="text-warning">
-                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
-                    </a> 
-                  </span>
-
-                ';
-          }
-
-
+        $id = $this->session->userdata('admin_login');
+        $etat = '';
+        $url = '';
         
-       $output .= '
-       
+        foreach($query->result() as $row)
+        {
 
-
-        <div class="col-md-12 media text-muted pt-3 mb-2">
-                        
-          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
-
-          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-              <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
-            <san class="text-info">'.$row->email.'</span>
-              '.$etat.'
+           
             
-          </div>
+            if ($row->id != $id) {
+              $url = base_url().'admin/detail_users_profile/'.$row->id;
+                  $etat = '<div class="col-md-12"><span class="message">
+                    <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
+                  &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                      </a> 
+                    </span></div>';
+            }
+            else{
+                  $url = base_url().'admin/profile';
+                  $etat = '
+
+                  <span class="message">
+                    <a href="'.base_url().'admin/profile" class="text-warning">
+                  &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                      </a> 
+                    </span>
+
+                  ';
+            }
+
+
           
-      </div>
+         $output .= '
+         
+
+
+          <div class="col-md-12 media text-muted pt-3 mb-2">
+                          
+            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+            <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+              <san class="text-info">'.$row->email.'</span>
+                '.$etat.'
+              
+            </div>
+            
+        </div>
 
 
 
 
-       ';
-      }
-      
-      return $output;
-  }
+         ';
+        }
+        
+        return $output;
+    }
+  // fin pagination
+
+     // pagination des utilisateurs connecters
+    function entreprise_fetch_pagination_to_users_count($limit, $start){
+        $output = '';
+        $this->db->select("*");
+        $this->db->from("users");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('instuctor_login');
+        $etat = '';
+        $url = '';
+        
+        foreach($query->result() as $row)
+        {
+
+           
+            
+            if ($row->id != $id) {
+              $url = base_url().'entreprise/detail_users_profile/'.$row->id;
+                  $etat = '<div class="col-md-12"><span class="message">
+                    <a href="'.base_url().'entreprise/chat_admin/'.$id.'/'.$row->id.'">
+                  &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                      </a> 
+                    </span></div>';
+            }
+            else{
+                  $url = base_url().'entreprise/profile';
+                  $etat = '
+
+                  <span class="message">
+                    <a href="'.base_url().'entreprise/profile" class="text-warning">
+                  &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                      </a> 
+                    </span>
+
+                  ';
+            }
+
+
+          
+         $output .= '
+         
+
+
+          <div class="col-md-12 media text-muted pt-3 mb-2">
+                          
+            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+            <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+              <san class="text-info">'.$row->email.'</span>
+                '.$etat.'
+              
+            </div>
+            
+        </div>
+
+
+
+
+         ';
+        }
+        
+        return $output;
+    }
   // fin pagination
 
 
@@ -2948,6 +3055,269 @@ class crud_model extends CI_Model{
         
         return $output;
       }
+
+       // pagination des utilisateurs connecters
+      function Entreprise_fetch_online_connected($limit, $start){
+          $output = '';
+        $this->db->select("*");
+        $this->db->from("profile_online");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('instuctor_login');
+        $etat = '';
+        $url='';
+        
+        foreach($query->result() as $row)
+        {
+            if ($row->id_user != $id) {
+              $url= $url = base_url().'entreprise/detail_users_profile/'.$row->id_user;
+              $etat = '<div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'entreprise/chat_admin/'.$id.'/'.$row->id_user.'">
+                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span></div>';
+            }
+            else{
+                $url = $url = base_url().'entreprise/profile';
+                $etat = '
+
+                <div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'entreprise/profile" class="text-warning">
+                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span>
+                  </div>
+
+                ';
+
+                
+             }
+
+
+
+            $output .= '
+
+             <li class="online">
+                  <a href="'.$url.'">
+                      <div class="media">
+                          <div class="avtar-pic w35 bg-red">
+                            <span>
+                            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle" style="width: 50px; height: 40px; border-radius: 70%;">
+                              </span>
+
+                          </div>
+
+                          <div class="contacts-list-info">
+                              <span class="contacts-list-name">
+                                <span class="name text-info">&nbsp;&nbsp;@'.$row->first_name.' '.substr($row->last_name, 0,25).' </span><br>
+                              '.$etat.'
+
+
+                              </span>
+
+
+                              
+                          </div>
+
+                          
+                      </div>
+                  </a>
+              </li>
+              
+
+            ';
+          
+        }
+        
+        return $output;
+      }
+
+
+
+      /*
+      * script de group de chat
+      *
+
+      ====================================================
+      ====================================================
+      ====================================================
+
+      */
+
+      function insert_groupe_chat($data)  
+      {  
+           $this->db->insert('groupe_chat', $data);  
+      }
+
+      function update_groupe_chat($code, $data)  
+      {  
+           $this->db->where("code", $code);  
+           $this->db->update("groupe_chat", $data);  
+      }
+
+
+      function delete_groupe_chat($idgroupe)  
+      {  
+           $this->db->where("idgroupe", $idgroupe);  
+           $this->db->delete("groupe_chat");  
+      }
+
+      function fetch_single_groupe_chat($code)  
+      {   
+           $this->db->where("code", $code);  
+           $this->db->order_by("idgroupe", "DESC"); 
+           $query=$this->db->get('groupe_chat');  
+           return $query->result();  
+      }
+
+      function get_users_groupe_by_code($code){
+
+       $resultat = $this->db->query("SELECT * FROM profile_groupe WHERE code='".$code."' GROUP BY id_user LIMIT 100 ");
+        return $resultat;
+      }
+
+
+
+      function recherche_utilisateur_requete($query){
+          $this->db->select("*");
+          $this->db->from("users");
+          $this->db->limit(7);
+          if($query != '')
+          {
+             $this->db->like('id', $query);
+             $this->db->or_like('telephone', $query);
+             $this->db->or_like('first_name', $query);
+             $this->db->or_like('first_name', $query);
+             $this->db->or_like('email', $query);
+          }
+          $this->db->order_by('first_name', 'ASC');
+          return $this->db->get();
+      }
+
+      // pagination des utilisateurs 
+      function fetch_details_pagination_groupe($limit, $start){
+          $output = '';
+          $this->db->select("*");
+          $this->db->from("users");
+          $this->db->order_by("first_name", "ASC");
+          $this->db->limit($limit, $start);
+          $query = $this->db->get();
+
+          $id = $this->session->userdata('admin_login');
+          $etat = '';
+          $url = '';
+
+          $output .='<ul class="list-unstyled resultat">';
+          
+          foreach($query->result() as $row)
+          {
+
+             
+              
+              if ($row->id != $id) {
+                $url = base_url().'admin/detail_users_profile/'.$row->id;
+                    $etat = '<div class="col-md-12"><span class="message">
+                      <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
+                    &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                        </a> 
+                      </span></div>';
+              }
+              else{
+                    $url = base_url().'admin/profile';
+                    $etat = '
+
+                    <span class="message">
+                      <a href="'.base_url().'admin/profile" class="text-warning">
+                    &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                        </a> 
+                      </span>
+
+                    ';
+              }
+
+
+            
+           $output .= '
+
+
+           <li class="clearfix bg-white card mb-2">
+            <div class="col-md-12 mt-1">
+                  <div class="md-left">
+                      <label class="fancy-checkbox">
+                          <input type="checkbox" name="checkbox" class="checkbox-tick" value="'.$row->id.'">
+                          <span></span>
+                      </label>
+                      <a href="javascript:void(0);" class="mail-star active"><i class="fa fa-star"></i></a>                                                
+                  </div>
+                  <div class="md-right">
+                      
+                      <div class="col-md-12 media text-muted pt-3 mb-2">
+                            
+                          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+                          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                              <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+                            <san class="text-info">'.$row->email.'</span>
+                              '.$etat.'
+                            
+                          </div>
+                          
+                      </div>
+
+
+
+
+
+                      
+                  </div>
+              </div>
+            </li>
+           
+
+
+
+           ';
+          }
+
+          $output .='</ul>';
+          
+          return $output;
+      }
+      // fin pagination
+      // insertion  au groupe
+      function insert_integration_groupe($data){
+          $this->db->insert('groupe', $data);
+          return $this->db->insert_id();
+      }
+      // suppression au groupe
+      function returer_suppression_au_groupe_discution($code_groupe, $id_user)  
+      {  
+
+        $this->db->query("DELETE FROM groupe WHERE code_groupe='".$code_groupe."' AND id_user='".$id_user."' "); 
+
+      }
+
+      // get tittre 
+      function get_name_groupe($code){
+        $this->db->where("code", $code);
+        $this->db->limit(1);
+        $nom = $this->db->get("profile_groupe")->result_array();
+        foreach ($nom as $key) {
+          $titre = $key["nom"];
+          return $titre ;
+        }
+
+      }
+
+      // messagerie groupe
+      function insert_message_chat_groupe($data){
+        $this->db->insert('groupe', $data);
+      }
+
 
 
 

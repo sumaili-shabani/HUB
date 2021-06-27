@@ -147,7 +147,7 @@
                    $created_at_message;
                    $idcours_favory;
 
-                   $message = $this->db->query("SELECT idmessage,id_user,id_recever, messagerie.created_at, users.first_name,users.last_name, users.image, message FROM messagerie INNER JOIN users ON  users.id= messagerie.id_user WHERE messagerie.id_recever = '".$connected."'  ORDER BY messagerie.created_at DESC LIMIT 6 ");
+                   $message = $this->db->query("SELECT idmessage,id_user,id_recever, messagerie.created_at, users.first_name,users.last_name, users.image, message FROM messagerie INNER JOIN users ON  users.id= messagerie.id_user WHERE messagerie.id_recever = '".$connected."'  ORDER BY messagerie.created_at DESC LIMIT 3 ");
 
                    if ($message->num_rows() > 0) {
                     $nombre_de_favory = $message->num_rows();
@@ -182,7 +182,60 @@
                     
                    } 
 
-                 ?>
+              ?>
+
+              <?php
+
+                 
+                    $message_chat_groupe = $this->db->query("
+                      SELECT groupe.idgroupe,code_groupe,id_user,groupe.message,groupe.fichier,groupe.created_at, groupe_chat.nom,groupe_chat.image as logo,groupe_chat.code, users.first_name,users.last_name,users.image, users.id,users.email, users.image AS avatar,
+                        groupe_chat.image AS logo
+                       FROM groupe INNER JOIN groupe_chat ON groupe.code_groupe=groupe_chat.code INNER JOIN users ON groupe.id_user= users.id WHERE groupe.message IS NOT null AND groupe_chat.id_users=".$connected." GROUP BY groupe_chat.code DESC LIMIT 3
+
+                    ");
+
+                     if ($message_chat_groupe->num_rows() > 0) {
+                      
+
+                      foreach ($message_chat_groupe->result_array() as $not6) {
+                        if ($not6['id_user'] != $connected) {
+                          # code...
+                          ?>
+
+                          <a class="dropdown-item d-flex align-items-center" href="<?php echo(base_url()) ?>admin/chat_admin2/<?php echo($connected) ?>/<?php echo($not6['code']) ?>">
+                              <div class="mr-3">
+                                  <div class="icon-circle bg-hub">
+                                      <img alt="avatar" class="img img-thumbnail" src="<?php echo(base_url()) ?>upload/groupe/<?php echo($not6['logo']) ?>" >
+                                       
+                                  </div>
+                              </div>
+                              <div>
+                                  <div class="small text-gray-500"><?php echo(substr(date(DATE_RFC822, strtotime($not6['created_at'])), 0, 23)); ?></div>
+                                  <span> <?php echo($not6['first_name']); ?> <?php echo($not6['last_name']); ?> a réagi dans le <font class="text-warning">groupe</font> <font class="text-success"><?php echo(substr($not6['nom'], 0,30)); ?></font>...
+                                    <br>
+                                    <?php echo(substr($not5['message'], 0,42)) ?>...
+                                    <sup>
+                                      <div class="icon-circle bg-white pull-right mb-1 mt-1">
+                                      
+                                         <img alt="avatar" class="img img-thumbnail" src="<?php echo(base_url()) ?>upload/photo/<?php echo($not6['image']) ?>">
+                                      </div>
+                                    </sup>
+                                  </span>
+                              </div>
+                          </a>
+
+                          <?php
+                        }
+                      }
+
+                     }
+                     else{
+                      
+                     } 
+
+              ?>
+
+              
 
               
               <a class="dropdown-item text-center small text-gray-500" href="<?php echo(base_url()) ?>admin/message">Voir tous les messages</a>

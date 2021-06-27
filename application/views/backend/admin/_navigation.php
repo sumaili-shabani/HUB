@@ -140,6 +140,9 @@
                         <div class="dropdown-divider"></div>
 
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/database">Sauvegarde des données</a>
+
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/groupeconf">Groupe de discution</a>
                        
                     </div>
                 </div>

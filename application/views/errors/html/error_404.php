@@ -27,10 +27,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <link href="<?php echo($base_url)?>js/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
 <!-- Fav Icon  -->
 <link rel="shortcut icon" href="<?php echo($base_url) ?>upload/annumation/logo.jpg">
+<style type="text/css">
+    .hub{
+      background-color: rgb(220, 68, 5);
+     } 
+     .bg-hub{
+      background-color: rgb(220, 68, 5);
+      color:white;
+     } 
+     .btn-hub{
+      background-color: rgb(220, 68, 5);
+      color:white;
+     } 
+</style>
 
 </head>
 
-<body class="bg-gradient-secondary">
+<body class="bg-gradient-hub hub">
 
     <div class="container">
 
@@ -56,10 +69,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 											<h4><?php echo $heading; ?></h4>
 											<div id="body">
 												<?php echo $message; ?>
+                                                <h1>🙆</h1>
 											</div>
 
 											<hr>
-											<a class="btn btn-secondary btn-block" href="javascript:history.go(-1);">Revenir en arrière</a>
+											<a class="btn btn-secondary btn-hub" href="javascript:history.go(-1);">Revenir en arrière</a>
 										</div>
                                     </div>
                                         

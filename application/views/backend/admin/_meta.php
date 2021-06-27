@@ -31,6 +31,7 @@
 
 <!-- Custom styles for this template canavas-->
 <link href="<?php echo(base_url())?>js/css/canvas.css" rel="stylesheet">
+<link href="<?php echo(base_url())?>js/css/my_style.css" rel="stylesheet">
 
 <style>  
      body  

@@ -253,6 +253,17 @@ class admin extends CI_Controller
 		}
 
 
+		function groupeconf(){
+
+			$data['title']="Paramètrage de groupe de discutions ";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+			$data['users'] = $this->crud_model->fetch_connected($this->connected);
+			$data['my_group'] = $this->crud_model->fetch_tag_users_chat($this->connected);
+			$this->load->view('backend/admin/groupeconf', $data);
+		}
+
+
+
 
 
 	    /*
@@ -279,6 +290,25 @@ class admin extends CI_Controller
 		    $data['users'] = $this->crud_model->fetch_connected($this->connected);
 		    $this->load->view('backend/admin/messagerie', $data);
 		}
+
+		function chat_admin2($param1, $param2){
+
+			$title_job = $this->crud_model->get_name_groupe($param2);
+			
+		    $data['title']="le groupe ".$title_job." Discution instantanée";
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+		    $data['goupe_name']= $title_job;
+
+		    $data['id_user']= $param1;
+			$data['code_groupe']= $param2;
+
+		    $data['users'] = $this->crud_model->fetch_connected($this->connected);
+		    $this->load->view('backend/admin/chat_groupe', $data);
+		}
+
+		
+
 
 
 	     function operationCompteRendu($param1='',$param2=''){
@@ -2789,11 +2819,616 @@ class admin extends CI_Controller
 	    // echo("modification avec succès");
 	}
 
+	
 	function supression_message(){
 
       $this->crud_model->delete_messagerie($this->input->post("code"));
 	    
 	}
+
+	// chat groupe conversation 
+	function modification_chat_message(){
+
+	    $updated_data = array(  
+	       'message'    =>     htmlspecialchars($this->input->post("message"))
+	    );  
+
+	    $this->crud_model->update_chat_messagerie($this->input->post("idgroupe"), $updated_data);
+	    // echo("modification avec succès");
+	}
+
+	function supression_chat_message(){
+
+      $this->crud_model->delete_chat_messagerie($this->input->post("idgroupe"));
+	    
+	}
+
+
+	/*
+	* script de group de chat
+	*
+
+	====================================================
+	====================================================
+	====================================================
+
+	*/
+
+	function operation_groupe(){
+    	  $code = substr(md5(rand(100000000, 200000000)), 0, 10);
+	      $insert_data = array(  
+	           'nom'          			=>     $this->input->post('nom'),  
+	           'id_users'           	=>     $this->input->post("id_users"), 
+	           'code'         		    =>     $code, 
+	           'image'                  =>     $this->upload_image_groupe()
+		  );  
+	       
+	      $requete=$this->crud_model->insert_groupe_chat($insert_data);
+	      echo("le groupe est créé avec succès");
+	      // redirect('admin/groupeconf', 'refresh');
+	      
+    }
+
+    function modification_groupe(){
+
+    	if($_FILES["user_image"]["size"] > 0)  
+      	{
+      		$update_data = array(  
+		           'nom'          			=>     $this->input->post('nom'),  
+		           'id_users'           	=>     $this->input->post("id_users"),  
+		           'image'                  =>     $this->upload_image_groupe()
+			);  
+
+      	}
+      	else
+      	{
+      		$update_data = array(  
+		           'nom'          			=>     $this->input->post('nom'),  
+		           'id_users'           	=>     $this->input->post("id_users") 
+			);
+      	}
+
+	    $code = $this->input->post('code');   
+	    $requete=$this->crud_model->update_groupe_chat($code,$update_data);
+	    echo("mise à jour du groupe avec succès");
+	      
+    }
+
+    function delete_groupe()
+	{
+	    if($this->input->post('checkbox_value'))
+	    {
+	       $id = $this->input->post('checkbox_value');
+	       for($count = 0; $count < count($id); $count++)
+	       {
+	            $code    = $id[$count];
+	            $this->crud_model->delete_groupe_chat($code);
+
+	            echo($code);
+	            
+	       }
+
+	       // echo("suppression groupe avec succès");
+
+	    }
+	}
+
+
+    function fetch_single_groupe()  
+	{  
+       $output = array();  
+       $data = $this->crud_model->fetch_single_groupe_chat($this->input->post('code'));  
+       foreach($data as $row)  
+       {  
+            $output['nom'] 		= $row->nom; 
+            $output['id_users'] = $row->id_users;
+             
+            
+            if($row->image != '')  
+            {  
+                 $output['user_image'] = '<img src="'.base_url().'upload/groupe/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+            }  
+            else  
+            {  
+                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+            }  
+ 
+       }  
+
+       echo json_encode($output);  
+	}
+
+	function upload_image_groupe()  
+	{  
+       if(isset($_FILES["user_image"]))  
+       {  
+            $extension = explode('.', $_FILES['user_image']['name']);  
+            $new_name = rand() . '.' . $extension[1];  
+            $destination = './upload/groupe/' . $new_name;  
+            move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+            return $new_name;  
+       }  
+	}
+
+	// lieste de mes groupes 
+	function nos_goupe_discution_groupe(){
+      	$id = $this->connected;
+    	$output = '';
+   
+    	$this->db->where("id_users", $id);
+    	$resultat = $this->db->get("groupe_chat");
+
+    	if ($resultat->num_rows() > 0) {
+    		$output .='<ul class="list-unstyled resultat">';
+
+    		foreach ($resultat->result() as $key) {
+    			$output .='
+
+    			<li class="clearfix bg-white card mb-2">
+                    <div class="col-md-12  row mt-1">
+
+                    	<div class="col-2 mb-2">
+	                    	<div class="md-left">
+		                        <label class="fancy-checkbox">
+		                            <input type="checkbox" name="checkbox" class="checkbox-tick show_member_of_group2" value="'.$key->idgroupe.'" >
+		                            <span></span>
+		                        </label>
+		                        <a href="javascript:void(0);" code="'.$key->code.'" class="mail-star active update"><i class="fa fa-edit"></i></a>  
+
+		                        <a href="javascript:void(0);" code="'.$key->code.'" class="mail-star text-danger active deleted_group"><i class="fa fa-trash"></i></a> 
+
+		                    </div>
+                    	</div>
+
+                    	<div class="col-7 mb-2">
+	                    	<div class="col-md-12">
+	                    		<p class="sub text-justify "><a href="'.base_url().'admin/chat_admin2/'.$id.'/'.$key->code.'" class="mail-detail-expand text-justify">'.$key->nom.' </a></p>
+		                    </div>
+                    	</div>
+                    	<div class="col-3 mb-2">
+	                    	<div class="md-right">
+		                        <img class="img rounded img-thumbnail img-responsive" src="'.base_url().'upload/groupe/'.$key->image.'" alt="" style="border-radius: 50%; border-color: white;">
+		                        
+		                    </div>
+                    	</div>
+	                    
+	                    
+                    </div>
+                </li>
+
+    			';
+    		}
+
+    		$output .='</ul>';
+
+            echo($output);
+    	}
+    	else{
+
+    	}
+    } 
+    // voir le groupe de profile
+    function profile_groupe(){
+      	$id = $this->connected;
+    	$output = '';
+    	
+    	$etat = '';
+        $url = '';
+
+        $query = $this->input->post('code');
+
+    	$resultat = $this->crud_model->get_users_groupe_by_code($query);
+    	if ($resultat->num_rows() > 0) {
+    		$output .='<ul class="list-unstyled resultat">';
+
+    		$output .='<ul class="list-unstyled resultat">';
+
+    		foreach ($resultat->result() as $row) {
+
+    			if ($row->id_user != $id) {
+	                $url = base_url().'admin/detail_users_profile/'.$row->id_user;
+	                    $etat = '<div class="col-md-12"><span class="message">
+	                      <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id_user.'">
+	                    &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+	                        </a> 
+	                      </span></div>';
+	            }
+	            else{
+	                    $url = base_url().'admin/profile';
+	                    $etat = '
+
+	                    <span class="message">
+	                      <a href="'.base_url().'admin/profile" class="text-warning">
+	                    &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+	                        </a> 
+	                      </span>
+
+	                    ';
+	            }
+
+    			$output .='
+
+    			<li class="clearfix bg-white card mb-2">
+		            <div class="col-md-12 mt-1">
+		                  <div class="md-left">
+		                      <label class="fancy-checkbox">
+		                          <input type="checkbox" name="checkbox" class="checkbox-tick" value="'.$row->id.'">
+		                          <span></span>
+		                      </label>
+		                      <a href="javascript:void(0);" class="mail-star active"><i class="fa fa-star"></i></a>                                                
+		                  </div>
+		                  <div class="md-right">
+		                      
+		                      <div class="col-md-12 media text-muted pt-3 mb-2">
+		                            
+		                          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+		                          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+		                              <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+		                            <san class="text-info">'.$row->email.'</span>
+		                              '.$etat.'
+		                            
+		                          </div>
+		                          
+		                      </div>
+
+
+
+
+
+		                      
+		                  </div>
+		              </div>
+		            </li>
+
+    			';
+    		}
+
+    		$output .='</ul>';
+
+            echo($output);
+
+    		
+    	}
+    	else{
+
+    	}
+    }
+
+     // pour les follower
+   function pagination_utilisateur_groupe()
+   {
+
+	    $this->load->library("pagination");
+	    $config = array();
+	    $config["base_url"] = "#";
+	    $config["total_rows"] = $this->crud_model->fetch_pagination_ti_followe_count();
+	    $config["per_page"] = 3;
+	    $config["uri_segment"] = 3;
+	    $config["use_page_numbers"] = TRUE;
+	    $config["full_tag_open"] = '<ul class="pagination">';
+	    $config["full_tag_close"] = '</ul>';
+	    $config["first_tag_open"] = '<li class="page-item">';
+	    $config["first_tag_close"] = '</li>';
+	    $config["last_tag_open"] = '<li class="page-item">';
+	    $config["last_tag_close"] = '</li>';
+	    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+	    $config["next_tag_open"] = '<li class="page-item">';
+	    $config["next_tag_close"] = '</li>';
+	    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+	    $config["prev_tag_open"] = "<li class='page-item'>";
+	    $config["prev_tag_close"] = "</li>";
+	    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	    $config["cur_tag_close"] = "</a></li>";
+	    $config["num_tag_open"] = "<li class='page-item'>";
+	    $config["num_tag_close"] = "</li>";
+	    $config["num_links"] = 1;
+	    $this->pagination->initialize($config);
+	    $page = $this->uri->segment(3);
+	    $start = ($page - 1) * $config["per_page"];
+
+	    $output = array(
+	     'pagination_link' => $this->pagination->create_links(),
+	     'country_table'   => $this->crud_model->fetch_details_pagination_groupe($config["per_page"], $start)
+	    );
+	    echo json_encode($output);
+    }
+
+    // la rechere pour le groupe
+    function recherche_utilisateur_groupe(){
+      	$id = $this->connected;
+    	$output = '';
+    	$etat = '';
+        $url = '';
+    	$query = $this->input->post('query');
+    	$resultat = $this->crud_model->recherche_utilisateur_requete($query);
+    	if ($resultat->num_rows() > 0) {
+    		$output .='<ul class="list-unstyled resultat">';
+
+    		foreach ($resultat->result() as $row) {
+
+    			if ($row->id != $id) {
+	                $url = base_url().'admin/detail_users_profile/'.$row->id;
+	                    $etat = '<div class="col-md-12"><span class="message">
+	                      <a href="'.base_url().'admin/chat_admin/'.$id.'/'.$row->id.'">
+	                    &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+	                        </a> 
+	                      </span></div>';
+	            }
+	            else{
+	                    $url = base_url().'admin/profile';
+	                    $etat = '
+
+	                    <span class="message">
+	                      <a href="'.base_url().'admin/profile" class="text-warning">
+	                    &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+	                        </a> 
+	                      </span>
+
+	                    ';
+	            }
+
+    			$output .='
+
+    			<li class="clearfix bg-white card mb-2">
+		            <div class="col-md-12 mt-1">
+		                  <div class="md-left">
+		                      <label class="fancy-checkbox">
+		                          <input type="checkbox" name="checkbox" class="checkbox-tick" value="'.$row->id.'">
+		                          <span></span>
+		                      </label>
+		                      <a href="javascript:void(0);" class="mail-star active"><i class="fa fa-star"></i></a>                                                
+		                  </div>
+		                  <div class="md-right">
+		                      
+		                      <div class="col-md-12 media text-muted pt-3 mb-2">
+		                            
+		                          <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+		                          <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+		                              <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+		                            <san class="text-info">'.$row->email.'</span>
+		                              '.$etat.'
+		                            
+		                          </div>
+		                          
+		                      </div>
+
+
+
+
+
+		                      
+		                  </div>
+		              </div>
+		            </li>
+
+    			';
+    		}
+
+    		$output .='</ul>';
+
+            echo($output);
+    	}
+    	else{
+
+    		$output .= '
+	            <div class="col-md-12" >
+	                  <div class="row">
+	                      <div class="col-md-2"></div>
+	                    <div class="col-md-8">
+	                      <div class="media text-muted pt-3">
+	                        <img data-src="holder.js/32x32?theme=thumb&amp;bg=007bff&amp;fg=007bff&amp;size=1" alt="32x32" class="mr-2 rounded" style="width: 100%; height: auto;" src="data:'.base_url().'upload/annumation/a.gif" srcset="'.base_url().'upload/annumation/a.gif" data-holder-rendered="true">
+	                        
+	                      </div>
+	                    </div>
+	                    <div class="col-md-2"></div>
+	                  </div>
+	               </div>
+	          ';
+
+    	}
+    }
+
+
+    // ajout au groupe 
+    function integration_du_groupe()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           $gr = $this->input->post('code_groupe_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+                $id_user    = $id[$count];
+
+                for($count2 = 0; $count2 < count($gr); $count2++)
+		        {
+	                $code_groupe    = $gr[$count2];
+
+	                $data = array(
+	                	'id_user'		=>	$id_user,
+	                	'code_groupe'	=>	$code_groupe
+	                );
+
+	                $query = $this->crud_model->insert_integration_groupe($data);
+
+	                // isertion des notification 
+	                if ($query > 0) {
+	                	# code...
+
+	                	$users_cool = $this->crud_model->get_info_user_tag($id_user);
+			            foreach ($users_cool as $key) {
+
+			                if ($key['idrole'] == 1) {
+				                if ($key['id'] != $this->connected) {
+				                	# code...
+				                	$url ="admin/chat_admin2/".$id_user."/".$code_groupe;
+
+					                $id_user_recever = $key['id'];
+
+					                // $nom = $this->input->post('first_name');
+					                $nom   = $this->crud_model->get_name_user($this->connected);
+					                $message =$nom." Vient de nous ajouter dans un groupe ";
+
+					                $notification = array(
+					                  'titre'     =>    "Nouveau groupe",
+					                  'icone'     =>    "fa fa-comment",
+					                  'message'   =>     $message,
+					                  'url'       =>     $url,
+					                  'id_user'   =>     $id_user_recever
+					                );
+					                
+					                $not = $this->crud_model->insert_notification($notification);
+					                
+				                }
+
+				            }
+
+				            if ($key['idrole'] == 2) {
+				                $url ="user/chat_admin2/".$id_user."/".$code_groupe;
+
+				                $id_user_recever = $key['id'];
+
+				                // $nom = $this->input->post('first_name');
+				                $nom   = $this->crud_model->get_name_user($this->connected);
+				                $message =$nom." Vient de nous ajouter dans un groupe ";
+
+				                $notification = array(
+				                  'titre'     =>    "Nouveau groupe",
+				                  'icone'     =>    "fa fa-comment",
+				                  'message'   =>     $message,
+				                  'url'       =>     $url,
+				                  'id_user'   =>     $id_user_recever
+				                );
+				                
+				                $not = $this->crud_model->insert_notification($notification);
+
+				            }
+
+				            if ($key['idrole'] == 3) {
+				                $url ="entreprise/chat_admin2/".$id_user."/".$code_groupe;
+
+				                $id_user_recever = $key['id'];
+
+				                // $nom = $this->input->post('first_name');
+				                $nom   = $this->crud_model->get_name_user($this->connected);
+				                $message =$nom." Vient de nous ajouter dans un groupe ";
+
+				                $notification = array(
+				                  'titre'     =>    "Nouveau groupe",
+				                  'icone'     =>    "fa fa-comment",
+				                  'message'   =>     $message,
+				                  'url'       =>     $url,
+				                  'id_user'   =>     $id_user_recever
+				                );
+				                
+				                $not = $this->crud_model->insert_notification($notification);
+
+				            }
+			              
+			                # code...
+			            }
+
+	                }
+	                // fin insertion 
+		                
+		        }
+                
+           }
+
+           echo("intégration du groupe avec succès");
+
+        }
+    }
+
+    function retirer_integration_du_groupe()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           $gr = $this->input->post('code_groupe_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+                $id_user    = $id[$count];
+
+                for($count2 = 0; $count2 < count($gr); $count2++)
+		        {
+	                $code_groupe    = $gr[$count2];
+
+	                $this->crud_model->returer_suppression_au_groupe_discution($code_groupe, $id_user);
+		                
+		        }
+                
+           }
+
+           echo("suppession au groupe avec succès");
+
+        }
+    }
+
+
+    function chat_local_view_groupe($param1, $param2){
+		$data['title']="Discution instantané";
+		$data['id_user']= $param1;
+
+		$data['code_groupe']= $param2;
+
+		$code = substr(md5(rand(100000000, 200000000)), 0, 10);
+
+		if ($this->input->post('Message_text') !='') {
+
+			$chat['id_user'] = $param1;
+			$chat['code_groupe'] = $param2;
+			$chat['message'] = $this->input->post('Message_text');
+			if($_FILES['user_image']['size'] > 0){
+
+             	$chat['fichier'] = $this->upload_image_chat_envoie();
+            }
+			
+			$this->crud_model->insert_message_chat_groupe($chat);
+			redirect('admin/chat_admin2/'.$param1.'/'.$param2);
+		}
+		else{
+			redirect('admin/chat_admin2/'.$param1.'/'.$param2);
+		}
+		
+		
+	}
+
+	function upload_image_chat_envoie()  
+    {  
+       if(isset($_FILES["user_image"]))  
+       {  
+            $extension = explode('.', $_FILES['user_image']['name']);  
+            $new_name = rand() . '.' . $extension[1];  
+            $destination = './upload/groupe/fichier/' . $new_name;  
+            move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+            return $new_name;  
+       }  
+    }
+
+    function fetch_single_chat_groupe()  
+	{  
+	      
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_chat_groupe($this->input->post('code'));  
+	       foreach($data as $row)  
+	       {  
+	            $output['nom'] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));  
+	           
+	            $output['text_description']   ='
+	              <textarea class="form-control textarea" name="message" id="message">
+	                  '. html_entity_decode($row->message).'
+	              </textarea>
+	            ';
+
+
+	       }  
+	       echo json_encode($output);  
+	}
+
+
 
 
 
