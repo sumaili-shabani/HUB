@@ -12,13 +12,66 @@ class crud_model extends CI_Model{
     "description", "mission", "objectif","blog");  
   var $order_column2 = array(null, "nom_site", "adresse","tel1","tel2", 
     "description", "mission", "objectif","blog", null, null);
-    // fin de la tbl_info
+  // fin de la tbl_info
+
+  // opertion category
+  var $table3 = "category";  
+  var $select_column3 = array("idcat", "nom", "created_at");  
+  var $order_column3 = array(null, "nom", "created_at");
+  // fin category
 
    //users
   var $table8 = "users";  
   var $select_column8 = array("id", "first_name", "last_name", "email","image","telephone","full_adresse","biographie","date_nais","facebook","twitter","linkedin","idrole","sexe");  
   var $order_column8 = array(null, "first_name", "last_name","telephone","sexe","id", null, null);
   // fin information
+
+
+
+  // contact
+  var $table12 = "contact";  
+  var $select_column12 = array("id", "nom", "sujet","email", "message","fichier","created_at");  
+  var $order_column12 = array(null, "nom", "sujet","email","fichier", null, null);
+  // fin contact
+
+  // opertion category information
+  var $table15 = "profile_article";  
+  var $select_column15 = array("idart", "nom","description","lien","image", 
+    "type","idcat","nom_cat","created_at");  
+  var $order_column15 = array(null, "nom","description","lien","type","idcat","nom_cat", "created_at");
+  // fin category
+
+  // opertion tinfo_personnel
+  var $table16 = "tinfo_personnel";  
+  var $select_column16 = array("idtinfo_personnel", "titre","description","icone", "created_at");  
+  var $order_column16 = array(null, "titre","description","icone", "created_at");
+  // fin de la tinfo_personnel
+
+  // opertion tinfo_service
+  var $table17 = "tinfo_service";  
+  var $select_column17 = array("idtinfo_service", "titre","description","image", "created_at");  
+  var $order_column17 = array(null, "titre","description","image", "created_at");
+  // fin de la tinfo_service
+
+  // opertion tinfo_choix
+  var $table18 = "tinfo_choix";  
+  var $select_column18 = array("idtinfo_choix", "titre","description","icone", "created_at");  
+  var $order_column18 = array(null, "titre","description","icone", "created_at");
+  // fin de la tinfo_choix
+
+  // opertion tinfo_techno
+  var $table19 = "tinfo_techno";  
+  var $select_column19 = array("idtinfo_techno", "titre","icone", "created_at");  
+  var $order_column19 = array(null, "titre","icone", "created_at");
+  // fin de la tinfo_techno
+
+  //tinfo_user
+  var $table20 = "tinfo_user";  
+  var $select_column20 = array("idtinfo_user", "first_name", "last_name","sexe", "email","image","telephone","facebook","twitter","linkedin","poste","created_at");  
+  var $order_column20 = array(null, "first_name", "last_name","telephone","sexe","email",
+    "created_at",null, null);
+  // fin tinfo_user
+
 
 
 
@@ -173,8 +226,6 @@ class crud_model extends CI_Model{
        return $query->result();  
   } 
 
- 
-
   function get_info_user(){
       $nom = $this->db->get("users")->result_array();
       return $nom;
@@ -187,7 +238,6 @@ class crud_model extends CI_Model{
       ))->result_array();
       return $nom;
   }
-
 
   function statistiques_nombre_tag_by_column($query, $value){
       $my_nombre;
@@ -744,7 +794,7 @@ class crud_model extends CI_Model{
       }
 
       // operation catégorie d'entrise
-       function make_query_category()  
+      function make_query_category()  
       {  
             
            $this->db->select($this->select_column26);  
@@ -806,6 +856,74 @@ class crud_model extends CI_Model{
       {  
            $this->db->where("idcat", $idcat);  
            $query=$this->db->get('tbl_category');  
+           return $query->result();  
+      }
+
+      // fin operation categorie
+
+      // operation catégorie d'entrise
+      function make_query_category_news()  
+      {  
+            
+           $this->db->select($this->select_column3);  
+           $this->db->from($this->table3);  
+           if(isset($_POST["search"]["value"]))  
+           {  
+                $this->db->like("nom", $_POST["search"]["value"]);  
+                $this->db->or_like("idcat", $_POST["search"]["value"]);  
+           }  
+           if(isset($_POST["order"]))  
+           {  
+                $this->db->order_by($this->order_column3[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+           }  
+           else  
+           {  
+                $this->db->order_by('idcat', 'DESC');  
+           }  
+      }
+
+     function make_datatables_category_news(){  
+           $this->make_query_category_news();  
+           if($_POST["length"] != -1)  
+           {  
+                $this->db->limit($_POST['length'], $_POST['start']);  
+           }  
+           $query = $this->db->get();  
+           return $query->result();  
+      }
+
+      function get_filtered_data_category_news(){  
+           $this->make_query_category_news();  
+           $query = $this->db->get();  
+           return $query->num_rows();  
+      }       
+      function get_all_data_category_news()  
+      {  
+           $this->db->select("*");  
+           $this->db->from($this->table3);  
+           return $this->db->count_all_results();  
+      }
+
+      function insert_category_news($data){
+          $this->db->insert('category', $data);
+      }
+
+      function update_category_news($idcat, $data)  
+      {  
+           $this->db->where("idcat", $idcat);  
+           $this->db->update("category", $data);  
+      }
+
+      function delete_category_news($idcat)  
+      {  
+           $this->db->where("idcat", $idcat);  
+           $this->db->delete("category");  
+      }
+
+      function fetch_single_category_news($idcat)  
+      {  
+           $this->db->where("idcat", $idcat);  
+           $query=$this->db->get('category');  
            return $query->result();  
       }
 
@@ -953,6 +1071,7 @@ class crud_model extends CI_Model{
 
       function insert_link_canavas2($data){
           $this->db->insert('link_canavas2', $data);
+          return $this->db->insert_id();
       }
 
       function update_link_canavas($idlink, $data){
@@ -2742,6 +2861,25 @@ class crud_model extends CI_Model{
 
     }
 
+    // retourner les numéros  
+    function get_info_du_site($column){
+      $this->db->limit(1);
+      $nom = $this->db->get("tbl_info");
+      $infos = '';
+      if ($nom->num_rows() > 0) {
+        foreach ($nom->result_array() as $key) {
+          $infos = $key[$column];
+          
+        }
+      }
+      else{
+         $infos ="ce champ est vide";
+      }
+      return $infos ;
+      
+
+    }
+
 
     function update_messagerie($code, $data)  
     {  
@@ -3317,6 +3455,2331 @@ class crud_model extends CI_Model{
       function insert_message_chat_groupe($data){
         $this->db->insert('groupe', $data);
       }
+
+      function Select_category()
+      {
+          $this->db->order_by('nom','ASC');
+          $this->db->limit(50);
+          return $this->db->get('category');
+      }
+
+      function Select_articles()
+      {
+          $this->db->order_by('nom','ASC');
+          $this->db->limit(50);
+          return $this->db->get('profile_article');
+      }
+
+      function Select_formations()
+      {
+          $this->db->order_by('idf','DESC');
+          $this->db->limit(20);
+          return $this->db->get('formations');
+      }
+
+      function Select_formations_ok($column, $table)
+      {
+          $this->db->group_by($column);
+          $this->db->limit(20);
+          return $this->db->get($table);
+      }
+
+       // script pour nos article 
+  function make_query_article()  
+  {  
+      
+     $this->db->select($this->select_column15);  
+     $this->db->from($this->table15);
+     $this->db->limit(10);
+     
+     if(isset($_POST["search"]["value"]))  
+     {  
+          $this->db->like("idart", $_POST["search"]["value"]);  
+          $this->db->or_like("nom", $_POST["search"]["value"]);
+          $this->db->or_like("description", $_POST["search"]["value"]);
+          $this->db->or_like("lien", $_POST["search"]["value"]);
+          $this->db->or_like("nom_cat", $_POST["search"]["value"]);
+          $this->db->or_like("type", $_POST["search"]["value"]);
+     }  
+     if(isset($_POST["order"]))  
+     {  
+          $this->db->order_by($this->order_column15[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+     }  
+     else  
+     {  
+          $this->db->order_by('idart', 'DESC');  
+     }  
+  }
+
+   function make_datatables_article(){  
+         $this->make_query_article();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_article(){  
+         $this->make_query_article();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_article()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table15);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_article($data)  
+    {  
+         $this->db->insert('article', $data);  
+    }
+
+    
+    function update_article($idart, $data)  
+    {  
+         $this->db->where("idart", $idart);  
+         $this->db->update("article", $data);  
+    }
+
+
+    function delete_article($idart)  
+    {  
+         $this->db->where("idart", $idart);  
+         $this->db->delete("article");  
+    }
+
+    function fetch_single_article($idart)  
+    {  
+         $this->db->where("idart", $idart);  
+         $query=$this->db->get('article');  
+         return $query->result();  
+    } 
+    //fin de la article information
+
+    // filtrage avec limit 
+    function fetch_details_view_articles_limit($limit)
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("profile_article");
+      $this->db->order_by("idart", "DESC");
+      $this->db->limit($limit);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            if ($row->type=='texte') {
+              $etat = '
+                <div class="user-avatar bg-dim-primary d-none d-sm-flex text-center">
+                    <span><i class="fa fa-file text-primary" ></i></span>
+                </div>
+               ';
+            }
+            elseif ($row->type=='video'){
+              $etat = '
+                  <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+                      <span><i class="fa fa-video-camera text-primary"></i></span>
+                  </div>
+              ';
+            }
+            else{
+
+              $etat = '';
+            }
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/article/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,20)).'...'.'</td>
+          <td>'.nl2br(substr($row->description, 0,20)).' ....'.'</td>
+          <td>'.nl2br(substr($row->nom_cat, 0,20)).' ...'.'</td>
+          <td>'.$etat.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idart="'.$row->idart.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idart="'.$row->idart.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+     function fetch_details_view_articles()
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("profile_article");
+      $this->db->order_by("idart", "DESC");
+      $this->db->limit(10);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            if ($row->type=='texte') {
+              $etat = '
+                <div class="user-avatar bg-dim-hub d-none d-sm-flex text-center">
+                    <span><i class="fa fa-file text-hub" ></i></span>
+                </div>
+               ';
+            }
+            elseif ($row->type=='video'){
+              $etat = '
+                  <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+                      <span><i class="fa fa-video-camera text-hub"></i></span>
+                  </div>
+              ';
+            }
+            else{
+
+              $etat = '';
+            }
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/article/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,20)).'...'.'</td>
+          <td>'.nl2br(substr($row->description, 0,20)).' ....'.'</td>
+          <td>'.nl2br(substr($row->nom_cat, 0,20)).' ...'.'</td>
+          <td>'.$etat.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idart="'.$row->idart.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idart="'.$row->idart.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    function fetch_data_search_view_article($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_article");
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('idart', $query);
+         $this->db->or_like('nom', $query);
+         $this->db->or_like('description', $query);
+         $this->db->or_like('type', $query);
+         $this->db->or_like('nom_cat', $query);
+        }
+        $this->db->order_by('idart', 'DESC');
+        return $this->db->get();
+    }
+
+    function Select_artcle_orders()
+    {
+        $this->db->order_by('created_at','DESC');
+        $this->db->limit(15);
+        return $this->db->get('article');
+    }
+
+    // operation commentaire
+
+    function insert_commentaire($data)  
+    {  
+         $this->db->insert('commentaire', $data);  
+    }
+
+    
+    function update_commentaire($idcomment, $data)  
+    {  
+         $this->db->where("idcomment", $idcomment);  
+         $this->db->update("commentaire", $data);  
+    }
+
+
+    function delete_commentaire($idcomment)  
+    {  
+         $this->db->where("idcomment", $idcomment);  
+         $this->db->delete("commentaire");  
+    }
+
+    function fetch_single_commentaire($idcomment)  
+    {  
+         $this->db->where("idcomment", $idcomment);  
+         $query=$this->db->get('profile_commentaire');  
+         return $query->result();  
+    } 
+
+
+    function fetch_details_view_commentaire()
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("profile_commentaire");
+      $this->db->order_by("idcomment", "DESC");
+      $this->db->limit(10);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            if ($row->type=='texte') {
+              $etat = '
+                <div class="user-avatar bg-dim-hub d-none d-sm-flex text-center">
+                    <span><i class="fa fa-file text-hub" ></i></span>
+                </div>
+               ';
+            }
+            elseif ($row->type=='video'){
+              $etat = '
+                  <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+                      <span><i class="fa fa-video-camera text-hub"></i></span>
+                  </div>
+              ';
+            }
+            else{
+
+              $etat = '';
+            }
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/article/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,20)).'...'.'</td>
+          <td>'.nl2br(substr($row->description, 0,20)).' ....'.'</td>
+          <td>'.nl2br(substr($row->nomcat, 0,20)).' ...'.'</td>
+          <td>'.$etat.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idcomment="'.$row->idcomment.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idcomment="'.$row->idcomment.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    // filtrage avec limit 
+    function fetch_details_view_commentaire_limit($limit)
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("profile_commentaire");
+      $this->db->order_by("idcomment", "DESC");
+      $this->db->limit($limit);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            if ($row->type=='texte') {
+              $etat = '
+                <div class="user-avatar bg-dim-hub d-none d-sm-flex text-center">
+                    <span><i class="fa fa-file text-hub" ></i></span>
+                </div>
+               ';
+            }
+            elseif ($row->type=='video'){
+              $etat = '
+                  <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+                      <span><i class="fa fa-video-camera text-hub"></i></span>
+                  </div>
+              ';
+            }
+            else{
+
+              $etat = '';
+            }
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/article/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,20)).'...'.'</td>
+          <td>'.nl2br(substr($row->description, 0,20)).' ....'.'</td>
+          <td>'.nl2br(substr($row->nomcat, 0,20)).' ...'.'</td>
+          <td>'.$etat.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idcomment="'.$row->idcomment.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idcomment="'.$row->idcomment.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    function fetch_data_search_view_commentaire($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_commentaire");
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('idart', $query);
+         $this->db->or_like('nom', $query);
+         $this->db->or_like('description', $query);
+         $this->db->or_like('type', $query);
+         $this->db->or_like('nomcat', $query);
+        }
+        $this->db->order_by('idcomment', 'DESC');
+        return $this->db->get();
+    }
+
+
+    // script pour galery2 
+     //insertion des photos pour la galerie
+    function insert_galery2($data)  
+    {  
+        $this->db->insert('galery2', $data);  
+    }
+    // fin pagination
+    function fetch_pagination_galery_personnel(){
+      $this->db->order_by("idg", "DESC");
+      $query = $this->db->get("galery2");
+      return $query->num_rows();
+    }
+
+    // pagination galery utilisateur
+    function fetch_details_pagination_galery2($limit, $start){
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("galery2");
+      // $this->db->order_by("nom", "ASC");
+      $this->db->order_by("idg", "DESC");
+
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      
+      foreach($query->result() as $row)
+      {
+        
+       $output .= '
+
+          <div class="col-md-4" align="center" style="margin-bottom:24px;">
+              <img src="'.base_url().'upload/galery/'.$row->image.'" class="img-thumbnail img-responsive" style="height: 200px;" />
+                <br />
+            <input type="checkbox" name="images[]" idg="'.$row->idg.'" class="select checkbox_id image_galery" value="upload/galery/'.$row->image.'" /> &nbsp;
+            <a href="javascript:void(0);" class="text-danger supprimer" idg="'.$row->idg.'">
+              <i class="fa fa-trash"></i> supprimer
+            </a>
+
+            &nbsp;
+            <a href="javascript:void(0);" class="text-success update" idg="'.$row->idg.'">
+              <i class="fa fa-edit"></i> editer
+            </a>
+
+         </div>
+       ';
+      }
+      
+      return $output;
+    }
+    // fin pagination
+
+    //suppression des photos pour la galerie
+    function delete_photo_galery_personnele($idg)  
+    {  
+         $this->db->where("idg", $idg);  
+         $this->db->delete("galery2");  
+    }
+    // pagination contact
+
+    function update_galery_entrep_personnele($idg, $data)  
+    {  
+         $this->db->where("idg", $idg);  
+         $this->db->update("galery2", $data);  
+    }
+
+    function fetch_single_galery_entreprise_personnele($idg)  
+    {  
+         $this->db->where("idg", $idg);  
+         $query=$this->db->get('galery2');  
+         return $query->result();  
+    }
+
+     // script pour tinfo_user 
+   function make_query_tinfo_user()  
+   {  
+          
+         $this->db->select($this->select_column20);  
+         $this->db->from($this->table20);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idtinfo_user", $_POST["search"]["value"]);  
+              $this->db->or_like("poste", $_POST["search"]["value"]);
+              $this->db->or_like("first_name", $_POST["search"]["value"]);
+              $this->db->or_like("last_name", $_POST["search"]["value"]);
+              $this->db->or_like("email", $_POST["search"]["value"]);
+              $this->db->or_like("sexe", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column20[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idtinfo_user', 'DESC');  
+         }  
+    }
+
+   function make_datatables_tinfo_user(){  
+         $this->make_query_tinfo_user();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_tinfo_user(){  
+         $this->make_query_tinfo_user();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_tinfo_user()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table20);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_tinfo_user($data)  
+    {  
+         $this->db->insert('tinfo_user', $data);  
+    }
+
+    
+    function update_tinfo_user($idtinfo_user, $data)  
+    {  
+         $this->db->where("idtinfo_user", $idtinfo_user);  
+         $this->db->update("tinfo_user", $data);  
+    }
+
+
+    function delete_tinfo_user($idtinfo_user)  
+    {  
+         $this->db->where("idtinfo_user", $idtinfo_user);  
+         $this->db->delete("tinfo_user");  
+    }
+
+    function fetch_single_tinfo_user($idtinfo_user)  
+    {  
+         $this->db->where("idtinfo_user", $idtinfo_user);  
+         $query=$this->db->get('tinfo_user');  
+         return $query->result();  
+    } 
+  // fin de script tinfo_user
+
+       // script pour tinfo_personnel 
+   function make_query_tinfo_personnel()  
+   {  
+          
+         $this->db->select($this->select_column16);  
+         $this->db->from($this->table16);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idtinfo_personnel", $_POST["search"]["value"]);  
+              $this->db->or_like("titre", $_POST["search"]["value"]);
+              $this->db->or_like("icone", $_POST["search"]["value"]);
+              $this->db->or_like("description", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column16[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idtinfo_personnel', 'DESC');  
+         }  
+    }
+
+   function make_datatables_tinfo_personnel(){  
+         $this->make_query_tinfo_personnel();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_tinfo_personnel(){  
+         $this->make_query_tinfo_personnel();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_tinfo_personnel()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table16);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_tinfo_personnel($data)  
+    {  
+         $this->db->insert('tinfo_personnel', $data);  
+    }
+
+    
+    function update_tinfo_personnel($idtinfo_personnel, $data)  
+    {  
+         $this->db->where("idtinfo_personnel", $idtinfo_personnel);  
+         $this->db->update("tinfo_personnel", $data);  
+    }
+
+
+    function delete_tinfo_personnel($idtinfo_personnel)  
+    {  
+         $this->db->where("idtinfo_personnel", $idtinfo_personnel);  
+         $this->db->delete("tinfo_personnel");  
+    }
+
+    function fetch_single_tinfo_personnel($idtinfo_personnel)  
+    {  
+         $this->db->where("idtinfo_personnel", $idtinfo_personnel);  
+         $query=$this->db->get('tinfo_personnel');  
+         return $query->result();  
+    } 
+  // fin de script tinfo_personnel
+
+       // script pour tinfo_choix 
+   function make_query_tinfo_choix()  
+   {  
+          
+         $this->db->select($this->select_column18);  
+         $this->db->from($this->table18);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idtinfo_choix", $_POST["search"]["value"]);  
+              $this->db->or_like("titre", $_POST["search"]["value"]);
+              $this->db->or_like("icone", $_POST["search"]["value"]);
+              $this->db->or_like("description", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column18[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idtinfo_choix', 'DESC');  
+         }  
+    }
+
+   function make_datatables_tinfo_choix(){  
+         $this->make_query_tinfo_choix();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_tinfo_choix(){  
+         $this->make_query_tinfo_choix();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_tinfo_choix()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table18);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_tinfo_choix($data)  
+    {  
+         $this->db->insert('tinfo_choix', $data);  
+    }
+
+    
+    function update_tinfo_choix($idtinfo_choix, $data)  
+    {  
+         $this->db->where("idtinfo_choix", $idtinfo_choix);  
+         $this->db->update("tinfo_choix", $data);  
+    }
+
+
+    function delete_tinfo_choix($idtinfo_choix)  
+    {  
+         $this->db->where("idtinfo_choix", $idtinfo_choix);  
+         $this->db->delete("tinfo_choix");  
+    }
+
+    function fetch_single_tinfo_choix($idtinfo_choix)  
+    {  
+         $this->db->where("idtinfo_choix", $idtinfo_choix);  
+         $query=$this->db->get('tinfo_choix');  
+         return $query->result();  
+    } 
+    // fin de script tinfo_choix
+
+       // script pour tinfo_service 
+   function make_query_tinfo_service()  
+   {  
+          
+         $this->db->select($this->select_column17);  
+         $this->db->from($this->table17);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idtinfo_service", $_POST["search"]["value"]);  
+              $this->db->or_like("titre", $_POST["search"]["value"]);
+              $this->db->or_like("description", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column17[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idtinfo_service', 'DESC');  
+         }  
+    }
+
+   function make_datatables_tinfo_service(){  
+         $this->make_query_tinfo_service();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_tinfo_service(){  
+         $this->make_query_tinfo_service();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_tinfo_service()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table17);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_tinfo_service($data)  
+    {  
+         $this->db->insert('tinfo_service', $data);  
+    }
+
+    
+    function update_tinfo_service($idtinfo_service, $data)  
+    {  
+         $this->db->where("idtinfo_service", $idtinfo_service);  
+         $this->db->update("tinfo_service", $data);  
+    }
+
+
+    function delete_tinfo_service($idtinfo_service)  
+    {  
+         $this->db->where("idtinfo_service", $idtinfo_service);  
+         $this->db->delete("tinfo_service");  
+    }
+
+    function fetch_single_tinfo_service($idtinfo_service)  
+    {  
+         $this->db->where("idtinfo_service", $idtinfo_service);  
+         $query=$this->db->get('tinfo_service');  
+         return $query->result();  
+    } 
+  // fin de script tinfo_personnel
+
+    // script pour tinfo_techno 
+   function make_query_tinfo_techno()  
+   {  
+          
+         $this->db->select($this->select_column19);  
+         $this->db->from($this->table19);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idtinfo_techno", $_POST["search"]["value"]);  
+              $this->db->or_like("titre", $_POST["search"]["value"]);
+              $this->db->or_like("icone", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column19[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idtinfo_techno', 'DESC');  
+         }  
+    }
+
+   function make_datatables_tinfo_techno(){  
+         $this->make_query_tinfo_techno();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_tinfo_techno(){  
+         $this->make_query_tinfo_techno();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_tinfo_techno()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table19);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_tinfo_techno($data)  
+    {  
+         $this->db->insert('tinfo_techno', $data);  
+    }
+
+    
+    function update_tinfo_techno($idtinfo_techno, $data)  
+    {  
+         $this->db->where("idtinfo_techno", $idtinfo_techno);  
+         $this->db->update("tinfo_techno", $data);  
+    }
+
+
+    function delete_tinfo_techno($idtinfo_techno)  
+    {  
+         $this->db->where("idtinfo_techno", $idtinfo_techno);  
+         $this->db->delete("tinfo_techno");  
+    }
+
+    function fetch_single_tinfo_techno($idtinfo_techno)  
+    {  
+         $this->db->where("idtinfo_techno", $idtinfo_techno);  
+         $query=$this->db->get('tinfo_techno');  
+         return $query->result();  
+    } 
+  // fin de script tinfo_techno
+
+    // operation carousel
+
+    function insert_carousel($data)  
+    {  
+         $this->db->insert('carousel', $data);  
+    }
+
+    function update_carousel($idc, $data)  
+    {  
+         $this->db->where("idc", $idc);  
+         $this->db->update("carousel", $data);  
+    }
+
+
+    function delete_carousel($idc)  
+    {  
+         $this->db->where("idc", $idc);  
+         $this->db->delete("carousel");  
+    }
+
+    function fetch_single_carousel($idc)  
+    {  
+         $this->db->where("idc", $idc);  
+         $query=$this->db->get('carousel');  
+         return $query->result();  
+    } 
+
+    function fetch_data_search_view_carousel($query)
+    {
+        $this->db->select("*");
+        $this->db->from("carousel");
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('idc', $query);
+         $this->db->or_like('description', $query);
+         $this->db->or_like('created_at', $query);
+        
+        }
+        $this->db->order_by('idc', 'DESC');
+        return $this->db->get();
+    }
+
+
+    function fetch_details_view_carousel()
+    {
+      $output = '';
+      $etat = '';
+      $this->db->select("*");
+      $this->db->from("carousel");
+      $this->db->order_by("idc", "DESC");
+      $this->db->limit(10);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="60%">Description </th> 
+                  <th width="20%">Mise à jour</th>
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/carousel/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->description, 0,80)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idc="'.$row->idc.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idc="'.$row->idc.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="60%">Description </th> 
+                  <th width="20%">Mise à jour</th>
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    // filtrage avec limit 
+    function fetch_details_view_carousel_limit($limit)
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("carousel");
+      $this->db->order_by("idc", "DESC");
+      $this->db->limit($limit);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="60%">Description </th> 
+                  <th width="20%">Mise à jour</th>
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/carousel/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->description, 0,80)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idc="'.$row->idc.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idc="'.$row->idc.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="60%">Description </th> 
+                  <th width="20%">Mise à jour</th>
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    // information carousel du site
+    function Select_info_carousel()
+    {
+        return $this->db->query('SELECT * FROM carousel  LIMIT 6');
+    }
+    // fin carousel
+
+
+    /*
+    ===============================
+    ===============================
+    * operation formations
+    *operation fin
+    */
+
+    function insert_formations($data)  
+    {  
+         $this->db->insert('formations', $data);  
+    }
+
+    function update_formations($idf, $data)  
+    {  
+         $this->db->where("idf", $idf);  
+         $this->db->update("formations", $data);  
+    }
+
+
+    function delete_formations($idf)  
+    {  
+         $this->db->where("idf", $idf);  
+         $this->db->delete("formations");  
+    }
+
+    function fetch_single_formations($idf)  
+    {  
+         $this->db->where("idf", $idf);  
+         $query=$this->db->get('formations');  
+         return $query->result();  
+    } 
+
+    function fetch_data_search_view_formations($query)
+    {
+        $this->db->select("*");
+        $this->db->from("formations");
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('idf', $query);
+         $this->db->or_like('nom', $query);
+         $this->db->or_like('date_debit', $query);
+         $this->db->or_like('date_fin', $query);
+         $this->db->or_like('fin_inscription', $query);
+         $this->db->or_like('description', $query);
+         $this->db->or_like('created_at', $query);
+        
+        }
+        $this->db->order_by('idf', 'DESC');
+        return $this->db->get();
+    }
+
+
+    function fetch_details_view_formations()
+    {
+      $output = '';
+      $etat = '';
+      $this->db->select("*");
+      $this->db->from("formations");
+      $this->db->order_by("idf", "DESC");
+      $this->db->limit(10);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Fin inscription </th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->fin_inscription)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          
+          <td><button type="button" name="update" idf="'.$row->idf.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idf="'.$row->idf.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Fin inscription </th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    // filtrage avec limit 
+    function fetch_details_view_formations_limit($limit)
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("formations");
+      $this->db->order_by("idf", "DESC");
+      $this->db->limit($limit);
+      $query = $this->db->get();
+       $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Fin inscription </th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->fin_inscription)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          
+          <td><button type="button" name="update" idf="'.$row->idf.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idf="'.$row->idf.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Fin inscription </th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    // information formations du site
+    function Select_info_formations()
+    {
+        return $this->db->query('SELECT * FROM formations  LIMIT 6');
+    }
+    // fin formations
+
+
+     /*
+    ===============================
+    ===============================
+    * inscription_formations 
+    *operation fin
+    */
+
+    function insert_inscription_formations($data)  
+    {  
+         $this->db->insert('inscription_formations', $data);  
+    }
+
+    function update_inscription_formations($idinscription, $data)  
+    {  
+         $this->db->where("idinscription", $idinscription);  
+         $this->db->update("inscription_formations", $data);  
+    }
+
+
+    function delete_inscription_formations($idinscription)  
+    {  
+         $this->db->where("idinscription", $idinscription);  
+         $this->db->delete("inscription_formations");  
+    }
+
+    function fetch_single_inscription_formations($idinscription)  
+    {  
+         $this->db->where("idinscription", $idinscription);  
+         $query=$this->db->get('profile_inscription');  
+         return $query->result();  
+    } 
+
+    function fetch_single_test_inscription_formations($idf,$email,$annee)  
+    {  
+         $query=$this->db->get_where('profile_inscription',
+            array(
+              'idf'     =>    $idf,
+              'email'   =>    $email,
+              'annee'   =>    $annee
+            )
+         );  
+         return $query->num_rows();  
+    } 
+
+    function fetch_data_search_view_inscription_formations($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_inscription");
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('idinscription', $query);
+         $this->db->or_like('nom', $query);
+         $this->db->or_like('nomcomplet', $query);
+         $this->db->or_like('date_debit', $query);
+         $this->db->or_like('date_fin', $query);
+         $this->db->or_like('created_at', $query);
+         $this->db->or_like('annee', $query);
+        
+        }
+        $this->db->order_by('idinscription', 'DESC');
+        return $this->db->get();
+    }
+
+
+    function fetch_details_view_inscription_formations()
+    {
+      $output = '';
+      $etat = '';
+      $this->db->select("*");
+      $this->db->from("profile_inscription");
+      $this->db->order_by("idinscription", "DESC");
+      $this->db->limit(10);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Apprenant Nom complet</th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td>'.nl2br(substr($row->nomcomplet, 0,15)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          
+          <td><button type="button" name="update" idinscription="'.$row->idinscription.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idinscription="'.$row->idinscription.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Apprenant Nom complet</th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+    // filtrage avec limit 
+    function fetch_details_view_inscription_formations_limit($limit)
+    {
+      $output = '';
+       $etat = '';
+      $this->db->select("*");
+      $this->db->from("profile_inscription");
+      $this->db->order_by("idinscription", "DESC");
+      $this->db->limit($limit);
+      $query = $this->db->get();
+       $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Apprenant Nom complet</th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td>'.nl2br(substr($row->nomcomplet, 0,15)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          
+          <td><button type="button" name="update" idinscription="'.$row->idinscription.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idinscription="'.$row->idinscription.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Apprenant Nom complet</th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+
+    // impression de resultat de formations 
+    // filtrage avec limit 
+    function fetch_details_view_inscription_pdf($idf, $annee)
+    {
+      $output = '';
+      $etat = '';
+      $query = $this->db->get_where("profile_inscription", array(
+        'idf'     =>  $idf,
+        'annee'   =>  $annee
+      ));
+
+      $output .= '<link href="' . base_url() . 'js/css/style.css" rel="stylesheet">';
+      $output .= '
+
+      <div class="col-md-12 mt-2 mb-2" >
+          <a href="javascript:void(0)" class="btn btn-outline-warning select_all pull-left" id="#select_all" data-toggle="modal" data-target="#userModal3"><i class="fa fa-send"></i> Envoyer un sms</a>
+      </div>
+
+      <div class="col-md-12 mt-2 mb-2">
+        <a class="btn btn-outline-warning pull-right mb-2" href="'.base_url().'admin/printFormation/'.$idf.'/'.$annee.'"><i class="fa fa-print mr-1"></i> Imprimmer la liste</a>
+      </div>
+
+      <table class="table-warning table-striped nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Apprenant Nom complet</th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Niveau d\'étude</th> 
+                  <th width="5%">Téléphone</th>  
+              </tr>  
+         </thead> 
+
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td>
+           <input type="checkbox" name="tel" value="'.$row->telephone.'" class="tels delete_checkbox">
+          <img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td>'.nl2br(substr($row->nomcomplet, 0,15)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          <td>'.nl2br(substr($row->niveau_etude, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr($row->telephone, 0,15)).'</td>
+         
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Apprenant Nom complet</th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Niveau d\'étude</th> 
+                  <th width="5%">Téléphone</th>  
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+     // filtrage avec limit 
+    function fetch_details_view_formation_pdf($idf, $annee)
+    {
+      $output = '';
+      $etat = '';
+      $query = $this->db->get_where("profile_inscription", array(
+        'idf'     =>  $idf,
+        'annee'   =>  $annee
+      ));
+
+        $icone    = '';
+        $email    = '';
+
+        $info = $this->db->get('tbl_info')->result_array();
+        foreach ($info as $key) {
+          $nom_site = $key['nom_site'];
+          $icone    = $key['icone'];
+          $email    = $key['email'];
+          
+        }
+
+
+       $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br/>
+         <h3>
+            Liste des apprenants iscrits à la formation
+         <h3>
+         ";
+
+         $img =  base_url().'upload/tbl_info/'.$icone;
+
+         $output = '<div align="right">';
+         $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data" >';
+         $output .= '
+         <tr>
+          <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100"/></td>
+          <td width="50%" align="center">
+           <p><b>'.$message.' </b></p>
+           <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+           <a href="'.base_url().'upload/tbl_info/'.$icone.'" class="btn btn-primary"> voir l\'image</a>
+
+           <hr>
+           
+          </td>
+
+          <td width="25%">
+          <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" />
+          </td>
+
+
+         </tr>
+         ';
+      
+        $output .= '</table>';
+
+         $output .= '</div>';
+
+      $output .= '<link href="' . base_url() . 'js/css/style.css" rel="stylesheet">';
+      $output .= '
+
+      <style>
+          body { margin:0;padding:0; }
+          @media only screen and (max-width: 480px) {
+              /* horizontal scrollbar for tables if mobile screen */
+              .tablemobile {
+                  overflow-x: auto;
+                  display: block;
+              }
+          }
+      </style>
+
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer tablemobile" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="15%">Nom</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="15%">Date debit </th>
+                  <th width="15%">Date fin </th>
+                  <th width="15%">Mail</th>
+
+                  <th width="15%">Mise à jour</th>
+
+                  <th width="5%">Niveau d\'étude</th> 
+                  <th width="5%">Téléphone</th> 
+                  <th width="5%">Adresse domicile</th>   
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($query->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td>'.nl2br(substr($row->nomcomplet, 0,15)).'</td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td><a href="mailto:'.$row->email.'">'.$row->email.'</a></td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          <td>'.nl2br(substr($row->niveau_etude, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr($row->telephone, 0,15)).'</td>
+          <td>'.nl2br(substr($row->domicile, 0,15)).'</td>
+         
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="15%">Nom</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="15%">Date debit </th>
+                  <th width="15%">Date fin </th>
+                  <th width="15%">Mail</th>
+
+                  <th width="15%">Mise à jour</th>
+
+                  <th width="5%">Niveau d\'étude</th> 
+                  <th width="5%">Téléphone</th> 
+                  <th width="5%">Adresse domicile</th>    
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+      return $output;
+    }
+
+
+    // information inscription_formations du site
+    function Select_info_inscription_formations()
+    {
+        return $this->db->query('SELECT * FROM inscription_formations  LIMIT 6');
+    }
+    // fin inscription_formations
+
+    // contact
+  function make_query_contact()  
+  {  
+      
+     $this->db->select($this->select_column12);  
+     $this->db->from($this->table12);  
+     if(isset($_POST["search"]["value"]))  
+     {  
+          $this->db->like("sujet", $_POST["search"]["value"]);  
+          $this->db->or_like("nom", $_POST["search"]["value"]);  
+          $this->db->or_like("email", $_POST["search"]["value"]);  
+     }  
+     if(isset($_POST["order"]))  
+     {  
+          $this->db->order_by($this->order_column12[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+     }  
+     else  
+     {  
+          $this->db->order_by('id', 'DESC');  
+     }  
+  }
+
+  function make_datatables_contact(){  
+     $this->make_query_contact();  
+     if($_POST["length"] != -1)  
+     {  
+          $this->db->limit($_POST['length'], $_POST['start']);  
+     }  
+     $query = $this->db->get();  
+     return $query->result();  
+  }
+
+  function get_filtered_data_contact(){  
+     $this->make_query_contact();  
+     $query = $this->db->get();  
+     return $query->num_rows();  
+  }       
+  function get_all_data_contact()  
+  {  
+     $this->db->select("*");  
+     $this->db->from($this->table12);  
+     return $this->db->count_all_results();  
+  }
+
+
+
+  function update_contact($id, $data)  
+  {  
+     $this->db->where("id", $id);  
+     $this->db->update("contact", $data);  
+  }
+
+
+  function delete_contact($id)  
+  {  
+     $this->db->where("id", $id);  
+     $this->db->delete("contact");  
+  }
+
+  function fetch_single_contact($id)  
+  {  
+     $this->db->where("id", $id);  
+     $query=$this->db->get('contact');  
+     return $query->result();  
+  }
+
+
+  /*
+  *script de messagerie
+  ===================================
+  ==================================
+  ===================================
+  */
+
+  // sauvegarde de message
+  function insert_message_sender($data)  
+  {  
+       $this->db->insert('message_sender', $data);  
+  }
+
+  function update_message_sender($idsms, $data)  
+  {  
+     $this->db->where("idsms", $idsms);  
+     $this->db->update("message_sender", $data);  
+  }
+
+  // suppression de message 
+  function delete_message_sender($idsms)  
+  {  
+       $this->db->where("idsms", $idsms);  
+       $this->db->delete("message_sender");  
+  }
+
+  function fetch_single_message_sender($idsms)  
+  {  
+     $this->db->where("idsms", $idsms);  
+     $query=$this->db->get('message_sender');  
+     return $query->result();  
+  }
+
+  // voir tous les messages 
+   function count_all_message_users_byrole($idrole)
+   {
+    $query = $this->db->get_where("profile_user", array('idrole'  =>  $idrole));
+    return $query->num_rows();
+   }
+
+  // voir tous les messages 
+   function count_all_message_users()
+   {
+    $query = $this->db->get("profile_user");
+    return $query->num_rows();
+   }
+
+  // voir tous les messages 
+   function count_all_message_sender()
+   {
+    $query = $this->db->get("message_sender");
+    return $query->num_rows();
+   }
+
+   function fetch_detailsmessage_sender($limit, $start)
+   {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("message_sender");
+    $this->db->order_by("created_at", "DESC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        <th width="5%">Avatar</th>
+        <th width="15%">Télephone</th>
+        <th width="10%">Etat</th>
+        <th width="40%">Message</th>
+        <th width="20%">Mise à jour</th>
+        <th width="5%">Renvoyer</th>
+        <th width="5%">Supprimer</th>
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+
+          if ($row->etat == "ok") {
+            $etat ='<span class="badge badge-success"><i class="fa fa-check"></i> bien envoyé</span>';
+          }
+          else if ($row->etat == "faux") {
+            $etat ='<span class="badge badge-danger"><i class="fa fa-close"></i> échec d\'envoie</span>';
+          }
+          else{
+            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+          }
+
+          $link = '<a href="tel:'.$row->tel.'" class="text-primary"><i class="fa fa-phone"></i></a>';
+
+
+          $btn1 = '<button type="button" name="delete" idsms="'.$row->idsms.'" class="btn btn-hub btn-circle btn-sm renvoyer"><i class="fa fa-send"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idsms="'.$row->idsms.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';
+           $output .= '
+           <tr>
+            <td>'.$link.'</td>
+             <td>'.$row->tel.'</td>
+            <td>'.$etat.'</td>
+            <td>'.substr($row->message, 0,40).'...</td>
+            <td>'.substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23).'</td>
+            <td>'.$btn1.'</td>
+            <td>'.$btn2.'</td>
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Avatar</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Etat</th>
+              <th width="40%">Message</th>
+              <th width="20%">Mise à jour</th>
+              <th width="5%">Renvoyer</th>
+              <th width="5%">Supprimer</th>
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+   function fetch_data_sms_sender($query)
+   {
+      $this->db->select("*");
+      $this->db->limit(10);
+      $this->db->from("message_sender");
+      if($query != '')
+      {
+       $this->db->like('idsms', $query);
+       $this->db->or_like('tel', $query);
+       $this->db->or_like('etat', $query);
+       $this->db->or_like('message', $query);
+      }
+      $this->db->order_by('created_at', 'DESC');
+      return $this->db->get();
+   }
+
+
+   // pagination users 
+   function fetch_detailsmessage_users($limit, $start)
+   {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("profile_user");
+    $this->db->order_by("first_name", "ASC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        <th width="5%">Selectionner</th>
+        <th width="5%">Avatar</th>
+        <th width="20%">Nom complet</th>
+        <th width="15%">Télephone</th>
+        <th width="10%">Statut</th>
+        <th width="20%">Email</th>
+        <th width="5%">Sexe</th>
+        <th width="20%">Mise à jour</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+
+          if ($row->idrole == 1) {
+            $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 2) {
+            $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 3) {
+            $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 4) {
+            $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+          }
+          else{
+            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+          }
+
+          $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+           <input type="checkbox" name="tel" value="'.$row->telephone.'" class="tels delete_checkbox">
+          ';
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+           $output .= '
+           <tr>
+            <td>'.$link.'</td>
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+             <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+            <td>'.$row->telephone.'</td>
+            <td>'.$etat.'</td>
+            <td>'.$email.'</td>
+            <td>'.$row->sexe.'</td>
+
+
+            <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+           
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Selectionner</th>
+              <th width="5%">Avatar</th>
+              <th width="20%">Nom complet</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Statut</th>
+              <th width="20%">Email</th>
+              <th width="5%">Sexe</th>
+              <th width="20%">Mise à jour</th>
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+   function fetch_data_sms_users($query)
+   {
+      $this->db->select("*");
+      $this->db->limit(10);
+      $this->db->from("profile_user");
+      if($query != '')
+      {
+       $this->db->like('id', $query);
+       $this->db->or_like('first_name', $query);
+       $this->db->or_like('last_name', $query);
+       $this->db->or_like('nom', $query);
+       $this->db->or_like('telephone', $query);
+      }
+      $this->db->order_by('first_name', 'ASC');
+      return $this->db->get();
+   }
+
+   // filtrage bu role 
+   // pagination users 
+   function fetch_detailsmessage_users_byrole($limit, $start, $idrole)
+   {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("profile_user");
+    $this->db->where("idrole", $idrole);
+    $this->db->order_by("first_name", "ASC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        <th width="5%">Selectionner</th>
+        <th width="5%">Avatar</th>
+        <th width="20%">Nom complet</th>
+        <th width="15%">Télephone</th>
+        <th width="10%">Statut</th>
+        <th width="20%">Email</th>
+        <th width="5%">Sexe</th>
+        <th width="20%">Mise à jour</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+
+          if ($row->idrole == 1) {
+            $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 2) {
+            $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 3) {
+            $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 4) {
+            $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+          }
+          else{
+            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+          }
+
+          $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+           <input type="checkbox" name="tel" value="'.$row->telephone.'" class="tels delete_checkbox">
+          ';
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+           $output .= '
+           <tr>
+            <td>'.$link.'</td>
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+             <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+            <td>'.$row->telephone.'</td>
+            <td>'.$etat.'</td>
+            <td>'.$email.'</td>
+            <td>'.$row->sexe.'</td>
+
+
+            <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+           
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Selectionner</th>
+              <th width="5%">Avatar</th>
+              <th width="20%">Nom complet</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Statut</th>
+              <th width="20%">Email</th>
+              <th width="5%">Sexe</th>
+              <th width="20%">Mise à jour</th>
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+
+
+
+
+
+
+
+
+
 
 
 

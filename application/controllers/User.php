@@ -1323,8 +1323,36 @@ class user extends CI_Controller
             $data['student_id']     = $student_id;
             $data['message']        = $this->input->post('message');
             $query = $this->crud_model->insert_link_canavas2($data);
+
+             if ($query > 0) {
+              # code...
+              if ($student_id != $this->connected) {
+                          # code...
+                $url ="entreprise/canavas";
+
+                  $id_user_recever = $student_id;
+
+                  // $nom = $this->input->post('first_name');
+                  $nom   = $this->crud_model->get_name_user($this->connected);
+                  $message ="Coach ".$nom." Vient de corriger votre busness model canavas dans la colonne:".$this->input->post('titre');
+
+                  $notification = array(
+                    'titre'     =>    "Nouvelle correction",
+                    'icone'     =>    "fa fa-tasks",
+                    'message'   =>     $message,
+                    'url'       =>     $url,
+                    'id_user'   =>     $id_user_recever
+                  );
+                  
+                  $not = $this->crud_model->insert_notification($notification);
+                  
+              }
+            }
+
+
             $this->session->set_flashdata('message' , 'Enregistrement avec succès ');
             redirect(base_url() . 'user/canavas/'.$student_id, 'refresh');
+
 
         }
 

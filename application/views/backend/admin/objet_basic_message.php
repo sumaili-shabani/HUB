@@ -31,7 +31,7 @@
 
             <div class="media text-muted pt-3">
 
-                <img alt="avatar" class="img img-thumbnail img-responsive mr-4" src="<?php echo(base_url()) ?>upload/photo/<?php echo($not['image']) ?>" >
+                <img alt="avatar" class="img img-thumbnail img-responsive mr-4" src="<?php echo(base_url()) ?>upload/photo/<?php echo($not['image']) ?>" style="width: 50px; height: 50;" >
                 
                 
                 <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">

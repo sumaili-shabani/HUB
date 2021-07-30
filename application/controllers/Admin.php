@@ -5,6 +5,10 @@ class admin extends CI_Controller
 {
 		private $token;
 		private $connected;
+		protected $email_sites;
+	    protected $logos_sites;
+	    protected $num_dev;
+	    protected $token_sms;
 		public function __construct()
 		{
 		  parent::__construct();
@@ -14,7 +18,7 @@ class admin extends CI_Controller
 		  }
 		  $this->load->library('form_validation');
 		  $this->load->library('encryption');
-	      // $this->load->library('pdf');
+	      $this->load->library('pdf');
 		  $this->load->model('crud_model'); 
 
 		  $this->load->helper('url');
@@ -22,13 +26,196 @@ class admin extends CI_Controller
 		  $this->token = "sk_test_51GzffmHcKfZ3B3C9DATC3YXIdad2ummtHcNgVK4E5ksCLbFWWLYAyXHRtVzjt8RGeejvUb6Z2yUk740hBAviBSyP00mwxmNmP1";
 		  $this->connected = $this->session->userdata('admin_login');
 
+		  $this->email_sites = $this->crud_model->get_email_du_site();
+	      $this->logos_sites = $this->crud_model->get_logo_du_site();
+
+	      // pour les envoies des sms 
+	      $this->num_dev 	= $this->crud_model->get_info_du_site("tel3");
+	      $this->token_sms  = $this->crud_model->get_info_du_site("token_sms");
+
+		  // load helper
+    	  $this->load->helper(array('url', 'html', 'new'));
+
 		}
+
+		public function get_pdf_test(){
+		      $data = array(
+		        'title' => 'Add PDF | ERP',
+		        'data' => 'Test'
+		      );
+		      generate_pdf("welcome.pdf", "backend/admin/pdf_formation", $data);
+	    }
+
+	    function printFormation($idf='', $annee=''){
+
+
+	    	
+	        $customer_id = "Bon d'etrée en stock ";
+	        $html_content = '';
+	        
+	        $html_content .= $this->crud_model->fetch_details_view_formation_pdf($idf, $annee);
+
+	       // echo($html_content);
+	       $this->pdf->loadHtml($html_content);
+	       $this->pdf->setPaper('A4', 'portrait');
+    	   //Render the HTML as PDF
+	       $this->pdf->render();
+	       $this->pdf->stream("".$customer_id.".pdf", array("Attachment"=>0));
+	       
+	    }
 
 		function index(){
 			$data['title']="mon profile admin";
 			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
 			$this->load->view('backend/admin/templete_admin', $data);
 		}
+
+		function category_news(){
+
+			$data['title']="Paramètrage cétegorie produit";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$this->load->view('backend/admin/category', $data);
+		}
+
+		function category(){
+
+			$data['title']="Paramètrage cétegorie produit";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$this->load->view('backend/admin/category', $data);
+		}
+
+		function carousel(){
+
+			$data['title']="Paramètrage de carousel sur l'accueil";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$this->load->view('backend/admin/carousel', $data);
+		}
+
+		function formations(){
+
+			$data['title']="Paramètrage de formations";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$this->load->view('backend/admin/formations', $data);
+		}
+
+		function inscri_formation(){
+			$data['title']="Paramètrage de l'inscription aux formations";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$data['formations']  		= $this->crud_model->Select_formations();
+			$this->load->view('backend/admin/inscri_formation', $data);
+		}
+
+		function liste_formation(){
+			$data['title']="Paramètrage de l'inscription aux formations";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$data['formations']  		= $this->crud_model->Select_formations_ok("idf","profile_inscription");
+			$data['annees']  		= $this->crud_model->Select_formations_ok("annee","profile_inscription");
+			$this->load->view('backend/admin/liste_formation', $data);
+		}
+
+		function sms(){
+			$data['title']="Paramètrage de l'inscription aux formations";
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			$data['formations']  		= $this->crud_model->Select_formations_ok("idf","profile_inscription");
+			$data['annees']  		= $this->crud_model->Select_formations_ok("annee","profile_inscription");
+
+			$data['formateurs'] 	= $this->crud_model->statistiques_nombre_tag_by_column("users", 2);
+
+		    $data['entreprises'] 	= $this->crud_model->statistiques_nombre_tag_by_column("users", 3);
+
+		    $data['admins'] 		= $this->crud_model->statistiques_nombre_tag_by_column("users", 1);
+		    $data['comptables'] 	= $this->crud_model->statistiques_nombre_tag_by_column("users", 4);
+
+			$data['roles']  		= $this->crud_model->Select_formations_ok("idrole","role");
+
+
+			$this->load->view('backend/admin/sms', $data);
+		}
+
+		
+
+		
+
+		function blog(){
+			$data['title']="Paramétrage  des Blogs et publication";
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+ 
+			$data['articles']  		= $this->crud_model->Select_articles();
+			$data['categories']  	= $this->crud_model->Select_category();
+
+			$this->load->view('backend/admin/article', $data);	
+		}
+
+		function commentaire(){
+			$data['title']="Paramétrage  des commentaire pour les blogs";
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+ 
+			$data['articles']  		= $this->crud_model->Select_articles();
+			$data['categories']  	= $this->crud_model->Select_category();
+			$data['articles']  	= $this->crud_model->Select_artcle_orders();
+			
+
+			$this->load->view('backend/admin/commentaire', $data);	
+		}
+
+		function partenariat(){
+		    $data['title']="Paramétrage  des publicités";
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+		    $data['users'] = $this->crud_model->fetch_connected($this->connected);
+		    $this->load->view('backend/admin/publicity_personnele', $data);  
+		}
+
+
+		function info_personnel(){
+			$data['title']="Nos informations personneles";
+			$data['users'] = $this->crud_model->fetch_connected($this->connected);
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			
+			$this->load->view('backend/admin/info_personnel', $data);
+		}
+
+		function info_choix(){
+			$data['title']="Parametrage de choix technologiques";
+			$data['users'] = $this->crud_model->fetch_connected($this->connected);
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			
+			$this->load->view('backend/admin/info_choix', $data);
+		}
+
+		function info_technologique(){
+			$data['title']="Parametrage sur nos services technologiques";
+			$data['users'] = $this->crud_model->fetch_connected($this->connected);
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			
+			$this->load->view('backend/admin/info_technologique', $data);
+		}
+
+		function info_membre(){
+			$data['title']="Parametrage sur notre famille";
+			$data['users'] = $this->crud_model->fetch_connected($this->connected);
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			
+			$this->load->view('backend/admin/info_membre', $data);
+		}
+
+
+		function info_service(){
+			$data['title']="Les informations sur services";
+			$data['users'] = $this->crud_model->fetch_connected($this->connected);
+			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			
+			$this->load->view('backend/admin/info_service', $data);
+		}
+
+		function contact_info(){
+		    $data['title']="Les informations de contact";
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+		    $this->load->view('backend/admin/contact_info', $data);
+		}
+
+
+
+
 
 		function dashbord(){
 			  $data['title']="Tableau de bord";
@@ -96,12 +283,6 @@ class admin extends CI_Controller
 			$this->load->view('backend/admin/role', $data);
 		}
 
-		function category(){
-
-			$data['title']="Paramètrage cétegorie produit";
-			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
-			$this->load->view('backend/admin/category', $data);
-		}
 
 		function users(){
 	      $data['title']="Nos utilisateurs";
@@ -634,6 +815,83 @@ class admin extends CI_Controller
 	// fin de script categorie
 
 
+	// debit des scripts category
+    function fetch_category_news(){  
+
+	       $fetch_data = $this->crud_model->make_datatables_category_news();  
+	       $data = array();  
+	       foreach($fetch_data as $row)  
+	       {  
+	            $sub_array = array();  
+
+	            $sub_array[] = nl2br(substr($row->nom, 0,50)).'';
+	            $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+
+	            
+
+	            $sub_array[] = '<button type="button" name="update" idcat="'.$row->idcat.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button>';  
+	            $sub_array[] = '<button type="button" name="delete" idcat="'.$row->idcat.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';  
+	            $data[] = $sub_array;  
+	       }  
+	       $output = array(  
+	            "draw"                =>     intval($_POST["draw"]),  
+	            "recordsTotal"        =>     $this->crud_model->get_all_data_category_news(),  
+	            "recordsFiltered"     =>     $this->crud_model->get_filtered_data_category_news(),  
+	            "data"                =>     $data  
+	       );  
+	       echo json_encode($output);
+
+
+	}
+
+    function operation_category_news($param1 ='', $param2='', $param3=''){
+	    if ($param1='Add') {
+
+	      $insert_data = array( 
+	           'nom'                 =>     $this->input->post('nom')   
+	      );  
+	       
+	      $requete=$this->crud_model->insert_category_news($insert_data);
+
+	      echo("Enregistrement avec succès");
+	           
+	      # code...
+	    }
+	   
+
+	}
+
+    function modification_category_news()  
+	{  
+	       $updated_data = array(  
+	          'nom'                =>     $this->input->post('nom')
+	       );   
+
+	      $this->crud_model->update_category_news($this->input->post("idcat"), $updated_data);
+	      echo("information mise à jour avec succès"); 
+	}
+
+	function suppression_category_news()  
+	{  
+	      $this->crud_model->delete_category_news($this->input->post("idcat"));      
+	       echo("suppression avec succès");  
+	}  
+
+
+	function fetch_single_category_news()  
+	{  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_category_news($this->input->post("idcat"));  
+	       foreach($data as $row)  
+	       {  
+	            $output['nom']   = $row->nom; 
+	       }  
+	       echo json_encode($output);  
+	}  
+
+	// fin de script categorie
+
+
 
 
 
@@ -1092,6 +1350,9 @@ class admin extends CI_Controller
 	                $output['objectif']      = $row->objectif;
 	                $output['blog']      = $row->blog;
 
+	                $output['tel3']      = $row->tel3;
+	                $output['token_sms'] = $row->token_sms;
+
 
 	                if($row->icone != '')  
 	                {  
@@ -1126,6 +1387,8 @@ class admin extends CI_Controller
 	               'mission'            =>     $this->input->post("mission"), 
 	               'objectif'           =>     $this->input->post("objectif"),
 	               'blog'               =>     $this->input->post("blog"), 
+	               'tel3'               =>     $this->input->post("tel3"),
+	               'token_sms'          =>     $this->input->post("token_sms"),
 	               'icone'              =>     $this->upload_image_tbl_info()
 	          );    
 	          }  
@@ -1147,6 +1410,8 @@ class admin extends CI_Controller
 	               'mission'            =>     $this->input->post("mission"), 
 	               'objectif'           =>     $this->input->post("objectif"), 
 	               'blog'               =>     $this->input->post("blog"), 
+	               'tel3'               =>     $this->input->post("tel3"),
+	               'token_sms'          =>     $this->input->post("token_sms"),
 	               'icone'              =>     $user_image
 	          );   
 	          }
@@ -1176,7 +1441,9 @@ class admin extends CI_Controller
 	               'description'        =>     $this->input->post("description"), 
 	               'mission'            =>     $this->input->post("mission"), 
 	               'objectif'           =>     $this->input->post("objectif"),
-	               'blog'               =>     $this->input->post("blog"), 
+	               'blog'               =>     $this->input->post("blog"),
+	                'tel3'               =>     $this->input->post("tel3"),
+	               'token_sms'          =>     $this->input->post("token_sms"), 
 	               'icone'                  =>     $this->upload_image_tbl_info()
 	          );    
 	          }  
@@ -1196,6 +1463,8 @@ class admin extends CI_Controller
 	               'mission'            =>     $this->input->post("mission"), 
 	               'objectif'           =>     $this->input->post("objectif"), 
 	               'blog'               =>     $this->input->post("blog"),
+	               'tel3'               =>     $this->input->post("tel3"),
+	               'token_sms'          =>     $this->input->post("token_sms"),
 	               'confidentialite'        =>     $this->input->post("confidentialite")
 	          );    
 	          }
@@ -2193,6 +2462,33 @@ class admin extends CI_Controller
             $data['student_id']     = $student_id;
             $data['message']        = $this->input->post('message');
             $query = $this->crud_model->insert_link_canavas2($data);
+
+            if ($query > 0) {
+            	# code...
+            	if ($student_id != $this->connected) {
+				                	# code...
+	            	$url ="entreprise/canavas";
+
+	                $id_user_recever = $student_id;
+
+	                // $nom = $this->input->post('first_name');
+	                $nom   = $this->crud_model->get_name_user($this->connected);
+	                $message ="Coach ".$nom." Vient de corriger votre busness model canavas dans la colonne:".$this->input->post('titre');
+
+	                $notification = array(
+	                  'titre'     =>    "Nouvelle correction",
+	                  'icone'     =>    "fa fa-tasks",
+	                  'message'   =>     $message,
+	                  'url'       =>     $url,
+	                  'id_user'   =>     $id_user_recever
+	                );
+	                
+	                $not = $this->crud_model->insert_notification($notification);
+	                
+	            }
+            }
+
+
             $this->session->set_flashdata('message' , 'Enregistrement avec succès ');
             redirect(base_url() . 'admin/canavas/'.$student_id, 'refresh');
 
@@ -3427,6 +3723,2484 @@ class admin extends CI_Controller
 	       }  
 	       echo json_encode($output);  
 	}
+
+
+	// script de article
+	function fetch_article(){  
+
+	       $fetch_data = $this->crud_model->make_datatables_article();  
+	       $data = array();  
+	       $etat = '';
+	       foreach($fetch_data as $row)  
+	       {  
+	            $sub_array = array(); 
+
+	            if ($row->type=='texte') {
+	            	$etat = '
+	            <div class="user-avatar bg-dim-primary d-none d-sm-flex text-center">
+	                <span><i class="fa fa-file text-primary" ></i></span>
+	            </div>
+	             ';
+	            }
+	            elseif ($row->type=='video'){
+	            	$etat = '
+		                <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+		                    <span><i class="fa fa-video-camera text-primary"></i></span>
+		                </div>
+		            ';
+	            }
+	            else{
+
+	            	$etat = '';
+	            }
+
+
+	            $sub_array[] = $etat;
+	           
+	            // $sub_array[] = '<img src="'.base_url().'upload/article/'.$row->image.'" class="img-thumbnail user-avatar bg-success  d-sm-flex" width="50" height="35" />';  
+	            $sub_array[] = nl2br(substr($row->nom, 0,20)).'...';  
+	            $sub_array[] = nl2br(substr($row->description, 0,10)).'...'; 
+
+	            $sub_array[] = nl2br(substr($row->nom_cat, 0,15)).' ...';
+
+	            $sub_array[] = nl2br(substr($row->type, 0,15)).'';
+
+	            $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+
+	           
+	            $sub_array[] = '<button type="button" name="update" idart="'.$row->idart.'" class="btn btn-success btn-circle btn-sm update"><i class="fa fa-edit"></i></button>'; 
+
+	            $sub_array[] = '<button type="button" name="delete" idart="'.$row->idart.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';
+	            
+	            $data[] = $sub_array;  
+	       }  
+	       $output = array(  
+	            "draw"                =>     intval($_POST["draw"]),  
+	            "recordsTotal"        =>     $this->crud_model->get_all_data_article(),  
+	            "recordsFiltered"     =>     $this->crud_model->get_filtered_data_article(),  
+	            "data"                =>     $data  
+	       );  
+	       echo json_encode($output);  
+	  }
+
+
+	  function fetch_article_pub(){  
+
+	       $fetch_data = $this->crud_model->make_datatables_article();  
+	       $data = array();  
+	       $etat = '';
+	       foreach($fetch_data as $row)  
+	       {  
+	            $sub_array = array(); 
+
+	            if ($row->type=='texte') {
+	              $etat = '
+	            <div class="user-avatar bg-dim-success d-none d-sm-flex">
+	                <span><i class="fa fa-file text-success" ></i></span>
+	            </div>
+	             ';
+	            }
+	            elseif ($row->type=='video'){
+	              $etat = '
+	                <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+	                    <span><i class="fa fa-video-camera text-success"></i></span>
+	                </div>
+	            ';
+	            }
+	            else{
+
+	              $etat = '';
+	            }
+
+
+	            $sub_array[] = '<input type="checkbox" class="delete_checkbox" value="'.$row->idart.'" id="delete_checkbox" />'; 
+
+	            // $sub_array[] = $etat;
+	           
+	            $sub_array[] = '<img src="'.base_url().'upload/article/'.$row->image.'" class="img-thumbnail user-avatar bg-success  d-sm-flex" width="50" height="35" />';  
+	            $sub_array[] = nl2br(substr($row->nom, 0,20)).'...';  
+	            $sub_array[] = nl2br(substr($row->description, 0,10)).'...'; 
+
+	            $sub_array[] = nl2br(substr($row->nom_cat, 0,15)).' ...';
+
+	            $sub_array[] = nl2br(substr($row->type, 0,15)).'';
+
+	            // $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+
+	           
+	            $sub_array[] = '<button type="button" name="update" idart="'.$row->idart.'" class="btn btn-success btn-circle btn-sm update"><i class="fa fa-edit"></i></button>'; 
+
+	            $sub_array[] = '<button type="button" name="delete" idart="'.$row->idart.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';
+	            
+	            $data[] = $sub_array;  
+	       }  
+	       $output = array(  
+	            "draw"                =>     intval($_POST["draw"]),  
+	            "recordsTotal"        =>     $this->crud_model->get_all_data_article(),  
+	            "recordsFiltered"     =>     $this->crud_model->get_filtered_data_article(),  
+	            "data"                =>     $data  
+	       );  
+	       echo json_encode($output);  
+	  }
+
+
+
+	  function operation_article(){
+
+	      if($_FILES["user_image"]["size"] > 0)  
+	      {  
+	           $insert_data = array(  
+	               'nom'     	      =>     $this->input->post('nom'),  
+	               'description'    =>     htmlspecialchars($this->input->post("description")),
+	               'lien'           =>     $this->input->post("lien"),
+	               'idcat'     	    =>     $this->input->post('idcat'), 
+	               'type'     	    =>     $this->input->post('type'), 
+	               'image'          =>     $this->upload_image_article()
+	            );    
+	      }  
+	      else  
+	      {  
+	             $user_image = "icone-user.png";  
+	             $insert_data = array(  
+	               'nom'     	      =>     $this->input->post('nom'),  
+	               'description'    =>     htmlspecialchars($this->input->post("description")),
+	               'lien'           =>     $this->input->post("lien"),
+	               'idcat'     	    =>     $this->input->post('idcat'), 
+	               'type'     	    =>     $this->input->post('type'),
+	               'image'          =>     $user_image
+	            );   
+	      }
+
+	    $requete=$this->crud_model->insert_article($insert_data);
+	    echo("Ajout information avec succès");
+	    
+	  }
+
+	  function modification_article(){
+
+	      if($_FILES["user_image"]["size"] > 0)  
+	      {  
+	           $updated_data = array(  
+	               'nom'     	      =>     $this->input->post('nom'),  
+	               'description'    =>     htmlspecialchars($this->input->post("description")),
+	               'lien'           =>     $this->input->post("lien"),
+	               'idcat'     	    =>     $this->input->post('idcat'), 
+	               'type'     	    =>     $this->input->post('type'), 
+	               'image'          =>     $this->upload_image_article()
+	            );    
+	      }  
+	      
+	      else  
+	      {   
+	           $updated_data = array(  
+	               'nom'     	    =>     $this->input->post('nom'),  
+	               'description'    =>     htmlspecialchars($this->input->post("description")),
+	               'lien'           =>     $this->input->post("lien"),
+	               'idcat'     	    =>     $this->input->post('idcat'), 
+	               'type'     	    =>     $this->input->post('type')
+	            );   
+	      }
+
+	      
+	      $this->crud_model->update_article($this->input->post("idart"), $updated_data);
+
+	      echo("modification avec succès");
+	  }
+
+	  function supression_article(){
+
+	      $this->crud_model->delete_article($this->input->post("idart"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	  function fetch_single_article()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_article($this->input->post('idart'));  
+	       foreach($data as $row)  
+	       {  
+	            $output['nom'] = $row->nom;  
+	            $output['description'] = $row->description; 
+
+	            $output['lien'] 	= $row->lien;
+	            $output['type'] 	= $row->type;
+	            $output['idcat'] 	= $row->idcat;
+	            
+	            $output['image'] 	= $row->image;
+	            $output['text_description']   ='
+	              <textarea class="form-control textarea" name="description" id="description" placeholder="Parler un peu sur la description de l\'article">
+	                  '.$row->description.'
+	              </textarea>
+	            ';
+
+
+	            if($row->image != '')  
+	            {  
+	                 $output['user_image'] = '<img src="'.base_url().'upload/article/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+	            }  
+	            else  
+	            {  
+	                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+	            }  
+
+	            
+	       }  
+	       echo json_encode($output);  
+	  }
+
+	  function upload_image_article()  
+      {  
+           if(isset($_FILES["user_image"]))  
+           {  
+                $extension = explode('.', $_FILES['user_image']['name']);  
+                $new_name = rand() . '.' . $extension[1];  
+                $destination = './upload/article/' . $new_name;  
+                move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+                return $new_name;  
+           }  
+      }
+
+
+    function pagination_view_article($param1='')
+	{
+	  $limit = $param1;
+	  if ($limit !='') {
+	  	$output = $this->crud_model->fetch_details_view_articles_limit($limit);
+	  }
+	  else{
+	  	$output = $this->crud_model->fetch_details_view_articles();
+	  }
+	  
+	  echo($output);
+	}
+
+	function fetch_search_view_article()
+	{
+	  $output = '';
+	  $query = '';
+	  $etat = '';
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_search_view_article($query);
+	 $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($data->result() as $row)
+        {
+
+            if ($row->type=='texte') {
+              $etat = '
+                <div class="user-avatar bg-dim-hub d-none d-sm-flex text-center">
+                    <span><i class="fa fa-file text-hub" ></i></span>
+                </div>
+               ';
+            }
+            elseif ($row->type=='video'){
+              $etat = '
+                  <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+                      <span><i class="fa fa-video-camera text-hub"></i></span>
+                  </div>
+              ';
+            }
+            else{
+
+              $etat = '';
+            }
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/article/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,20)).'...'.'</td>
+          <td>'.nl2br(substr($row->description, 0,20)).' ....'.'</td>
+          <td>'.nl2br(substr($row->nom_cat, 0,20)).' ...'.'</td>
+          <td>'.$etat.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idart="'.$row->idart.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idart="'.$row->idart.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+
+	    echo($output);
+	  
+	}
+
+	// fin de sript article 
+
+	/**
+   * commentaires des articles de publications
+   ===============================================
+   *===============================================
+   *
+
+   */
+
+   	function operation_commentaire(){
+
+	    $insert_data = array(  
+           'etape1'     	=>     htmlspecialchars($this->input->post('etape1')),  
+           'etape2'    		=>     htmlspecialchars($this->input->post("etape2")),
+           'idart'          =>     $this->input->post("idart")
+        ); 
+
+	    $requete=$this->crud_model->insert_commentaire($insert_data);
+	    echo("Ajout information avec succès");
+	    
+	  }
+
+	  function modification_commentaire(){
+
+	    $updated_data = array(  
+            'etape1'     	=>     htmlspecialchars($this->input->post('etape1')),  
+   			'etape2'    	=>     htmlspecialchars($this->input->post("etape2")),
+   			'idart'         =>     $this->input->post("idart")
+        );
+
+	    $this->crud_model->update_commentaire($this->input->post("idcomment"), $updated_data);
+
+	    echo("modification avec succès");
+	  }
+
+	  function supression_commentaire(){
+
+	      $this->crud_model->delete_commentaire($this->input->post("idcomment"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	  function fetch_single_commentaire()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_commentaire($this->input->post('idcomment'));  
+	       foreach($data as $row)  
+	       {  
+	            $output['etape1'] = $row->etape1;  
+	            $output['etape2'] = $row->etape2; 
+	            $output['idart']  = $row->idart;
+
+	            $output['nom']  = $row->nom;
+
+	            $output['description']  = substr(nl2br(html_entity_decode($row->description)), 100) .'...';
+
+	            $output['text_description']   ='
+	              <textarea class="form-control textarea" name="etape1" id="etape1" >
+	                  '.$row->etape1.'
+	              </textarea>
+	            ';
+
+	            $output['text_description2']   ='
+	              <textarea class="form-control textarea" name="etape2" id="etape2">
+	                  '.$row->etape2.'
+	              </textarea>
+	            ';
+	            
+
+	            $output['image'] 	= $row->image;
+	            
+	            if($row->image != '')  
+	            {  
+	                 $output['user_image'] = '<img src="'.base_url().'upload/article/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+	            }  
+	            else  
+	            {  
+	                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+	            }  
+	            
+	       }  
+	       echo json_encode($output);  
+	  }
+
+	function pagination_view_commentaire($param1='')
+	{
+	  $limit = $param1;
+	  if ($limit !='') {
+	  	$output = $this->crud_model->fetch_details_view_commentaire_limit($limit);
+	  }
+	  else{
+	  	$output = $this->crud_model->fetch_details_view_commentaire();
+	  }
+	  
+	  echo($output);
+	}
+
+	function fetch_search_view_commentaire()
+	{
+	  $output = '';
+	  $query = '';
+	  $etat = '';
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_search_view_commentaire($query);
+	 $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($data->result() as $row)
+        {
+
+            if ($row->type=='texte') {
+              $etat = '
+                <div class="user-avatar bg-dim-success d-none d-sm-flex text-center">
+                    <span><i class="fa fa-file text-hub" ></i></span>
+                </div>
+               ';
+            }
+            elseif ($row->type=='video'){
+              $etat = '
+                  <div class="user-avatar bg-dim-danger d-none d-sm-flex">
+                      <span><i class="fa fa-video-camera text-hub"></i></span>
+                  </div>
+              ';
+            }
+            else{
+
+              $etat = '';
+            }
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/article/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,20)).'...'.'</td>
+          <td>'.nl2br(substr($row->description, 0,20)).' ....'.'</td>
+          <td>'.nl2br(substr($row->nomcat, 0,20)).' ...'.'</td>
+          <td>'.$etat.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+          
+          <td><button type="button" name="update" idcomment="'.$row->idcomment.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idcomment="'.$row->idcomment.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="20%">Nom de la vidéo</th>  
+                  <th width="20%">Description </th> 
+                  <th width="10%">Catégorie </th> 
+                  <th width="10%">Type </th>  
+                  <th width="20%">Mise à jour</th>
+                   
+                  
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+
+	    echo($output);
+	  
+	}
+
+	/*
+
+	*upload galery
+	*===============================
+	*===============================
+
+	*/
+
+	function upload_galery2()
+    {
+      sleep(3);
+      if($_FILES["files"]["name"] != '')
+      {
+       $output = '';
+       $config["upload_path"] = './upload/galery/';
+       $config["allowed_types"] = 'gif|jpg|png|webp';
+       $this->load->library('upload', $config);
+       $this->upload->initialize($config);
+       for($count = 0; $count<count($_FILES["files"]["name"]); $count++)
+       {
+        $extension = explode('.', $_FILES["files"]["name"][$count]);  
+        $new_name = rand() . '.' . $extension[1];
+
+        $_FILES["file"]["name"] = $new_name;
+        $_FILES["file"]["type"] = $_FILES["files"]["type"][$count];
+        $_FILES["file"]["tmp_name"] = $_FILES["files"]["tmp_name"][$count];
+        $_FILES["file"]["error"] = $_FILES["files"]["error"][$count];
+        $_FILES["file"]["size"] = $_FILES["files"]["size"][$count];
+
+        // echo($_FILES["files"]["name"][$count]).'<br>';
+        // echo($new_name).PHP_EOL;
+
+
+        if($this->upload->do_upload('file'))
+        {
+         $data = $this->upload->data();
+
+         $insert_data = array(  
+             'image'         =>     $new_name              
+         ); 
+         $requete=$this->crud_model->insert_galery2($insert_data);
+
+         $output .= '
+         <div class="col-md-4" align="center" style="margin-bottom:24px;">
+          <img src="'.base_url().'upload/galery/'.$data["file_name"].'" class="img-thumbnail img-responsive" style="height: 200px;" />
+            <br />
+            <input type="checkbox" name="images[]" class="select" value="upload/galery/'.$data["file_name"].'" />
+         </div>
+         ';
+        }
+       }
+       echo $output;   
+      }
+    }
+
+
+     // pagination contact 
+	function pagination_galery_member2()
+	{
+
+	  $this->load->library("pagination");
+	  $config = array();
+	  $config["base_url"] = "#";
+	  $config["total_rows"] = $this->crud_model->fetch_pagination_galery_personnel();
+	  $config["per_page"] = 3;
+	  $config["uri_segment"] = 3;
+	  $config["use_page_numbers"] = TRUE;
+	  $config["full_tag_open"] = '<ul class="pagination">';
+	  $config["full_tag_close"] = '</ul>';
+	  $config["first_tag_open"] = '<li class="page-item">';
+	  $config["first_tag_close"] = '</li>';
+	  $config["last_tag_open"] = '<li class="page-item">';
+	  $config["last_tag_close"] = '</li>';
+	  $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+	  $config["next_tag_open"] = '<li class="page-item">';
+	  $config["next_tag_close"] = '</li>';
+	  $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+	  $config["prev_tag_open"] = "<li class='page-item'>";
+	  $config["prev_tag_close"] = "</li>";
+	  $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	  $config["cur_tag_close"] = "</a></li>";
+	  $config["num_tag_open"] = "<li class='page-item'>";
+	  $config["num_tag_close"] = "</li>";
+	  $config["num_links"] = 1;
+	  $this->pagination->initialize($config);
+	  $page = $this->uri->segment(3);
+	  $start = ($page - 1) * $config["per_page"];
+
+	  $output = array(
+	   'pagination_link' => $this->pagination->create_links(),
+	   'country_table'   => $this->crud_model->fetch_details_pagination_galery2($config["per_page"], $start)
+	  );
+	  echo json_encode($output);
+	  }
+
+	  function supression_photo_galery_personnele(){
+
+	    $this->crud_model->delete_photo_galery_personnele($this->input->post("idg"));
+	    echo("suppression avec succès");
+
+	  }
+
+	  function modification_galery_entrep_personnele(){
+  
+          $updated_data = array(  
+                 'url'            =>     $this->input->post('url')
+          );
+  
+          $this->crud_model->update_galery_entrep_personnele($this->input->post("idg"), $updated_data);
+          echo("modification avec succès");
+      }
+
+    function fetch_single_galery_entrep_personnele()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_galery_entreprise_personnele($_POST["idg"]);  
+         foreach($data as $row)  
+         {  
+              $output['url']    = $row->url;  
+              
+             
+         }  
+         echo json_encode($output);  
+    }
+
+    function download_photo_galery()
+   {
+      if($this->input->post('images'))
+      {
+        $this->load->library('zip');
+        $images = $this->input->post('images');
+        foreach($images as $image)
+        {
+          $this->zip->read_file($image);
+          // echo($image);
+        }
+        $this->zip->download(''.time().'.zip');
+      }
+   }
+
+   // script de  tinfo_user
+    function fetch_tinfo_user(){  
+
+         $fetch_data = $this->crud_model->make_datatables_tinfo_user();  
+         $data = array();  
+         foreach($fetch_data as $row)  
+         {  
+              $sub_array = array();  
+
+              $sub_array[] = '<img src="'.base_url().'upload/photo/'.$row->image.'" class="img-thumbnail" width="50" height="35" />';  
+             
+              $sub_array[] = nl2br(substr($row->first_name.''.$row->last_name, 0,22)).' ...';
+              $sub_array[] = nl2br(substr($row->email, 0,20)).' ...';
+
+              $sub_array[] = nl2br(substr($row->poste, 0,20)).' ...';
+              $sub_array[] = nl2br(substr($row->telephone, 0,15));
+
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+             
+
+              $sub_array[] = '<button type="button" name="update" idtinfo_user="'.$row->idtinfo_user.'" class="btn btn-hub btn-sm btn-circle update"><i class="fa fa-edit"></i></button>';  
+              $sub_array[] = '<button type="button" name="delete" idtinfo_user="'.$row->idtinfo_user.'" class="btn btn-danger btn-sm btn-circle delete"><i class="fa fa-trash"></i></button>';  
+              $data[] = $sub_array;  
+         }  
+         $output = array(  
+              "draw"                =>     intval($_POST["draw"]),  
+              "recordsTotal"        =>     $this->crud_model->get_all_data_tinfo_user(),  
+              "recordsFiltered"     =>     $this->crud_model->get_filtered_data_tinfo_user(),  
+              "data"                =>     $data  
+         );  
+         echo json_encode($output);  
+    }
+
+    function fetch_single_tinfo_user()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_tinfo_user($_POST["idtinfo_user"]);  
+         foreach($data as $row)  
+         {  
+              $output['first_name']    = $row->first_name; 
+              $output['last_name']    = $row->last_name;
+              $output['email']    = $row->email;
+              $output['telephone']    = $row->telephone;
+              $output['sexe']    = $row->sexe;
+              $output['facebook']    = $row->facebook;
+              $output['twitter']    = $row->twitter;
+              $output['linkedin']    = $row->linkedin;
+              $output['poste']    = $row->poste;
+
+
+              if($row->image != '')  
+              {  
+                   $output['user_image'] = '<img src="'.base_url().'upload/photo/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+              }  
+              else  
+              {  
+                   $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+              }  
+              
+             
+         }  
+         echo json_encode($output);  
+    }  
+
+
+    function operation_tinfo_user(){
+
+      if($_FILES["user_image"]["size"] > 0)  
+      {  
+           $insert_data = array(  
+               'first_name'     =>     $this->input->post('first_name'),
+               'last_name'      =>     $this->input->post('last_name'),
+               'email'          =>     $this->input->post('email'),
+               'sexe'           =>     $this->input->post('sexe'),
+               'telephone'      =>     $this->input->post('telephone'),
+               'poste'          =>     $this->input->post('poste'),
+               'facebook'       =>     $this->input->post('facebook'),
+               'twitter'        =>     $this->input->post('twitter'),
+               'linkedin'       =>     $this->input->post('linkedin'),
+               'image'          =>     $this->upload_image_users()
+            );    
+      }  
+      else  
+      {  
+             $user_image = "icone-user.png";   
+             $insert_data = array(  
+                 'first_name'     =>     $this->input->post('first_name'),
+                 'last_name'      =>     $this->input->post('last_name'),
+                 'email'          =>     $this->input->post('email'),
+                 'sexe'           =>     $this->input->post('sexe'),
+                 'telephone'      =>     $this->input->post('telephone'),
+                 'poste'          =>     $this->input->post('poste'),
+                 'facebook'       =>     $this->input->post('facebook'),
+                 'twitter'        =>     $this->input->post('twitter'),
+                 'linkedin'       =>     $this->input->post('linkedin'),
+                 'image'          =>     $user_image
+              );  
+      }
+
+        
+
+      $requete=$this->crud_model->insert_tinfo_user($insert_data);
+      echo("Ajout information avec succès");
+      
+    }
+
+    function modification_tinfo_user(){
+
+      if($_FILES["user_image"]["size"] > 0)  
+      {  
+           $updated_data = array(  
+               'first_name'     =>     $this->input->post('first_name'),
+               'last_name'      =>     $this->input->post('last_name'),
+               'email'          =>     $this->input->post('email'),
+               'sexe'           =>     $this->input->post('sexe'),
+               'telephone'      =>     $this->input->post('telephone'),
+               'poste'          =>     $this->input->post('poste'),
+               'facebook'       =>     $this->input->post('facebook'),
+               'twitter'        =>     $this->input->post('twitter'),
+               'linkedin'       =>     $this->input->post('linkedin'),
+               'image'            =>     $this->upload_image_users()
+            );    
+      }  
+      else  
+      {    
+             $updated_data = array(  
+                 'first_name'     =>     $this->input->post('first_name'),
+                 'last_name'      =>     $this->input->post('last_name'),
+                 'email'          =>     $this->input->post('email'),
+                 'sexe'           =>     $this->input->post('sexe'),
+                 'telephone'      =>     $this->input->post('telephone'),
+                 'poste'          =>     $this->input->post('poste'),
+                 'facebook'       =>     $this->input->post('facebook'),
+                 'twitter'        =>     $this->input->post('twitter'),
+                 'linkedin'       =>     $this->input->post('linkedin')
+            );  
+      }
+
+      $this->crud_model->update_tinfo_user($this->input->post("idtinfo_user"), $updated_data);
+
+      echo("modification avec succès");
+
+    }
+
+    function supression_tinfo_user(){
+
+        $this->crud_model->delete_tinfo_user($this->input->post("idtinfo_user"));
+        echo("suppression avec succès");
+      
+    }
+    // fin informations tinfo_user
+
+    // script de  tinfo_personnel
+    function fetch_tinfo_personnel(){  
+
+         $fetch_data = $this->crud_model->make_datatables_tinfo_personnel();  
+         $data = array();  
+         foreach($fetch_data as $row)  
+         {  
+              $sub_array = array();  
+             
+              $sub_array[] = nl2br(substr($row->titre, 0,50)).' ...';
+              $sub_array[] = nl2br(substr($row->description, 0,50)).' ...';
+              $sub_array[] = '<i class="fa '.$row->icone.'"></i> '; 
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+             
+
+              $sub_array[] = '<button type="button" name="update" idtinfo_personnel="'.$row->idtinfo_personnel.'" class="btn btn-hub btn-sm btn-circle update"><i class="fa fa-edit"></i></button>';  
+              $sub_array[] = '<button type="button" name="delete" idtinfo_personnel="'.$row->idtinfo_personnel.'" class="btn btn-danger btn-sm btn-circle delete"><i class="fa fa-trash"></i></button>';  
+              $data[] = $sub_array;  
+         }  
+         $output = array(  
+              "draw"                =>     intval($_POST["draw"]),  
+              "recordsTotal"        =>     $this->crud_model->get_all_data_tinfo_personnel(),  
+              "recordsFiltered"     =>     $this->crud_model->get_filtered_data_tinfo_personnel(),  
+              "data"                =>     $data  
+         );  
+         echo json_encode($output);  
+    }
+
+    function fetch_single_tinfo_personnel()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_tinfo_personnel($_POST["idtinfo_personnel"]);  
+         foreach($data as $row)  
+         {  
+              $output['titre']    = $row->titre; 
+              $output['description']    = $row->description;
+              $output['icone']    = $row->icone; 
+              
+             
+         }  
+         echo json_encode($output);  
+    }  
+
+
+    function operation_tinfo_personnel(){
+
+        $insert_data = array(  
+           'titre'            =>     $this->input->post('titre'),
+           'description'            =>     $this->input->post('description'),
+           'icone'            =>     $this->input->post('icone')
+    );  
+
+      $requete=$this->crud_model->insert_tinfo_personnel($insert_data);
+      echo("Ajout information avec succès");
+      
+    }
+
+    function modification_tinfo_personnel(){
+
+        $updated_data = array(  
+            'titre'            =>     $this->input->post('titre'),
+            'description'      =>     $this->input->post('description'),
+            'icone'            =>     $this->input->post('icone')
+        );
+
+        $this->crud_model->update_tinfo_personnel($this->input->post("idtinfo_personnel"), $updated_data);
+
+        echo("modification avec succès");
+    }
+
+    function supression_tinfo_personnel(){
+
+        $this->crud_model->delete_tinfo_personnel($this->input->post("idtinfo_personnel"));
+        echo("suppression avec succès");
+      
+    }
+    // fin informations tinfo_personnel
+
+    // script de  tinfo_choix
+    function fetch_tinfo_choix(){  
+
+         $fetch_data = $this->crud_model->make_datatables_tinfo_choix();  
+         $data = array();  
+         foreach($fetch_data as $row)  
+         {  
+              $sub_array = array();  
+             
+              $sub_array[] = nl2br(substr($row->titre, 0,50)).' ...';
+              $sub_array[] = nl2br(substr($row->description, 0,50)).' ...';
+              $sub_array[] = '<i class="fa '.$row->icone.'"></i> '; 
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+             
+
+              $sub_array[] = '<button type="button" name="update" idtinfo_choix="'.$row->idtinfo_choix.'" class="btn btn-warning btn-sm btn-circle update"><i class="fa fa-edit"></i></button>';  
+              $sub_array[] = '<button type="button" name="delete" idtinfo_choix="'.$row->idtinfo_choix.'" class="btn btn-danger btn-sm btn-circle delete"><i class="fa fa-trash"></i></button>';  
+              $data[] = $sub_array;  
+         }  
+         $output = array(  
+              "draw"                =>     intval($_POST["draw"]),  
+              "recordsTotal"        =>     $this->crud_model->get_all_data_tinfo_choix(),  
+              "recordsFiltered"     =>     $this->crud_model->get_filtered_data_tinfo_choix(),  
+              "data"                =>     $data  
+         );  
+         echo json_encode($output);  
+    }
+
+    function fetch_single_tinfo_choix()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_tinfo_choix($_POST["idtinfo_choix"]);  
+         foreach($data as $row)  
+         {  
+              $output['titre']    = $row->titre; 
+              $output['description']    = $row->description;
+              $output['icone']    = $row->icone; 
+              
+             
+         }  
+         echo json_encode($output);  
+    }  
+
+
+    function operation_tinfo_choix(){
+
+        $insert_data = array(  
+           'titre'            =>     $this->input->post('titre'),
+           'description'      =>     $this->input->post('description'),
+           'icone'            =>     $this->input->post('icone')
+    );  
+
+      $requete=$this->crud_model->insert_tinfo_choix($insert_data);
+      echo("Ajout information avec succès");
+      
+    }
+
+    function modification_tinfo_choix(){
+
+        $updated_data = array(  
+            'titre'            =>     $this->input->post('titre'),
+            'description'      =>     $this->input->post('description'),
+            'icone'            =>     $this->input->post('icone')
+        );
+
+        $this->crud_model->update_tinfo_choix($this->input->post("idtinfo_choix"), $updated_data);
+
+        echo("modification avec succès");
+    }
+
+    function supression_tinfo_choix(){
+
+        $this->crud_model->delete_tinfo_choix($this->input->post("idtinfo_choix"));
+        echo("suppression avec succès");
+      
+    }
+    // fin informations tinfo_choix
+
+    // script de  tinfo_service
+    function fetch_tinfo_service(){  
+
+         $fetch_data = $this->crud_model->make_datatables_tinfo_service();  
+         $data = array();  
+         foreach($fetch_data as $row)  
+         {  
+              $sub_array = array();  
+
+              $sub_array[] = '<img src="'.base_url().'upload/service/'.$row->image.'" class="img-thumbnail" width="50" height="35" />';  
+             
+              $sub_array[] = nl2br(substr($row->titre, 0,50)).' ...';
+              $sub_array[] = nl2br(substr($row->description, 0,50)).' ...';
+
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+             
+
+              $sub_array[] = '<button type="button" name="update" idtinfo_service="'.$row->idtinfo_service.'" class="btn btn-hub btn-sm btn-circle update"><i class="fa fa-edit"></i></button>';  
+              $sub_array[] = '<button type="button" name="delete" idtinfo_service="'.$row->idtinfo_service.'" class="btn btn-danger btn-sm btn-circle delete"><i class="fa fa-trash"></i></button>';  
+              $data[] = $sub_array;  
+         }  
+         $output = array(  
+              "draw"                =>     intval($_POST["draw"]),  
+              "recordsTotal"        =>     $this->crud_model->get_all_data_tinfo_service(),  
+              "recordsFiltered"     =>     $this->crud_model->get_filtered_data_tinfo_service(),  
+              "data"                =>     $data  
+         );  
+         echo json_encode($output);  
+    }
+
+    function fetch_single_tinfo_service()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_tinfo_service($_POST["idtinfo_service"]);  
+         foreach($data as $row)  
+         {  
+              $output['titre']    = $row->titre; 
+              $output['description']    = $row->description;
+
+              if($row->image != '')  
+              {  
+                   $output['user_image'] = '<img src="'.base_url().'upload/service/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+              }  
+              else  
+              {  
+                   $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+              }  
+              
+             
+         }  
+         echo json_encode($output);  
+    }  
+
+
+    function operation_tinfo_service(){
+
+      if($_FILES["user_image"]["size"] > 0)  
+      {  
+           $insert_data = array(  
+               'titre'            =>     $this->input->post('titre'),
+               'description'      =>     $this->input->post('description'),
+               'image'            =>     $this->upload_image_service()
+            );    
+      }  
+      else  
+      {  
+             $user_image = "icone-user.jpg";  
+             $insert_data = array(  
+                   'titre'            =>     $this->input->post('titre'),
+                   'description'      =>     $this->input->post('description'),
+                   'image'            =>     $user_image
+            );  
+      }
+
+        
+
+      $requete=$this->crud_model->insert_tinfo_service($insert_data);
+      echo("Ajout information avec succès");
+      
+    }
+
+    function modification_tinfo_service(){
+
+      if($_FILES["user_image"]["size"] > 0)  
+      {  
+           $updated_data = array(  
+               'titre'            =>     $this->input->post('titre'),
+               'description'      =>     $this->input->post('description'),
+               'image'            =>     $this->upload_image_service()
+            );    
+      }  
+      else  
+      {    
+             $updated_data = array(  
+                   'titre'            =>     $this->input->post('titre'),
+                   'description'      =>     $this->input->post('description')
+            );  
+      }
+
+      $this->crud_model->update_tinfo_service($this->input->post("idtinfo_service"), $updated_data);
+
+      echo("modification avec succès");
+
+    }
+
+    function supression_tinfo_service(){
+
+        $this->crud_model->delete_tinfo_service($this->input->post("idtinfo_service"));
+        echo("suppression avec succès");
+      
+    }
+
+    function upload_image_service()  
+	{  
+       if(isset($_FILES["user_image"]))  
+       {  
+            $extension = explode('.', $_FILES['user_image']['name']);  
+            $new_name = rand() . '.' . $extension[1];  
+            $destination = './upload/service/' . $new_name;  
+            move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+            return $new_name;  
+       }  
+	}
+    // fin informations tinfo_service
+
+    // script de  tinfo_techno
+    function fetch_tinfo_techno(){  
+
+         $fetch_data = $this->crud_model->make_datatables_tinfo_techno();  
+         $data = array();  
+         foreach($fetch_data as $row)  
+         {  
+              $sub_array = array();  
+             
+              $sub_array[] = nl2br(substr($row->titre, 0,70)).' ...';
+              $sub_array[] = '<i class="fa '.$row->icone.'"></i> '; 
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+             
+
+              $sub_array[] = '<button type="button" name="update" idtinfo_techno="'.$row->idtinfo_techno.'" class="btn btn-hub btn-sm btn-circle update"><i class="fa fa-edit"></i></button>';  
+              $sub_array[] = '<button type="button" name="delete" idtinfo_techno="'.$row->idtinfo_techno.'" class="btn btn-danger btn-sm btn-circle delete"><i class="fa fa-trash"></i></button>';  
+              $data[] = $sub_array;  
+         }  
+         $output = array(  
+              "draw"                =>     intval($_POST["draw"]),  
+              "recordsTotal"        =>     $this->crud_model->get_all_data_tinfo_techno(),  
+              "recordsFiltered"     =>     $this->crud_model->get_filtered_data_tinfo_techno(),  
+              "data"                =>     $data  
+         );  
+         echo json_encode($output);  
+    }
+
+    function fetch_single_tinfo_techno()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_tinfo_techno($_POST["idtinfo_techno"]);  
+         foreach($data as $row)  
+         {  
+              $output['titre']    = $row->titre; 
+              $output['icone']    = $row->icone; 
+              
+             
+         }  
+         echo json_encode($output);  
+    }  
+
+
+    function operation_tinfo_techno(){
+
+        $insert_data = array(  
+           'titre'            =>     $this->input->post('titre'),
+           'icone'            =>     $this->input->post('icone')
+    );  
+
+      $requete=$this->crud_model->insert_tinfo_techno($insert_data);
+      echo("Ajout information avec succès");
+      
+    }
+
+    function modification_tinfo_techno(){
+
+        $updated_data = array(  
+            'titre'            =>     $this->input->post('titre'),
+            'icone'            =>     $this->input->post('icone')
+        );
+
+        $this->crud_model->update_tinfo_techno($this->input->post("idtinfo_techno"), $updated_data);
+
+        echo("modification avec succès");
+    }
+
+    function supression_tinfo_techno(){
+
+        $this->crud_model->delete_tinfo_techno($this->input->post("idtinfo_techno"));
+        echo("suppression avec succès");
+      
+    }
+    // fin informations tinfo_techno
+
+
+    /**
+	   * carousel des articles de publications
+	   ===============================================
+	   *===============================================
+	   *
+    */
+
+   	function operation_carousel(){
+
+   		if($_FILES["user_image"]["size"] > 0)  
+	    {
+	    	$insert_data = array(  
+	           'description'    =>     htmlspecialchars($this->input->post('description')),  
+	           'image'    		=>     $this->upload_carousel()
+	        ); 
+
+	    	$requete=$this->crud_model->insert_carousel($insert_data);
+	    	echo("Ajout information avec succès");
+	    }
+	    else{
+
+	    	$insert_data = array(  
+	           'description'    =>     htmlspecialchars($this->input->post('description')),  
+	        ); 
+
+	    	$requete=$this->crud_model->insert_carousel($insert_data);
+	    	echo("Ajout information avec succès");
+	    }
+
+	    
+	    
+	  }
+
+	  function modification_carousel(){
+
+	  	if($_FILES["user_image"]["size"] > 0)  
+	    {
+	    	$updated_data = array(  
+	           'description'    =>     htmlspecialchars($this->input->post('description')),  
+	           'image'    		=>     $this->upload_carousel()
+	        ); 
+
+	    	$this->crud_model->update_carousel($this->input->post("idc"), $updated_data);
+	    	echo("modification avec succès");
+	    }
+	    else{
+
+	    	$updated_data = array(  
+	           'description'    =>     htmlspecialchars($this->input->post('description'))  
+	        ); 
+
+	    	$this->crud_model->update_carousel($this->input->post("idc"), $updated_data);
+	    	echo("modification avec succès");
+	    }
+
+	   
+	  }
+
+	  function supression_carousel(){
+
+	      $this->crud_model->delete_carousel($this->input->post("idc"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	  function fetch_single_carousel()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_carousel($this->input->post('idc'));  
+	       foreach($data as $row)  
+	       {  
+
+	            $output['description']  = $row->description;
+
+	           
+	            $output['image'] 	= $row->image;
+	            
+	            if($row->image != '')  
+	            {  
+	                 $output['user_image'] = '<img src="'.base_url().'upload/carousel/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+	            }  
+	            else  
+	            {  
+	                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+	            }  
+	            
+	       }  
+	       echo json_encode($output);  
+	  }
+
+	function pagination_view_carousel($param1='')
+	{
+	  $limit = $param1;
+	  if ($limit !='') {
+	  	$output = $this->crud_model->fetch_details_view_carousel_limit($limit);
+	  }
+	  else{
+	  	$output = $this->crud_model->fetch_details_view_carousel();
+	  }
+	  
+	  echo($output);
+	}
+
+	function fetch_search_view_carousel()
+	{
+	  $output = '';
+	  $query = '';
+	  $etat = '';
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_search_view_carousel($query);
+	 $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="60%">Description </th> 
+                  <th width="20%">Mise à jour</th>
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($data->result() as $row)
+        {
+
+         $output .= '
+	         <tr>
+	          
+	          
+	          <td><img src="'.base_url().'upload/carousel/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+	          <td>'.nl2br(substr($row->description, 0,80)).' ....'.'</td>
+	          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+	          
+	          <td><button type="button" name="update" idc="'.$row->idc.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+	          <td><button type="button" name="delete" idc="'.$row->idc.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+	          
+
+	         </tr>
+	     ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="60%">Description </th> 
+                  <th width="20%">Mise à jour</th>
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+
+	    echo($output);
+	  
+	}
+
+	function upload_carousel()  
+	{  
+	       if(isset($_FILES["user_image"]))  
+	       {  
+	            $extension = explode('.', $_FILES['user_image']['name']);  
+	            $new_name = rand() . '.' . $extension[1];  
+	            $destination = './upload/carousel/' . $new_name;  
+	            move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+	            return $new_name;  
+	       }  
+	}
+
+	// fin carousel 
+
+
+	/**
+	   * formations des articles de publications
+	   ===============================================
+	   *===============================================
+	   *
+    */
+
+   	function operation_formations(){
+
+   		if($_FILES["user_image"]["size"] > 0)  
+	    {
+	    	$insert_data = array(  
+	           'nom'    			=>     htmlspecialchars($this->input->post('nom')),
+	           'date_debit'    		=>     htmlspecialchars($this->input->post('date_debit')),
+	           'date_fin'    		=>     htmlspecialchars($this->input->post('date_fin')),
+	           'fin_inscription'    =>     $this->input->post('fin_inscription'),
+	           'description'    	=>     htmlspecialchars($this->input->post('description')),
+	    
+	           'image'    			=>     $this->upload_formations()
+	        ); 
+
+	    	$requete=$this->crud_model->insert_formations($insert_data);
+	    	echo("Ajout information avec succès");
+	    }
+	    else{
+
+	    	$insert_data = array(  
+	           'nom'    			=>     htmlspecialchars($this->input->post('nom')),
+	           'date_debit'    		=>     htmlspecialchars($this->input->post('date_debit')),
+	           'date_fin'    		=>     htmlspecialchars($this->input->post('date_fin')),
+	           'fin_inscription'    =>     $this->input->post('fin_inscription'),
+	           'description'    	=>     htmlspecialchars($this->input->post('description')) 
+	        ); 
+
+	    	$requete=$this->crud_model->insert_formations($insert_data);
+	    	echo("Ajout information avec succès");
+	    }
+
+	    
+	    
+	  }
+
+	  function modification_formations(){
+
+	  	if($_FILES["user_image"]["size"] > 0)  
+	    {
+	    	$updated_data = array(  
+	           'nom'    			=>     htmlspecialchars($this->input->post('nom')),
+	           'date_debit'    		=>     htmlspecialchars($this->input->post('date_debit')),
+	           'date_fin'    		=>     htmlspecialchars($this->input->post('date_fin')),
+	           'fin_inscription'    =>     $this->input->post('fin_inscription'),
+	           'description'    	=>     htmlspecialchars($this->input->post('description')),  
+	           'image'    			=>     $this->upload_formations()
+	        ); 
+
+	    	$this->crud_model->update_formations($this->input->post("idf"), $updated_data);
+	    	echo("modification avec succès");
+	    }
+	    else{
+
+	    	$updated_data = array(  
+	           'nom'    			=>     htmlspecialchars($this->input->post('nom')),
+	           'date_debit'    		=>     htmlspecialchars($this->input->post('date_debit')),
+	           'date_fin'    		=>     htmlspecialchars($this->input->post('date_fin')),
+	           'fin_inscription'    =>     $this->input->post('fin_inscription'),
+	           'description'    	=>     htmlspecialchars($this->input->post('description')) 
+	        ); 
+
+	    	$this->crud_model->update_formations($this->input->post("idf"), $updated_data);
+	    	echo("modification avec succès");
+	    }
+
+	   
+	  }
+
+	  function supression_formations(){
+
+	      $this->crud_model->delete_formations($this->input->post("idf"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	  function fetch_single_formations()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_formations($this->input->post('idf'));  
+	       foreach($data as $row)  
+	       {  
+
+	            $output['nom']  			= $row->nom;
+	            $output['date_debit']  		= $row->date_debit;
+	            $output['date_fin']  		= $row->date_fin;
+	            $output['fin_inscription']  = $row->fin_inscription;
+	            $output['description']  	= $row->description;
+
+	            $output['text_description']   ='
+	             <label><i class="fa fa-edit"></i> Saisissez une description de la formation</label>
+	              <textarea class="form-control textarea" name="description" id="description" placeholder="Saisissez une description de la formation">
+	                  '.$row->description.'
+	              </textarea>
+	            ';
+
+	           
+	            $output['image'] 	= $row->image;
+	            
+	            if($row->image != '')  
+	            {  
+	                 $output['user_image'] = '<img src="'.base_url().'upload/formations/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+	            }  
+	            else  
+	            {  
+	                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+	            }  
+	            
+	       }  
+	       echo json_encode($output);  
+	  }
+
+	function pagination_view_formations($param1='')
+	{
+	  $limit = $param1;
+	  if ($limit !='') {
+	  	$output = $this->crud_model->fetch_details_view_formations_limit($limit);
+	  }
+	  else{
+	  	$output = $this->crud_model->fetch_details_view_formations();
+	  }
+	  
+	  echo($output);
+	}
+
+	function fetch_search_view_formations()
+	{
+	  $output = '';
+	  $query = '';
+	  $etat = '';
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_search_view_formations($query);
+	 $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead class="tb-member-head thead-light">  
+              <tr> 
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Fin inscription </th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th>  
+              </tr>  
+         </thead> 
+
+         <tbody>
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+
+        foreach($data->result() as $row)
+        {
+
+            
+
+
+         $output .= '
+         <tr>
+          
+          <td><img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->fin_inscription)), 0, 23)).'</td>
+          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+          
+          <td><button type="button" name="update" idf="'.$row->idf.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+          <td><button type="button" name="delete" idf="'.$row->idf.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+          
+
+         </tr>
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+
+         <tfoot>  
+              <tr>  
+                  <th width="10%">Avatar</th> 
+                  <th width="10%">Titre </th>
+
+                  <th width="20%">Date debit </th>
+                  <th width="20%">Date fin </th>
+                  <th width="10%">Fin inscription </th>
+
+                  <th width="20%">Mise à jour</th>
+
+                  <th width="5%">Modifier</th> 
+                  <th width="5%">Supprimer</th> 
+
+              </tr>  
+         </tfoot>   
+          
+      </table>';
+
+	    echo($output);
+	  
+	}
+
+	function upload_formations()  
+	{  
+	       if(isset($_FILES["user_image"]))  
+	       {  
+	            $extension = explode('.', $_FILES['user_image']['name']);  
+	            $new_name = rand() . '.' . $extension[1];  
+	            $destination = './upload/formations/' . $new_name;  
+	            move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+	            return $new_name;  
+	       }  
+	}
+
+	// fin formations 
+
+
+	/**
+	   * inscription_formations des articles de publications
+	   ===============================================
+	   *===============================================
+	   *
+    */
+
+	function stat_entree(){
+		 $data['title']="Filtrage sur l'inscription de formation";
+		 $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+
+		 $date1=$this->input->post('date1');
+		 $date2=$this->input->post('date2');
+		 if ($date1=='' && $date2=='') {
+		 	
+		 	$data['title']="Filtrage sur l'inscription de formation";
+		 	$this->load->view('backend/admin/stat_entree_stock', $data);
+		 }
+		 else{
+		 	$data['title']="Filtrage entrée en stock marchandise";
+
+		 	$data['date1']=$date1;
+		 	$data['date2']=$date2;
+		 	$this->load->view('backend/admin/stat_entree_stock', $data);
+		 }
+	}
+
+   	function operation_inscription_formations(){
+
+   		$email =    htmlspecialchars($this->input->post('email'));
+   		$annee =    htmlspecialchars($this->input->post('annee'));
+   		$idf   =    htmlspecialchars($this->input->post('idf'));
+
+   		$test = $this->crud_model->fetch_single_test_inscription_formations($idf,$email,$annee);
+   		if ($test > 0) {
+
+   			echo("vous vous  êtes déjà inscrit pour cette formation 🏧");
+   		}
+   		else{
+
+   			$insert_data = array(  
+	           'nomcomplet'    		=>     htmlspecialchars($this->input->post('nomcomplet')),
+	           'email'    			=>     htmlspecialchars($this->input->post('email')),
+	           'telephone'    		=>     htmlspecialchars($this->input->post('telephone')),
+	           'niveau_etude'    	=>     $this->input->post('niveau_etude'),
+	           'domicile'    		=>     htmlspecialchars($this->input->post('domicile')),
+
+	           'idf'    			=>     htmlspecialchars($this->input->post('idf')),
+	           'annee'    			=>     htmlspecialchars($this->input->post('annee'))
+	        ); 
+
+	    	$requete=$this->crud_model->insert_inscription_formations($insert_data);
+	    	echo("Ajout information avec succès");
+
+   		}
+	    
+	  }
+
+	  function modification_inscription_formations(){
+
+	  	$updated_data = array(  
+           'nomcomplet'    		=>     htmlspecialchars($this->input->post('nomcomplet')),
+           'email'    			=>     htmlspecialchars($this->input->post('email')),
+           'telephone'    		=>     htmlspecialchars($this->input->post('telephone')),
+           'niveau_etude'    	=>     $this->input->post('niveau_etude'),
+           'domicile'    		=>     htmlspecialchars($this->input->post('domicile')),
+
+           'idf'    			=>     htmlspecialchars($this->input->post('idf')),
+           'annee'    			=>     htmlspecialchars($this->input->post('annee'))
+        ); 
+
+    	$this->crud_model->update_inscription_formations($this->input->post("idinscription"), $updated_data);
+    	echo("modification avec succès");
+
+	   
+	  }
+
+	  function supression_inscription_formations(){
+
+	      $this->crud_model->delete_inscription_formations($this->input->post("idinscription"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	  function fetch_single_inscription_formations()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_inscription_formations($this->input->post('idinscription'));  
+	       foreach($data as $row)  
+	       {  
+				$output['nom']  			= $row->nom;
+	            $output['date_debit']  		= $row->date_debit;
+	            $output['date_fin']  		= $row->date_fin;
+	           
+	            $output['nomcomplet']  	= $row->nomcomplet;
+	            $output['email']  	= $row->email;
+
+	            $output['idf']  	= $row->idf;
+	            $output['annee']  	= $row->annee;
+	            $output['domicile']  	= $row->domicile;
+	            $output['niveau_etude']  	= $row->niveau_etude;
+	            $output['telephone']  	= $row->telephone;
+
+	            $output['date_debit'] = nl2br(substr(date(DATE_RFC822, 
+	            	strtotime($row->date_debit)), 0, 23));
+
+	           
+	           
+	            $output['image'] 	= $row->image;
+	            
+	            if($row->image != '')  
+	            {  
+	                 $output['user_image'] = '<img src="'.base_url().'upload/formations/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+	            }  
+	            else  
+	            {  
+	                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+	            }  
+	            
+	       }  
+	       echo json_encode($output);  
+	  }
+
+	function pagination_view_inscription_formations($param1='')
+	{
+	  $limit = $param1;
+	  if ($limit !='') {
+	  	$output = $this->crud_model->fetch_details_view_inscription_formations_limit($limit);
+	  }
+	  else{
+	  	$output = $this->crud_model->fetch_details_view_inscription_formations();
+	  }
+	  
+	  echo($output);
+	}
+
+	function pagination_view_inscription_pdf()
+	{
+	  $idf 		= 	$_GET['idf'];
+	  $annee 	= 	$_GET['annee'];
+	  if ($idf !='' && $annee !='') {
+	  	$output = $this->crud_model->fetch_details_view_inscription_pdf($idf, $annee);
+	  }
+	  else{
+	  	$output = $this->crud_model->fetch_details_view_inscription_formations();
+	  }
+	  
+	  echo($output);
+	}
+
+	function fetch_search_view_inscription_formations()
+	{
+	  $output = '';
+	  $query = '';
+	  $etat = '';
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_search_view_inscription_formations($query);
+		 $output .= '
+	      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	          <thead class="tb-member-head thead-light">  
+	              <tr> 
+	                  <th width="10%">Avatar</th> 
+	                  <th width="10%">Titre </th>
+
+	                  <th width="20%">Date debit </th>
+	                  <th width="20%">Date fin </th>
+	                  <th width="10%">Apprenant Nom complet</th>
+
+	                  <th width="20%">Mise à jour</th>
+
+	                  <th width="5%">Modifier</th> 
+	                  <th width="5%">Supprimer</th>  
+	              </tr>  
+	         </thead> 
+
+	         <tbody>
+	      ';
+	      if ($data->num_rows() < 0) {
+	        
+	      }
+	      else{
+
+	        foreach($data->result() as $row)
+	        {
+
+	         $output .= '
+	         <tr>
+	          
+	          <td><img src="'.base_url().'upload/formations/'.$row->image.'" class="img img-responsive img-thumbnail" width="50" height="35" style="border-radius:50%;" /></td>
+
+	          <td>'.nl2br(substr($row->nom, 0,30)).' ....'.'</td>
+	          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+	          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+	          <td>'.nl2br(substr($row->nomcomplet, 0,15)).' ....'.'</td>
+	          <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+
+	          
+	          <td><button type="button" name="update" idinscription="'.$row->idinscription.'" class="btn btn-hub btn-circle btn-sm update"><i class="fa fa-edit"></i></button></td>
+	          <td><button type="button" name="delete" idinscription="'.$row->idinscription.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button></td>
+	          
+
+	         </tr>
+	         ';
+	        }
+	      }
+	      $output .= '
+	          </tbody>
+
+	         <tfoot>  
+	              <tr>  
+	                  <th width="10%">Avatar</th> 
+	                  <th width="10%">Titre </th>
+
+	                  <th width="20%">Date debit </th>
+	                  <th width="20%">Date fin </th>
+	                  <th width="10%">Apprenant Nom complet</th>
+
+	                  <th width="20%">Mise à jour</th>
+
+	                  <th width="5%">Modifier</th> 
+	                  <th width="5%">Supprimer</th> 
+
+	              </tr>  
+	         </tfoot>   
+	          
+	      </table>';
+
+	    echo($output);
+	  
+	}
+
+
+	// ajout des contacts
+    function fetch_contact(){  
+
+       $fetch_data = $this->crud_model->make_datatables_contact();  
+       $data = array();  
+       foreach($fetch_data as $row)  
+       {  
+
+          if ($row->fichier != '') {
+            $etat = '<a href="'.base_url().'upload/contact/'.$row->fichier.'" class="badge badge-white"><i class="fa fa-file"></i></a>';
+          }
+          else{
+            $etat = '';
+          }
+
+            $sub_array = array();
+
+            $sub_array[] = '
+            <input type="checkbox" class="delete_checkbox" value="'.$row->email.'" />
+            ';  
+              
+            $sub_array[] = nl2br(substr($row->nom, 0,20)).'...';  
+            $sub_array[] = nl2br(substr($row->sujet, 0,20)).'...'; 
+            $sub_array[] = $row->email; 
+            $sub_array[] = nl2br(substr($row->message, 0,50)).'...';
+            $sub_array[] = substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23);
+
+            $sub_array[] = $etat; 
+
+            $sub_array[] = '<button type="button" name="delete" idcontact="'.$row->id.'" class="btn btn-dark btn-circle btn-sm update"><i class="fa fa-comment-o"></i></button>'; 
+
+            $sub_array[] = '<button type="button" name="delete" idcontact="'.$row->id.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';  
+            $data[] = $sub_array;  
+       }  
+       $output = array(  
+            "draw"                =>     intval($_POST["draw"]),  
+            "recordsTotal"        =>     $this->crud_model->get_all_data_contact(),  
+            "recordsFiltered"     =>     $this->crud_model->get_filtered_data_contact(),  
+            "data"                =>     $data  
+       );  
+       echo json_encode($output);  
+  }
+
+  function fetch_single_contact()  
+  {  
+       $output = array();  
+       $data = $this->crud_model->fetch_single_contact($this->input->post('idcontact'));  
+       foreach($data as $row)  
+       {  
+            $output['nom'] = $row->nom;  
+            $output['message'] = $row->message;
+            $output['email'] = $row->email;
+            $output['sujet'] = $row->sujet; 
+
+       }  
+       echo json_encode($output);  
+  } 
+
+  function operation_contact(){
+
+    $insert_data = array(  
+         'nom'          =>     $this->input->post('name'),  
+         'sujet'       =>     $this->input->post("subject"),
+         'email'         =>     $this->input->post("email"),  
+         'message'       =>     $this->input->post("message")  
+         
+  );  
+     
+    $requete=$this->crud_model->insert_contact($insert_data);
+    echo("Ajout message  avec succès");
+    
+  }
+
+  
+  function supression_contact()
+  {
+
+      $this->crud_model->delete_contact($this->input->post("idcontact"));
+
+      echo("suppression avec succès");
+    
+  }
+
+    public function get_image(){
+		$icone = $this->crud_model->get_logo_du_site();
+		$iconev = base_url()."upload/tbl_info/".$icone;
+		return $iconev;
+	}
+
+    function infomation_par_mail()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+
+
+           		$website = $this->email_sites;
+
+                $to =$id[$count];
+                $subject = $this->input->post('sujet');
+                $message2 = $this->input->post('message');
+                 
+
+                $headers= "MIME Version 1.0\r\n";
+                $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+                $headers .= "From: no-reply@etskase.com" . "\r\n" ."Reply-to: sumailiroger681@gmail.com"."\r\n"."X-Mailer: PHP/".phpversion();
+
+
+                $info = "<div class='text-center' style='
+	                	text-align: center !important;
+		                '>
+		                	<h1 class='h4 text-gray-900 mb-4' style='
+			                	color: #3a3b45 !important;
+			                	margin-bottom: 1.5rem !important;
+		                	'>Information personnelle</h1>
+							".$subject."
+	                </div>"
+                ;
+
+                $message2 = "<div class='col-md-12' style='
+					          position: relative;
+							  display: flex;
+							  flex-direction: column;
+							  min-width: 0;
+							  word-wrap: break-word;
+							  background-color: #fff;
+							  background-clip: border-box;
+							  border: 1px solid #e3e6f0;
+							  border-radius: 0.35rem;
+							  position: relative;
+							  width: 100%;
+							  padding-right: 0.75rem;
+							  padding-left: 0.75rem;
+                '>
+                <div class='card-header' style='
+                	  flex: 1 1 auto;
+					  min-height: 1px;
+					  padding: 1.25rem;
+					  border-radius: calc(0.35rem - 1px) calc(0.35rem - 1px) 0 0;
+                '>
+                		".$info."
+                </div>
+                <div class='card-body' style='flex: 1 1 auto;
+				  min-height: 1px;
+				  padding: 1.25rem;
+				  '>
+               			 <p>
+	               			 <img src='".$this->get_image()."' style='
+	               			 	float: left; margin-right: 10px;
+	               			 	padding: .25rem;
+							    background-color: #fff;
+							    border: 1px solid #dddfeb;
+							    border-radius: .35rem;
+							    max-width: 100%;
+							    height: auto;
+							    width: 200px;
+							    vertical-align: middle;
+    							border-style: none;
+    						'
+	               			 > 
+	               			 ".$this->input->post('message')."
+               			 </p>
+               
+                </div>
+                </div>
+                ";
+
+                mail($to,$subject,$message2,$headers);
+
+
+           }
+
+           if(mail($to,$subject,$message2,$headers) > 0){
+                echo("message envoyé avec succès");
+           } 
+           else {
+                echo("échec lors de l'envoie de message!!!!!!!!!!!!");
+           }
+
+
+        }
+    }
+
+    function infomation_telephone()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+
+           		$website = $this->email_sites;
+                $to =$id[$count];
+                $message = htmlentities($this->input->post('message'));
+                $num_dev = $this->num_dev;
+                $token_sms = $this->token_sms;
+
+                // echo("tél:".$to." message:".$message." num_dev:".$num_dev." 
+                // 	token:".$token_sms);
+
+                $this->envoieSMS($to, $message, $num_dev, $token_sms);
+
+           }
+
+        }
+    }
+    // fin contact
+
+    function envoieSMS($tel, $message, $num_dev,$token)
+    {
+        $etat = false;
+        try {
+            //form's fields name:
+            $value = '{
+	            "outboundSMSMessageRequest":{
+	                "address": "tel:' . $tel . '", 
+	                "senderAddress":"tel:'.$num_dev.'", 
+	                "outboundSMSTextMessage":{ 
+	                    "message": "' .$message. '" 
+	                } 
+	            }
+	        }';
+            //API url:
+            $url = 'https://api.orange.com/smsmessaging/v1/outbound/tel:'.$num_dev.'/requests';
+            //JSON data(not exact, but will be compiled to JSON) file: 
+            // use key 'http' even if you send the request to https://...
+            $options = array(
+                'http' => array(
+                    'header'  => "Content-Type: application/json\r\n" .
+                        "Authorization:Bearer ".$token."\r\n",
+                    'method'  => 'POST',
+                    'content' => $value
+                )
+            );
+            //engine:
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $etat = false;
+            if ($result === FALSE) { /* Handle error */
+                $etat = false;
+            } else {
+                $etat = true;
+
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+
+        if ($etat) {
+                	# code...
+        	$data = array(
+        		'tel' 	=> $tel,
+        		'message' 	=> $message,
+        		'etat' 	=>	'ok'
+        	);
+        	$query = $this->crud_model->insert_message_sender($data);
+        	echo("📞 ".$tel." envoyé 🆗");
+        }
+        else{
+
+        	$data = array(
+        		'tel' 	=> $tel,
+        		'message' 	=> $message,
+        		'etat' 	=>	'faux'
+        	);
+        	$query = $this->crud_model->insert_message_sender($data);
+        	echo(" échec !!!!");
+        }
+       
+        // return $etat;
+    }
+
+    function supression_message_sender(){
+
+	      $this->crud_model->delete_message_sender($this->input->post("idsms"));
+	      echo("suppression avec succès");
+	    
+	}
+
+	function renvoie_message_sender(){
+
+		   $data = $this->crud_model->fetch_single_message_sender($this->input->post('idsms')); 
+		   $idsms = $this->input->post('idsms'); 
+	       foreach($data as $row)  
+	       {  
+	            $to = $row->tel; 
+	            $message = $row->message; 
+	            $etat = $row->etat;
+
+                $num_dev = $this->num_dev;
+                $token_sms = $this->token_sms;
+
+                // echo("tél:".$to." message:".$message." num_dev:".$num_dev." 
+                // 	token:".$token_sms);
+
+                if ($message !='') {
+                	# code...
+                	$this->envoieSMS($to, $message, $num_dev, $token_sms);
+                	$data = array(
+		        		'tel' 	=> $to,
+		        		'message' 	=> $message,
+		        		'etat' 	=>	'ok'
+		        	);
+                	$query = $this->crud_model->update_message_sender($idsms, $data);
+        			echo("échec !!!!");
+                }
+
+
+	       }  
+	       
+	    
+	}
+
+    // pagination sms sender 
+    function pagination_message_sender()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_message_sender();
+    $config["per_page"] = 5;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detailsmessage_sender($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_message_sender()
+   {
+	  $output = '';
+	  $query = '';
+
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_sms_sender($query);
+	   $output .= '
+   
+	    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	     <theader>
+	       <tr>
+	        <th width="5%">Avatar</th>
+	        <th width="15%">Télephone</th>
+	        <th width="10%">Etat</th>
+	        <th width="40%">Message</th>
+	        <th width="20%">Mise à jour</th>
+	        <th width="5%">Renvoyer</th>
+	        <th width="5%">Supprimer</th>
+	       </tr>
+	     <theader>
+	     <tbody>
+	    ';
+
+	    if ($data->num_rows() <= 0) {
+	    	# code...
+	    }
+	    else{
+
+	    	foreach($data->result() as $row)
+		    {
+
+	          if ($row->etat == "ok") {
+	            $etat ='<span class="badge badge-success"><i class="fa fa-check"></i> bien envoyé</span>';
+	          }
+	          else if ($row->etat == "faux") {
+	            $etat ='<span class="badge badge-danger"><i class="fa fa-close"></i> échec d\'envoie</span>';
+	          }
+	          else{
+	            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+	          }
+
+	          $link = '<a href="tel:'.$row->tel.'" class="text-primary"><i class="fa fa-phone"></i></a>';
+
+
+	          $btn1 = '<button type="button" name="delete" idsms="'.$row->idsms.'" class="btn btn-hub btn-circle btn-sm renvoyer"><i class="fa fa-send"></i></button>';
+
+	          $btn2 = '<button type="button" name="delete" idsms="'.$row->idsms.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';
+	           $output .= '
+	           <tr>
+	            <td>'.$link.'</td>
+	             <td>'.$row->tel.'</td>
+	            <td>'.$etat.'</td>
+	            <td>'.substr($row->message, 0,40).'...</td>
+	            <td>'.substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23).'</td>
+	            <td>'.$btn1.'</td>
+	            <td>'.$btn2.'</td>
+	           </tr>
+	           ';
+
+		    }
+
+	    }
+	      
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Avatar</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Etat</th>
+              <th width="40%">Message</th>
+              <th width="20%">Mise à jour</th>
+              <th width="5%">Renvoyer</th>
+              <th width="5%">Supprimer</th>
+             </tr>
+           <tfooter>
+        </table>';
+	  	echo $output;
+	}
+
+	// pour les personnes 
+
+	// pagination user to sms 
+    function pagination_message_users()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_message_users();
+    $config["per_page"] = 10;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination pagination2">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detailsmessage_users($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_message_users()
+   {
+	  $output = '';
+	  $query = '';
+
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_sms_users($query);
+	   $output .= '
+	   
+	    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	     <theader>
+	       <tr>
+	        <th width="5%">Selectionner</th>
+	        <th width="5%">Avatar</th>
+	        <th width="20%">Nom complet</th>
+	        <th width="15%">Télephone</th>
+	        <th width="10%">Statut</th>
+	        <th width="20%">Email</th>
+	        <th width="5%">Sexe</th>
+	        <th width="20%">Mise à jour</th>
+	        
+	        
+	       </tr>
+	     <theader>
+	     <tbody>
+	    ';
+	    if ($data->num_rows() <= 0) {
+	    	# code...
+	    }
+	    else{
+
+	    	foreach($data->result() as $row)
+		    {
+
+		          
+		          if ($row->idrole == 1) {
+		            $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+		          }
+		          else if ($row->idrole == 2) {
+		            $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+		          }
+		          else if ($row->idrole == 3) {
+		            $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+		          }
+		          else if ($row->idrole == 4) {
+		            $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+		          }
+		          else{
+		            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+		          }
+
+		          $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+		           <input type="checkbox" name="tel" value="'.$row->telephone.'" class="tels delete_checkbox">
+		          ';
+
+		           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+		          
+		          ';
+
+		           $output .= '
+		           <tr>
+		            <td>'.$link.'</td>
+		            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+		             <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+		            <td>'.$row->telephone.'</td>
+		            <td>'.$etat.'</td>
+		            <td>'.$email.'</td>
+		            <td>'.$row->sexe.'</td>
+
+
+		            <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+		           
+		           </tr>
+		           ';
+		        
+
+		    }
+
+	    }
+	      
+          $output .= '
+	        <tbody>
+	        <tfooter>
+	         <tr>
+	          <th width="5%">Selectionner</th>
+	          <th width="5%">Avatar</th>
+	          <th width="20%">Nom complet</th>
+	          <th width="15%">Télephone</th>
+	          <th width="10%">Statut</th>
+	          <th width="20%">Email</th>
+	          <th width="5%">Sexe</th>
+	          <th width="20%">Mise à jour</th>
+	          
+	         </tr>
+	       <tfooter>
+	    </table>';
+	  	echo $output;
+	}
+
+	// filtrage par categorie 
+	// pagination user to sms 
+    function pagination_message_users_byrole()
+	{
+		sleep(1);
+		$idrole = $this->input->post('idrole');
+
+	    $this->load->library("pagination");
+	    $config = array();
+	    $config["base_url"] = "#";
+	    $config["total_rows"] = $this->crud_model->count_all_message_users_byrole($idrole);
+	    $config["per_page"] = 5;
+	    $config["uri_segment"] = 3;
+	    $config["use_page_numbers"] = TRUE;
+	    $config["full_tag_open"] = '<ul class="pagination pagination_filter">';
+	    $config["full_tag_close"] = '</ul>';
+	    $config["first_tag_open"] = '<li class="page-item">';
+	    $config["first_tag_close"] = '</li>';
+	    $config["last_tag_open"] = '<li class="page-item">';
+	    $config["last_tag_close"] = '</li>';
+	    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+	    $config["next_tag_open"] = '<li class="page-item">';
+	    $config["next_tag_close"] = '</li>';
+	    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+	    $config["prev_tag_open"] = "<li class='page-item'>";
+	    $config["prev_tag_close"] = "</li>";
+	    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	    $config["cur_tag_close"] = "</a></li>";
+	    $config["num_tag_open"] = "<li class='page-item'>";
+	    $config["num_tag_close"] = "</li>";
+	    $config["num_links"] = 1;
+	    $this->pagination->initialize($config);
+	    $page = $this->uri->segment(3);
+	    $start = ($page - 1) * $config["per_page"];
+
+	    $output = array(
+	     'pagination_link2'  => $this->pagination->create_links(),
+	     'country_table'   => $this->crud_model->fetch_detailsmessage_users_byrole($config["per_page"], $start, $idrole)
+	    );
+	    echo json_encode($output);
+	}
+	 
+  
 
 
 

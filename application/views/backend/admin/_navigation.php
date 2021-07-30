@@ -38,15 +38,16 @@
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <!-- <h6 class="collapse-header">Applications:</h6>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/entreprise">Entreprise</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/galerie">Galerie</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/type">Type</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/chambre">Chambre</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/client">Client</a>
+                       <h6 class="collapse-header">Applications:</h6>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/category">Variété d'information</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/blog">Blog pour information</a>
 
+                      
                         <div class="dropdown-divider"></div>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/stat_filtrage_galerie_ap">Liste des Galeries</a> -->
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/commentaire">Commentaires des blogs</a>
+                        <div class="dropdown-divider"></div>
+                        
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/partenariat">Nos partennaires</a>
 
                         <div class="dropdown-divider"></div>
                         <h6 class="collapse-header">Configuration:</h6>
@@ -79,6 +80,102 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/compterendu">Compte rendu</a>
 
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/visiteur">Visiteur en attente</a>
+                        <div class="dropdown-divider"></div>
+
+
+                        <h6 class="collapse-header">Configuration basique:</h6>
+                       
+
+                        <div class="dropdown-divider"></div>
+
+                        <ul class="nav-list">
+                            <li class="nav-item">
+                                <a href="javascript:void(0);" class="nk-menu-link text-muted nk-menu-toggle" data-original-title="" title="">
+                                    <span class="nk-menu-text"><i class="fa fa-dribbble"></i> Nos opérations  </span>
+                                </a>
+                                <ul class="nk-menu-sub">
+                                    <li class="nk-menu-item text-muted">
+                                        <a href="<?php echo(base_url()) ?>admin/info_membre" class="nk-menu-link text-muted" data-original-title="Nos membres" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-trello"></i> Notre famille</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nk-menu-item text-muted">
+
+                                        <a href="<?php echo(base_url()) ?>admin/info_personnel" class="nk-menu-link text-muted" data-original-title="info_personnel" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-tag"></i> Info personneles</span>
+                                        </a>
+                                    </li>
+
+                                   <!--  <li class="nk-menu-item text-muted">
+
+                                        <a href="<?php echo(base_url()) ?>admin/info_choix" class="nk-menu-link text-muted">
+                                            <span class="nk-menu-text"><i class="fa fa-picture-o"></i> Info Choix technologique</span>
+                                        </a>
+                                    </li> -->
+
+                                    <li class="nk-menu-item text-muted">
+                                        
+                                        <a href="<?php echo(base_url()) ?>admin/info_technologique" class="nk-menu-link text-muted" data-original-title="Notre galerie" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-file"></i> Nos services technologique</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nk-menu-item text-muted">
+                                        
+                                        <a href="<?php echo(base_url()) ?>admin/info_service" class="nk-menu-link text-muted" data-original-title="Notre galerie" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-file"></i> Services humanitaires</span>
+                                        </a>
+                                    </li>
+
+
+
+                                   
+                                   
+                                    
+                                </ul>
+                            </li>
+                        </ul>
+                        
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/carousel">Carousel</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="collapse-header">Configuration formation:</h6>
+                       
+
+                        <div class="dropdown-divider"></div>
+
+                        <ul class="nav-list">
+                            <li class="nav-item">
+                                <a href="javascript:void(0);" class="nk-menu-link text-muted nk-menu-toggle" data-original-title="" title="">
+                                    <span class="nk-menu-text"> Nos formation  </span>
+                                </a>
+                                <ul class="nk-menu-sub">
+                                    <li class="nk-menu-item text-muted">
+                                        <a href="<?php echo(base_url()) ?>admin/formations" class="nk-menu-link text-muted" data-original-title="Nos membres" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-windows"></i> Formation</span>
+                                        </a>
+                                    </li>
+
+                                    <li class="nk-menu-item text-muted">
+
+                                        <a href="<?php echo(base_url()) ?>admin/inscri_formation" class="nk-menu-link text-muted" data-original-title="inscri_formation" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-eye"></i> Inscription aux formations</span>
+                                        </a>
+                                    </li>
+
+                                     <li class="nk-menu-item text-muted">
+
+                                        <a href="<?php echo(base_url()) ?>admin/liste_formation" class="nk-menu-link text-muted" data-original-title="inscri_formation" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-list"></i> Filtrage formation</span>
+                                        </a>
+                                    </li>
+
+                                  
+                                </ul>
+                            </li>
+                        </ul>
+                        
                         
 
                     </div>
@@ -138,11 +235,16 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/stat_users">Stat sur Utilisateur</a>
 
                         <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/contact_info">Contact pour info</a>
 
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/database">Sauvegarde des données</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/sms">Envoie SMS</a>
+
+
 
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/groupeconf">Groupe de discution</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/database">Sauvegarde des données</a>
                        
                     </div>
                 </div>

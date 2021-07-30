@@ -373,7 +373,7 @@ class login extends CI_Controller
 	                </div>"
                 ;
 
-                $subject = "votre mot de passe de recupération au compte system Ets yetu";
+                $subject = "votre mot de passe de recupération au compte system Hub un jour nouveau";
                 $message2 = "<div class='col-md-12' style='
 					          position: relative;
 							  display: flex;
@@ -410,11 +410,12 @@ class login extends CI_Controller
 							    border-radius: .35rem;
 							    max-width: 100%;
 							    height: auto;
+							    width:200px;
 							    vertical-align: middle;
     							border-style: none;
     						'
 	               			 > 
-	               			 Salut!!! voici votre code de recupération de votre mot de passe au système de Ets yetu  ".$verification_key." cliquer sur ce lien pour changer votre nouveau mot de passe 
+	               			 Salut!!! voici votre code de recupération de votre mot de passe au système de Hub un jour nouveau ".$verification_key." cliquer sur ce lien pour changer votre nouveau mot de passe 
 	               			 <a href='".base_url()."login/change_secure/".$verification_key."'>
 	               			 changer mon mot de passe</a>.
                			 </p>

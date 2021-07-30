@@ -162,6 +162,20 @@
 		                                <input type="file" name="user_image" id="user_image" class="form-control" />
 		                                
 		                             </div>
+
+                                 <hr>
+
+                                 <!-- envoie des sms et configuration -->
+                                 <div class="form-group col-md-6">
+                                    <label><i class="fa fa-phone"></i> Entrez le numéro de téléphone dev </label>
+                                    <input type="tel" name="tel3" id="tel3" class="form-control" placeholder="+243854543870">
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label><i class="fa fa-key"></i> Saisissez le token de retour réseau </label>
+                                    <input type="text" name="token_sms" id="token_sms" class="form-control" placeholder="ex: 9kIs97r9BxVaMLt5YPcBu80hfTqB">
+                                </div>
+                                <!-- fin envoie -->
 		                            
 		                        </div>
 		                    </div>
@@ -208,6 +222,9 @@
                             <textarea class="form-control" name="blog" id="blog" placeholder=" Blog pour information"></textarea>
                         </div>
                         <!-- fin ajout -->
+
+
+                      
 
 
 
@@ -391,6 +408,9 @@
                          $('#description').val(data.description);
 
                          $('#blog').val(data.blog);
+
+                         $('#tel3').val(data.tel3); 
+                         $('#token_sms').val(data.token_sms); 
 
                          $('.modal-title').text("modification des informations pour le paramètrage du site");  
                          $('#idinfo').val(idinfo);  
