@@ -406,6 +406,18 @@ class admin extends CI_Controller
 		      $this->load->view('backend/admin/evaluation', $data);
 		}
 
+		function evaluation_paiement(){
+		    $data['title']="Evaluation de paiement";
+	    	$data['users'] = $this->crud_model->fetch_connected($this->connected);
+		    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+		    $data['Hommes']   = $this->crud_model->fetch_membre_apprenant_inscrit();
+
+	        $data['dates']    = $this->crud_model->fetch_categores_dates_compt();
+	        $data['chart_data'] = $this->crud_model->get_stat_paie();
+	        $this->load->view('backend/admin/evaluation_paiement', $data);
+	    }
+
 		function entreprise(){
 			  $data['title']="liste de Start-up";
 			  $data['pays'] = $this->crud_model->fetch_pays_register();
@@ -1053,6 +1065,9 @@ class admin extends CI_Controller
 	           		else if ($row->idrole == 3) {
 	           			$etat ='<span class="badge badge-info">Start-up</span>';
 	           		}
+	           		else if ($row->idrole == 4) {
+	           			$etat ='<span class="badge badge-dark">Comptable</span>';
+	           		}
 	           		else{
 	           			$etat ='<span class="badge badge-danger">User</span>';
 	           		}
@@ -1123,6 +1138,7 @@ class admin extends CI_Controller
 	                   'twitter'        =>     $this->input->post("twitter"),
 	                   'linkedin'       =>     $this->input->post("linkedin"),
 	                   'idrole'         =>     $this->input->post("idrole"),
+	                   'passwords'      =>     md5(123456),
 	                   'image'          =>     $user_image
 	                );   
 	          }
@@ -3604,6 +3620,27 @@ class admin extends CI_Controller
 
 				            if ($key['idrole'] == 3) {
 				                $url ="entreprise/chat_admin2/".$id_user."/".$code_groupe;
+
+				                $id_user_recever = $key['id'];
+
+				                // $nom = $this->input->post('first_name');
+				                $nom   = $this->crud_model->get_name_user($this->connected);
+				                $message =$nom." Vient de nous ajouter dans un groupe ";
+
+				                $notification = array(
+				                  'titre'     =>    "Nouveau groupe",
+				                  'icone'     =>    "fa fa-comment",
+				                  'message'   =>     $message,
+				                  'url'       =>     $url,
+				                  'id_user'   =>     $id_user_recever
+				                );
+				                
+				                $not = $this->crud_model->insert_notification($notification);
+
+				            }
+				            // comptable
+				            if ($key['idrole'] == 4) {
+				                $url ="comptable/chat_admin2/".$id_user."/".$code_groupe;
 
 				                $id_user_recever = $key['id'];
 
@@ -6199,6 +6236,480 @@ class admin extends CI_Controller
 	    );
 	    echo json_encode($output);
 	}
+
+
+	/*
+	*script pour le filtrage
+	*===========================
+	*
+	*/
+
+	  // filtrage de piement par date 
+	function fetch_datebetwine_paiement_filtre()
+	{
+	    $output = '';
+	    $query = '';
+	    $total;
+	    $jour1 =$this->input->post('jour1');
+	    $jour2 =$this->input->post('jour2');
+	    if($jour1 > $jour2)
+	    {
+	     $data = $this->crud_model->fetch_data_paiement_date($jour2, $jour1);
+	     $total = $this->crud_model->fetch_sum_data_paiement_date($jour2, $jour1);
+	    }
+	    else{
+	      $data = $this->crud_model->fetch_data_paiement_date($jour1, $jour2);
+	      $total = $this->crud_model->fetch_sum_data_paiement_date($jour1, $jour2);
+	    }
+	    
+	    $output .= '
+	      <a class="btn btn-outline-warning pull-right mt-2 mb-2" 
+	      href="'.base_url().'admin/pdf_liste_facture/'.$jour1.'/'.$jour2.' "><i class="fa fa-print mr-1"></i> PDF</a>
+	      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	          <thead>
+	            <tr>
+	              <td>
+	                <div class="col-md-12 form-inline">
+	                  <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+	                  <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+	                </div>
+	              </td>
+
+	              <td>
+	                Profile complet des ceo et leurs entreprises
+
+	              </td>
+	              <td>
+	                logo startu-up
+	              </td>
+	              
+	              <td>
+	                Montant
+	              </td>
+	              <td>
+	                Mobile
+	              </td>
+	              <td>
+	                Token de transation
+	              </td>
+
+	              <td>
+	                supprimer
+	              </td>
+	              
+	              
+	            </tr>
+
+	        </thead>
+	         <tbody id="example-tbody">
+	      ';
+	      if ($data->num_rows() < 0) {
+	        
+	      }
+	      else{
+	        $mobile = '';
+	        $etat_paiement ='';
+
+	        foreach($data->result() as $row)
+	        {
+
+	          if ($row->motif =="m-pesa") {
+	            $mobile = '
+	            <img src="'.base_url().'upload/module/m-pesa.com.png" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+	            ';
+	          }
+	          elseif ($row->motif =="airtel money") {
+	            $mobile = '
+	            <img src="'.base_url().'upload/module/airtel.jpg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+	            ';
+	          }
+	          else{
+
+	             $mobile = '<img src="'.base_url().'upload/module/chat.svg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">';
+	          }
+
+	          if ($row->etat_paiement ==0) {
+	            $etat_paiement = '
+	                 &nbsp;
+	                <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-danger btn-circle invvalider_liste btn-sm"><i class="fa fa-trash"></i></a>
+	            ';
+	          }
+	          
+	          else{
+	              $etat_paiement = '
+	                 &nbsp;
+	                <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-secondary btn-circle btn-sm"><i class="fa fa-eye text-white"></i></a>
+	              ';
+	          }
+
+
+	         $output .= '
+	        
+	         <tr role="row" class="odd">
+	            <td>
+	              <input type="checkbox" name="delete_checkbox" value="'.$row->idp.'" class="delete_checkbox">
+	              '.$etat_paiement.'
+	            </td>
+	              
+	              <td>
+
+	                <div class="col-md-12">
+	                  <div class="row">
+
+	                    <div class="col-md-4">
+	                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+	                      
+	                    </div>
+
+	                    <div class="col-md-8">
+	                      
+	                            <div class="col-md-12">
+	                            '.$row->first_name.'
+	                            '.$row->last_name.'
+	                          </div>
+	                          <div class="col-md-12">
+	                            <a href="tel:'.$row->telephone.'" class="text-primary">
+	                              <i class="fa fa-phone"></i>
+	                              &nbsp;&nbsp;'.$row->telephone.'
+	                            </a>
+	                          </div>
+	                          <div class="col-md-12 text-success">
+	                            '.$row->nom.'
+	                          </div>
+	                    </div>
+	                  </div>
+	                </div>
+	                
+	              </td>
+
+	              <td>
+
+	                <div class="col-md-12">
+	                  <div class="row">
+
+	                    <div class="col-md-12">
+	                      
+	                      &nbsp;
+	                      <img src="'.base_url().'upload/photo/'.$row->logo.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+	                    </div>
+
+	                    
+	                  </div>
+	                </div>
+	                
+	              </td>
+
+	              <td class="sorting_1">'.$row->montant.' $</td>
+	              <td>
+	                  
+	                  '.$mobile.'
+	              </td>
+	               <td class="sorting_1">
+	                
+	                <div class="table-actions">
+	                     <i class="fa fa-key"></i> &nbsp;'.substr($row->token, 0,10).'...&nbsp;
+	                     
+	                  </div>
+	               </td>
+
+
+	               <td class="sorting_1">
+	                
+	                <div class="table-actions text-center">
+	                     
+	                       <a href="'.base_url().'comptable/facture/'.$row->codeFacture.'"  class="btn btn-primary btn-circle btn-sm"><i class="fa fa-print text-white"></i></a>
+	                  </div>
+	               </td>
+	              
+	          </tr>
+
+	         ';
+
+	        }
+	      }
+
+	      $output .='
+	      <tr>
+	        <td colspan="6">Montant total </td>
+	        <td><h4>'.$total.'$</h4></td>
+	        
+	      </tr>
+	      
+	      ';
+
+
+	      $output .= '
+	          </tbody>
+	        <tfoot role="row" class="odd">
+	            <tr>
+	              <td>
+	                <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+	                <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+	              </td>
+	              <td>
+	                Profile complet des ceo et leurs entreprises
+	              </td>
+	              <td>
+	                logo startu-up
+	              </td>
+	              
+	              <td>
+	                Montant
+	              </td>
+	              <td>
+	                Mobile
+	              </td>
+	              <td>
+	                Token de transation
+	              </td>
+	              <td>
+	                supprimer
+	              </td>
+	              
+	            </tr>
+
+	        </tfoot>   
+	            
+	        </table>';
+	    echo $output;
+	}
+
+	function pdf_liste_facture($jour1='', $jour2=''){
+       $customer_id = "Liste de paiement de paiement du ".$jour1." au ".$jour2;
+       $html_content = '';
+      
+       if ($jour1 > $jour2) {
+         # code...
+        $html_content .= $this->crud_model->fetch_single_details_listePaiement($jour2, $jour1);
+
+       }
+       else{
+        $html_content .= $this->crud_model->fetch_single_details_listePaiement($jour1, $jour2);
+
+       }
+
+       // echo($html_content);
+       $this->load->library('pdf');
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("".$customer_id.".pdf", array("Attachment"=>0));
+    }
+
+
+	function fetch_limit_view_paiements()
+	{
+	  $output = '';
+	  $query = '';
+	  if($this->input->post('limit'))
+	  {
+	   $query = $this->input->post('limit');
+	  }
+	  $data = $this->crud_model->fetch_data_limit_paiement($query);
+	  $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                <div class="col-md-12 form-inline">
+                  <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+                  <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+                </div>
+              </td>
+
+              <td>
+                Profile complet des ceo et leurs entreprises
+
+              </td>
+              <td>
+                logo startu-up
+              </td>
+              
+              <td>
+                Montant
+              </td>
+              <td>
+                Mobile
+              </td>
+              <td>
+                Token de transation
+              </td>
+
+              <td>
+                supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $mobile = '';
+        $etat_paiement ='';
+
+        foreach($data->result() as $row)
+        {
+
+          if ($row->motif =="m-pesa") {
+            $mobile = '
+            <img src="'.base_url().'upload/module/m-pesa.com.png" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+            ';
+          }
+          elseif ($row->motif =="airtel money") {
+            $mobile = '
+            <img src="'.base_url().'upload/module/airtel.jpg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+            ';
+          }
+          else{
+
+             $mobile = '<img src="'.base_url().'upload/module/chat.svg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">';
+          }
+
+          if ($row->etat_paiement ==0) {
+            $etat_paiement = '
+                 &nbsp;
+                <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-danger btn-circle invvalider_liste btn-sm"><i class="fa fa-trash"></i></a>
+            ';
+          }
+          
+          else{
+              $etat_paiement = '
+                 &nbsp;
+                <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-secondary btn-circle btn-sm"><i class="fa fa-eye text-white"></i></a>
+              ';
+          }
+
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->idp.'" class="delete_checkbox">
+              '.$etat_paiement.'
+            </td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          <div class="col-md-12">
+                            <a href="tel:'.$row->telephone.'" class="text-primary">
+                              <i class="fa fa-phone"></i>
+                              &nbsp;&nbsp;'.$row->telephone.'
+                            </a>
+                          </div>
+                          <div class="col-md-12 text-success">
+                            '.$row->nom.'
+                          </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-12">
+                      
+                      &nbsp;
+                      <img src="'.base_url().'upload/photo/'.$row->logo.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                    </div>
+
+                    
+                  </div>
+                </div>
+                
+              </td>
+
+              <td class="sorting_1">'.$row->montant.' $</td>
+              <td>
+                  
+                  '.$mobile.'
+              </td>
+               <td class="sorting_1">
+                
+                <div class="table-actions">
+                     <i class="fa fa-key"></i> &nbsp;'.substr($row->token, 0,10).'...&nbsp;
+                     
+                  </div>
+               </td>
+
+
+               <td class="sorting_1">
+                
+                <div class="table-actions text-center">
+                     
+                       <a href="'.base_url().'comptable/facture/'.$row->codeFacture.'"  class="btn btn-primary btn-circle btn-sm"><i class="fa fa-print text-white"></i></a>
+                  </div>
+               </td>
+              
+          </tr>
+
+         ';
+
+        }
+      }
+      $output .= '
+          </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+                <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+              </td>
+              <td>
+                Profile complet des ceo et leurs entreprises
+              </td>
+              <td>
+                logo startu-up
+              </td>
+              
+              <td>
+                Montant
+              </td>
+              <td>
+                Mobile
+              </td>
+              <td>
+                Token de transation
+              </td>
+              <td>
+                supprimer
+              </td>
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+	  echo $output;
+	}
+
+
+	
 	 
   
 

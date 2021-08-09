@@ -148,36 +148,7 @@
             
            
 
-        </tbody>
-        <tfoot role="row" class="odd">
-            <tr>
-            	<td>
-            		<a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
-
-            		<a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
-            	</td>
-            	<td>
-            		Profile complet des ceo et leurs entreprises
-            	</td>
-            	<td>
-            		logo startu-up
-            	</td>
-            	
-            	<td>
-            		Montant
-            	</td>
-            	<td>
-            		Mobile
-            	</td>
-            	<td>
-            		Token de transation
-            	</td>
-            	<td>
-            		supprimer
-            	</td>
-            	
-            </tr>
-
-        </tfoot>
+        
+        
     </table>
 </div>

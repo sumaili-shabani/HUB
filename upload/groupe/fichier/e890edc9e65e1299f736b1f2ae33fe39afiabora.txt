@@ -1,0 +1,35 @@
+idée générale
+Afia bora est une plateforme web de suivi électronique des dossiers des 
+malade grâce à la technologie QR Code, les informations sensibles 
+des malades et leurs carnets médicaux sont désormais protégés dans  une 
+carte carte électronique  couvert par QR Code.
+Nous   avons remarqué que les malades sont victimes par  une mauvaise 
+consultation et de l'embouteillage une chose qui crée la perte du temps.
+
+=========================================
+Nous avons à présent Softech avec leur application Heath malade qui offre 
+la protection électronique des données des patients mais ignore la gestion 
+entière des rendez-vous et  notification de consultation pour afin satisfaire 
+la garantie sanitaire
+==============================================================================
+
+Afia bora offre plusieurs services:
+- un suivi adéquat et protection électronique des données des malades
+ Nous emploierons tout le moyen possible de faire payer les hôpitaux par un système 
+de réabonnement mensuel  pour l'utilisation du produit.
+====================================================================================
+
+frais ébergement du site et fonctionnement de base pour l'installation du projet: 1800$
+imprimante pour impression des cartes des malades et autres coûts pour l'exercice: 1000$
+dont cout total 2800$
+========================================================================================
+
+To access the Twilio API you will need your Account SID and Auth Token, which are shown below.
+
+ACCOUNT SID
+AC6e269a214962c26b1d7eeac488c92b34
+AUTH TOKEN
+Click to Hide
+57aff9f2670808aaf222bbd481aa3b6f
+
+

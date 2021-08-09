@@ -204,6 +204,8 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Paiement galerie:</h6>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/paiement_normale">Nos paiements</a>
+
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/evaluation_paiement">Evaluation paiement</a>
                        <!--  <a class="collapse-item" href="<?php echo(base_url()) ?>admin/stat_paiement">Statistique sur paiement</a> -->
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/paiement_pading">Paiement en attente</a>

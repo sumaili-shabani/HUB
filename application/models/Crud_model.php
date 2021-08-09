@@ -291,6 +291,8 @@ class crud_model extends CI_Model{
       return $my_nombre;
   }
 
+  
+
   function statistiques_nombre_tag($query, $idpersonne){
       $my_nombre;
       $data_ok = $this->db->query("SELECT count(*) AS nombre from ".$query." WHERE idpersonne=".$idpersonne." ");
@@ -2933,6 +2935,9 @@ class crud_model extends CI_Model{
     }
 
 
+
+
+
     // recherche des utilisateurs par fultres
     function fetch_data_search_online_user_follow($query)
     {
@@ -3086,6 +3091,139 @@ class crud_model extends CI_Model{
 
 
 
+
+         ';
+        }
+        
+        return $output;
+    }
+  // fin pagination
+
+    // pagination des utilisateurs connecters
+    function entreprise_fetch_pagination_to_users_count_comptable($limit, $start){
+        $output = '';
+        $this->db->select("*");
+        $this->db->from("users");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('comptable_login');
+        $etat = '';
+        $url = '';
+        
+        foreach($query->result() as $row)
+        {
+
+           
+            
+            if ($row->id != $id) {
+              $url = base_url().'comptable/detail_users_profile/'.$row->id;
+                  $etat = '<div class="col-md-12"><span class="message">
+                    <a href="'.base_url().'comptable/chat_admin/'.$id.'/'.$row->id.'">
+                  &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                      </a> 
+                    </span></div>';
+            }
+            else{
+                  $url = base_url().'comptable/profile';
+                  $etat = '
+
+                  <span class="message">
+                    <a href="'.base_url().'comptable/profile" class="text-warning">
+                  &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                      </a> 
+                    </span>
+
+                  ';
+            }
+
+
+          
+         $output .= '
+         
+
+
+          <div class="col-md-12 media text-muted pt-3 mb-2">
+                          
+            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+            <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+              <san class="text-info">'.$row->email.'</span>
+                '.$etat.'
+              
+            </div>
+            
+        </div>
+
+
+
+
+         ';
+        }
+        
+        return $output;
+    }
+  // fin pagination
+
+    // pagination des utilisateurs connecters
+    function entreprise_fetch_pagination_to_users_count_user($limit, $start){
+        $output = '';
+        $this->db->select("*");
+        $this->db->from("users");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('id');
+        $etat = '';
+        $url = '';
+        
+        foreach($query->result() as $row)
+        {
+
+           
+            
+            if ($row->id != $id) {
+              $url = base_url().'user/detail_users_profile/'.$row->id;
+                  $etat = '<div class="col-md-12"><span class="message">
+                    <a href="'.base_url().'user/chat_admin/'.$id.'/'.$row->id.'">
+                  &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                      </a> 
+                    </span></div>';
+            }
+            else{
+                  $url = base_url().'user/profile';
+                  $etat = '
+
+                  <span class="message">
+                    <a href="'.base_url().'user/profile" class="text-warning">
+                  &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                      </a> 
+                    </span>
+
+                  ';
+            }
+
+
+          
+         $output .= '
+         
+
+
+          <div class="col-md-12 media text-muted pt-3 mb-2">
+                          
+            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle mr-2" style="width: 50px; height: 40px; border-radius: 70%;">
+
+            <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                <strong class="d-block text-gray-dark"> <a href="'.$url.'" >'.$row->first_name.' '.substr($row->last_name, 0,25).'</a></strong>
+              <san class="text-info">'.$row->email.'</span>
+                '.$etat.'
+              
+            </div>
+            
+        </div>
 
          ';
         }
@@ -3273,6 +3411,166 @@ class crud_model extends CI_Model{
         
         return $output;
       }
+
+
+      // pagination des utilisateurs connecters
+      function Comptable_fetch_online_connected($limit, $start){
+          $output = '';
+        $this->db->select("*");
+        $this->db->from("profile_online");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('comptable_login');
+        $etat = '';
+        $url='';
+        
+        foreach($query->result() as $row)
+        {
+            if ($row->id_user != $id) {
+              $url= $url = base_url().'comptable/detail_users_profile/'.$row->id_user;
+              $etat = '<div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'comptable/chat_admin/'.$id.'/'.$row->id_user.'">
+                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span></div>';
+            }
+            else{
+                $url = $url = base_url().'comptable/profile';
+                $etat = '
+
+                <div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'comptable/profile" class="text-warning">
+                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span>
+                  </div>
+
+                ';
+
+                
+             }
+
+
+
+            $output .= '
+
+             <li class="online">
+                  <a href="'.$url.'">
+                      <div class="media">
+                          <div class="avtar-pic w35 bg-red">
+                            <span>
+                            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle" style="width: 50px; height: 40px; border-radius: 70%;">
+                              </span>
+
+                          </div>
+
+                          <div class="contacts-list-info">
+                              <span class="contacts-list-name">
+                                <span class="name text-info">&nbsp;&nbsp;@'.$row->first_name.' '.substr($row->last_name, 0,25).' </span><br>
+                              '.$etat.'
+
+
+                              </span>
+
+
+                              
+                          </div>
+
+                          
+                      </div>
+                  </a>
+              </li>
+              
+
+            ';
+          
+        }
+        
+        return $output;
+      }
+
+
+      // pagination des utilisateurs connecters
+      function Comptable_fetch_online_connected_user($limit, $start){
+          $output = '';
+        $this->db->select("*");
+        $this->db->from("profile_online");
+        $this->db->order_by("first_name", "ASC");
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+
+        $id = $this->session->userdata('id');
+        $etat = '';
+        $url='';
+        
+        foreach($query->result() as $row)
+        {
+            if ($row->id_user != $id) {
+              $url= $url = base_url().'user/detail_users_profile/'.$row->id_user;
+              $etat = '<div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'user/chat_admin/'.$id.'/'.$row->id_user.'">
+                &nbsp;&nbsp;<i class="fa fa-comments-o"></i> message
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span></div>';
+            }
+            else{
+                $url = $url = base_url().'user/profile';
+                $etat = '
+
+                <div class="col-md-12"><span class="message">
+                  <a href="'.base_url().'user/profile" class="text-warning">
+                &nbsp;&nbsp;<i class="fa fa-user"></i> profile
+                <span class="badge badge-success ml-3">en ligne</span>
+                    </a> 
+                  </span>
+                  </div>
+
+                '; 
+             }
+
+
+            $output .= '
+
+             <li class="online">
+                  <a href="'.$url.'">
+                      <div class="media">
+                          <div class="avtar-pic w35 bg-red">
+                            <span>
+                            <img src="'.base_url().'upload/photo/'.$row->image.'" class="img img-responsive img-circle" style="width: 50px; height: 40px; border-radius: 70%;">
+                              </span>
+
+                          </div>
+
+                          <div class="contacts-list-info">
+                              <span class="contacts-list-name">
+                                <span class="name text-info">&nbsp;&nbsp;@'.$row->first_name.' '.substr($row->last_name, 0,25).' </span><br>
+                              '.$etat.'
+
+
+                              </span>
+
+
+                              
+                          </div>
+
+                          
+                      </div>
+                  </a>
+              </li>
+             
+            ';
+          
+        }
+        
+        return $output;
+      }
+
+
 
 
 
@@ -5772,6 +6070,730 @@ class crud_model extends CI_Model{
    }
 
 
+    /*
+    les scripts pour confirmation de paiement
+    ========================================
+    =======================================
+    =======================================
+    */
+
+    // script pour information  des paiements en attente
+    function count_all_view_paiement_padding()
+    {
+
+      $this->db->group_by("token");
+      $this->db->limit(30);
+      $query = $this->db->get("profile_paiement_padding");
+      return $query->num_rows();
+    }
+
+    // script pour information  des paiements 
+    function count_all_view_paiement()
+    {
+
+      $this->db->group_by("token");
+      $this->db->limit(30);
+      $query = $this->db->get("profile_paiement");
+      return $query->num_rows();
+    }
+
+
+    /*
+    les scripts pour confirmation de paiement
+    ========================================
+    =======================================
+    =======================================
+    */
+
+
+    // script pour le paiement en padding
+
+    function fetch_details_view_paiement_padding($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_paiement_padding");
+      $this->db->group_by("token");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                <div class="col-md-12 form-inline">
+                  <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+                  <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+                </div>
+              </td>
+
+              <td>
+                Profile complet des ceo et leurs entreprises
+
+              </td>
+              <td>
+                logo startu-up
+              </td>
+              
+              <td>
+                Montant
+              </td>
+              <td>
+                Mobile
+              </td>
+              <td>
+                Token de transation
+              </td>
+
+              <td>
+                supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $mobile = '';
+
+        foreach($query->result() as $row)
+        {
+
+          if ($row->motif =="m-pesa") {
+            $mobile = '
+            <img src="'.base_url().'upload/module/m-pesa.com.png" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+            ';
+          }
+          elseif ($row->motif =="airtel money") {
+            $mobile = '
+            <img src="'.base_url().'upload/module/airtel.jpg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+            ';
+          }
+          else{
+             $mobile = '';
+          }
+
+
+         $output .= '
+        
+
+
+
+
+
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->idp.'" class="delete_checkbox">
+            </td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          <div class="col-md-12">
+                            <a href="tel:'.$row->telephone.'" class="text-primary">
+                              <i class="fa fa-phone"></i>
+                              &nbsp;&nbsp;'.$row->telephone.'
+                            </a>
+                          </div>
+                          <div class="col-md-12 text-success">
+                            '.$row->nom.'
+                          </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-12">
+                      
+                      &nbsp;
+                      <img src="'.base_url().'upload/photo/'.$row->logo.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                    </div>
+
+                    
+                  </div>
+                </div>
+                
+              </td>
+
+              <td class="sorting_1">'.$row->montant.' $</td>
+              <td>
+                  
+                  '.$mobile.'
+              </td>
+               <td class="sorting_1">
+                
+                <div class="table-actions">
+                     <i class="fa fa-key"></i> &nbsp;'.$row->token.'&nbsp;
+                     
+                  </div>
+               </td>
+
+               <td class="sorting_1">
+                
+                <div class="table-actions text-center">
+                      <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash text-white"></i></a>
+                  </div>
+               </td>
+              
+          </tr>
+
+
+
+
+
+
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+                <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+              </td>
+              <td>
+                Profile complet des ceo et leurs entreprises
+              </td>
+              <td>
+                logo startu-up
+              </td>
+              
+              <td>
+                Montant
+              </td>
+              <td>
+                Mobile
+              </td>
+              <td>
+                Token de transation
+              </td>
+              <td>
+                supprimer
+              </td>
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+      return $output;
+    }
+
+
+    // script pour le paiement normal
+
+    function fetch_details_view_paiement($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_paiement");
+      $this->db->group_by("token");
+      $this->db->order_by("idp","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                <div class="col-md-12 form-inline">
+                  <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+                  <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+                </div>
+              </td>
+
+              <td>
+                Profile complet des ceo et leurs entreprises
+
+              </td>
+              <td>
+                logo startu-up
+              </td>
+              
+              <td>
+                Montant
+              </td>
+              <td>
+                Mobile
+              </td>
+              <td>
+                Token de transation
+              </td>
+
+              <td>
+                supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $mobile = '';
+        $etat_paiement ='';
+
+        foreach($query->result() as $row)
+        {
+
+          if ($row->motif =="m-pesa") {
+            $mobile = '
+            <img src="'.base_url().'upload/module/m-pesa.com.png" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+            ';
+          }
+          elseif ($row->motif =="airtel money") {
+            $mobile = '
+            <img src="'.base_url().'upload/module/airtel.jpg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">
+            ';
+          }
+          else{
+
+             $mobile = '<img src="'.base_url().'upload/module/chat.svg" class="img-thumbnail img-responsive" style="height: 25px; width: 50px;">';
+          }
+
+          if ($row->etat_paiement ==0) {
+            $etat_paiement = '
+                 &nbsp;
+                <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-danger btn-circle invvalider_liste btn-sm"><i class="fa fa-trash"></i></a>
+            ';
+          }
+          
+          else{
+              $etat_paiement = '
+                 &nbsp;
+                <a href="javascript:void(0);" idp="'.$row->idp.'" class="btn btn-secondary btn-circle btn-sm"><i class="fa fa-eye text-white"></i></a>
+              ';
+          }
+
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->idp.'" class="delete_checkbox">
+              '.$etat_paiement.'
+            </td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          <div class="col-md-12">
+                            <a href="tel:'.$row->telephone.'" class="text-primary">
+                              <i class="fa fa-phone"></i>
+                              &nbsp;&nbsp;'.$row->telephone.'
+                            </a>
+                          </div>
+                          <div class="col-md-12 text-success">
+                            '.$row->nom.'
+                          </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-12">
+                      
+                      &nbsp;
+                      <img src="'.base_url().'upload/photo/'.$row->logo.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                    </div>
+
+                    
+                  </div>
+                </div>
+                
+              </td>
+
+              <td class="sorting_1">'.$row->montant.' $</td>
+              <td>
+                  
+                  '.$mobile.'
+              </td>
+               <td class="sorting_1">
+                
+                <div class="table-actions">
+                     <i class="fa fa-key"></i> &nbsp;'.substr($row->token, 0,10).'...&nbsp;
+                     
+                  </div>
+               </td>
+
+               <td class="sorting_1">
+                
+                <div class="table-actions text-center">
+                     
+                       <a href="'.base_url().'comptable/facture/'.$row->codeFacture.'"  class="btn btn-primary btn-circle btn-sm"><i class="fa fa-print text-white"></i></a>
+                  </div>
+               </td>
+              
+          </tr>
+
+
+
+
+
+
+         ';
+        }
+      }
+      $output .= '
+          </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                <a href="javascript:void(0);" class="btn btn-danger btn-circle btn-sm supprimer supprimer_liste"> <i class="fa fa-trash"></i> </a>
+
+                <a href="javascript:void(0);" class="btn btn-success btn-circle btn-sm supprimer valider_liste"> <i class="fa fa-check"></i> </a>
+              </td>
+              <td>
+                Profile complet des ceo et leurs entreprises
+              </td>
+              <td>
+                logo startu-up
+              </td>
+              
+              <td>
+                Montant
+              </td>
+              <td>
+                Mobile
+              </td>
+              <td>
+                Token de transation
+              </td>
+              <td>
+                supprimer
+              </td>
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+      return $output;
+    }
+
+    function fetch_data_search_paiement_padding($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_paiement_padding");
+        $this->db->group_by("token");
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('token', $query);
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('telephone', $query);
+        }
+        return $this->db->get();
+    }
+
+    // pour le paiement 
+    function fetch_data_search_paiement($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_paiement");
+        $this->db->group_by("token");
+
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('token', $query);
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('telephone', $query);
+        }
+        return $this->db->get();
+    }
+
+    // pour le paiement 
+    function fetch_data_limit_paiement($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_paiement");
+       
+        if($query != '')
+        {
+          $this->db->limit($query);
+        }
+        return $this->db->get();
+    }
+
+    // pour le paiement 
+    function fetch_data_paiement_date($jour1, $jour2)
+    {
+        $query = $this->db->query("SELECT * FROM profile_paiement WHERE date_paie BETWEEN '".$jour1."' AND '".$jour2."' ");
+        return $query;
+    }
+
+    // pour la somme du paiement 
+    function fetch_sum_data_paiement_date($jour1, $jour2)
+    {
+        $montant;
+        $query = $this->db->query("SELECT SUM(montant) AS montant FROM profile_paiement WHERE date_paie BETWEEN '".$jour1."' AND '".$jour2."' ");
+        if ($query->num_rows() > 0) {
+          # code...
+
+          foreach ($query->result_array() as $key) {
+            # code...
+            $montant = $key['montant'];
+          }
+        }
+        else{
+          $montant = 0;
+        }
+
+        return $montant;
+    }
+
+
+    // appel de startups
+    function fetch_membre_apprenant_inscrit()
+    {
+        $this->db->order_by('first_name','ASC');
+        return $this->db->get('profile_entreprise');
+    }
+
+    // appel de dates 
+    function fetch_categores_dates_compt()
+    {
+        $this->db->group_by('date_paie');
+        $this->db->order_by('date_paie','DESC');
+        return $this->db->get('paiement');
+    }
+
+    function fetch_single_personne_user($id)  
+    {  
+         $this->db->where("id", $id);  
+         $query=$this->db->get('users');  
+         return $query->result();  
+    }
+
+    function insert_paiement($data)  
+    {  
+         $this->db->insert('paiement', $data);  
+    }
+
+    function get_stat_paie(){
+          $chart_data = '';
+          $montant;
+          $nom = $this->db->query("SELECT SUM(montant) AS montant,date_paie FROM profile_paiement WHERE etat_paiement=1 GROUP BY date_paie")->result_array();
+          foreach ($nom as $key) {
+
+            $sexe = "jour:".nl2br(substr(date(DATE_RFC822, strtotime($key["date_paie"])), 0, 23));
+            $montant = $key["montant"];
+            $chart_data .= "{ indexLabel:'".$sexe."', y:".$montant."}, ";
+            
+          }
+
+          return $chart_data;
+
+    }
+
+    // impression paiement de galerie
+    function fetch_single_details_listePaiement($jour1,$jour2)
+    {
+
+       $data = $this->db->query("SELECT * FROM profile_paiement WHERE date_paie BETWEEN '".$jour1."' AND '".$jour2."' ");
+
+        $montantT = $this->fetch_sum_data_paiement_date($jour1, $jour2);
+       
+
+        $nom_site = '';
+        $icone    = '';
+        $email    = '';
+        $retour = "javascript:history.go(-1);";
+
+        $info = $this->db->get('tbl_info')->result_array();
+        foreach ($info as $key) {
+          $nom_site = $key['nom_site'];
+          $icone    = $key['icone'];
+          $email    = $key['email'];
+          
+        }
+
+        $output = '';
+        $nomf;
+        $created_at;
+        $nom;
+        $icone;
+
+         
+
+         $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br/>
+         <h3>
+            LISTE DE PAIEMENT DU  ".nl2br(substr(date(DATE_RFC822, strtotime($jour1)), 0, 23))." AU 
+            ".nl2br(substr(date(DATE_RFC822, strtotime($jour2)), 0, 23))." AU SYSTEME ".$nom_site."
+         <h3>
+         ";
+
+         $output = '<div align="right">';
+         $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data" >';
+         $output .= '
+         <tr>
+          <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100"/></td>
+          <td width="50%" align="center">
+           <p><b>'.$message.' </b></p>
+           <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+           <hr>
+           
+          </td>
+
+          <td width="25%">
+          <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" />
+          </td>
+
+
+         </tr>
+         ';
+      
+        $output .= '</table>';
+
+        $output .= '</div>';
+
+        $output .= '
+            <div class="table-responsive">
+             
+             <br />
+             <table class="table table-bordered panier_table" width="100%"  cellspacing="5" cellpadding="5" id="user_data" border="0">
+              <tr>
+               <th width="5%">statut l\'entreprise</th>
+               <th width="30%">Nom du ceo</th>
+               <th width="5%">téléphone</th>
+
+               <th width="15%">Montant</th>
+               <th width="25%">motif</th>
+
+               <th width="20%">Date</th>
+               
+              </tr>
+
+          ';
+
+            foreach($data->result_array() as $items)
+            {
+              $maison = $items["nom"];
+              $idpersonne   = $items["idpersonne"];
+              $montantT;
+              $montantRestant;
+
+              $montant_a_payer = 30;
+
+
+              $nom_complet = $items["first_name"].' '.$items["last_name"];
+               $output .= '
+               <tr>
+                <td width="20%" align="center">
+               
+                '.$maison.'
+                 <br />
+                <img src="'.base_url().'upload/photo/'.$items["logo"].'" style="height: 40px; width: 50px; border-radius: 50%;"/></td> 
+                <td align="center">
+                '.$nom_complet.'
+                <br/>
+                 <img src="'.base_url().'upload/photo/'.$items["image"].'" style="height: 40px; width: 50px; border-radius: 50%;"/>
+                </td>
+                <td>'.$items["telephone"].'</td>
+                <td>'.$items["montant"].'$</td>
+                <td>'.$items["motif"].'</td>
+
+                <td width="15%">'.nl2br(substr(date(DATE_RFC822, strtotime($items["created_at"])), 0, 23)).'</td>
+
+
+               </tr>
+               ';
+
+            }
+
+            $output .= '
+             <tr>
+              <td colspan="5">
+                <div align="right">Total montant payé</div>
+              </td> 
+              <td >'.$montantT.'$</td>
+              
+             </tr>
+           ';
+
+            $output .= '
+             
+        </table>
+
+        </div>
+
+        <hr>
+    
+        <div align="right" style="margin-botton:20px;">
+
+            <a href="'.$retour.'" style="text-decoration: none; color: black;">signature:</a>
+      
+        </div>
+        <div align="center" style="
+
+         background-image: url('.base_url().'upload/tbl_info/'.$icone.'); background-repeat: no-repeat; background-size: 40%; background-position: center; height:100px;">
+        </div>
+        
+        ';
+
+       
+
+      
+        return $output;
+    }
+
+
 
 
 
@@ -5870,7 +6892,21 @@ class crud_model extends CI_Model{
               return 'mot de passe incorrect';
              }
 
-            }
+          }
+          elseif($row->idrole == '4')
+          {
+             $password = md5($password_ok);
+             $store_password = $row->passwords;
+             if($password == $store_password)
+             {
+              $this->session->set_userdata('comptable_login', $row->id);
+             }
+             else
+             {
+              return 'mot de passe incorrect';
+             }
+
+          }
           else
           {
            return 'les informations incorrectes';

@@ -56,7 +56,6 @@ class entreprise extends CI_Controller
 	}
 
 
-
 	function profile(){
       $data['title']="mon profile entreprise";
       $data['users'] = $this->crud_model->fetch_connected($this->connected);
@@ -692,6 +691,7 @@ class entreprise extends CI_Controller
   function add_paiement($param1 =''){
 
     $identrep = $param1;
+    $token = $this->input->post('token');
     if ($identrep !='') {
 
       $insertdata = array(
@@ -716,6 +716,23 @@ class entreprise extends CI_Controller
 
                 if ($key['idrole'] == 1) {
                   $url ="admin/paiement_pading";
+                    $nom   = $this->crud_model->get_name_user($id_user);
+                    // $nom = $this->input->post('titre');
+                    $message ="Nouvelle tentative de paiement ".$nom." vient de faire son paiement";
+
+                    $notification = array(
+                      'titre'     =>    "Nouveau de paiement",
+                      'icone'     =>    "fa fa-money",
+                      'message'   =>     $message,
+                      'url'       =>     $url,
+                      'id_user'   =>     $id_user_recever
+                    );
+                    
+                    $not = $this->crud_model->insert_notification($notification);
+
+                }
+                if ($key['idrole'] == 4) {
+                  $url ="comptable/paiement_pading/".$token;
                     $nom   = $this->crud_model->get_name_user($id_user);
                     // $nom = $this->input->post('titre');
                     $message ="Nouvelle tentative de paiement ".$nom." vient de faire son paiement";
@@ -1529,22 +1546,85 @@ class entreprise extends CI_Controller
         
     }
 
-    // chat groupe conversation 
-    function modification_chat_message(){
+    
 
-        $updated_data = array(  
-           'message'    =>     htmlspecialchars($this->input->post("message"))
-        );  
+    function chat_local_view_groupe($param1, $param2){
+    $data['title']="Discution instantané";
+    $data['id_user']= $param1;
 
-        $this->crud_model->update_chat_messagerie($this->input->post("idgroupe"), $updated_data);
-        // echo("modification avec succès");
+    $data['code_groupe']= $param2;
+
+    $code = substr(md5(rand(100000000, 200000000)), 0, 10);
+
+    if ($this->input->post('Message_text') !='') {
+
+      $chat['id_user'] = $param1;
+      $chat['code_groupe'] = $param2;
+      $chat['message'] = $this->input->post('Message_text');
+      if($_FILES['user_image']['size'] > 0){
+
+              $chat['fichier'] = $this->upload_image_chat_envoie();
+            }
+      
+      $this->crud_model->insert_message_chat_groupe($chat);
+      redirect('entreprise/chat_admin2/'.$param1.'/'.$param2);
     }
+    else{
+      redirect('entreprise/chat_admin2/'.$param1.'/'.$param2);
+    }
+    
+    
+  }
 
-    function supression_chat_message(){
+  function upload_image_chat_envoie()  
+  {  
+     if(isset($_FILES["user_image"]))  
+     {  
+          $extension = explode('.', $_FILES['user_image']['name']);  
+          $new_name = rand() . '.' . $extension[1];  
+          $destination = './upload/groupe/fichier/' . $new_name;  
+          move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+          return $new_name;  
+     }  
+  }
 
-        $this->crud_model->delete_chat_messagerie($this->input->post("idgroupe"));
+  function fetch_single_chat_groupe()  
+  {  
         
-    }
+         $output = array();  
+         $data = $this->crud_model->fetch_single_chat_groupe($this->input->post('code'));  
+         foreach($data as $row)  
+         {  
+              $output['nom'] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));  
+             
+              $output['text_description']   ='
+                <textarea class="form-control textarea" name="message" id="message">
+                    '. html_entity_decode($row->message).'
+                </textarea>
+              ';
+
+
+         }  
+         echo json_encode($output);  
+  }
+
+  // chat groupe conversation 
+  function modification_chat_message(){
+
+      $updated_data = array(  
+         'message'    =>     htmlspecialchars($this->input->post("message"))
+      );  
+
+      $this->crud_model->update_chat_messagerie($this->input->post("idgroupe"), $updated_data);
+      // echo("modification avec succès");
+  }
+
+  function supression_chat_message(){
+
+      $this->crud_model->delete_chat_messagerie($this->input->post("idgroupe"));
+      
+  }
+
 
 
 

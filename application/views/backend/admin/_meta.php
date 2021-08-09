@@ -59,7 +59,13 @@
      .btn-hub{
       background-color: rgb(220, 68, 5);
       color:white;
-     } 
+     }
+     #loading
+    {
+     text-align:center; 
+     background: url('<?php echo base_url(); ?>js/assets/loader.gif') no-repeat center; 
+     height: 150px;
+    } 
 </style>  
 
 <style>

@@ -117,6 +117,28 @@ class login extends CI_Controller
 					redirect('entreprise/dashbord');
 					
 				}
+
+				elseif ($this->session->userdata('comptable_login')) {
+
+					$id=$this->session->userdata('comptable_login');
+				    $cours = $this->db->get_where('online', array(
+						    	'id_user'	=>	$id
+						    ));
+			       
+			        if ($cours->num_rows() > 0) {
+			        	# code...
+			        }
+			        else{
+
+			        	$insert = array(
+							'id_user'	=>	$this->session->userdata('comptable_login')
+						);
+						$this->crud_model->insert_online($insert);
+			        }
+
+					redirect('comptable/dashbord');
+					
+				}
 				else{
 					
 				}
