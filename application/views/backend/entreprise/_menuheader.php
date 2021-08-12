@@ -237,7 +237,7 @@
                                 
 
                                 
-                                <a class="dropdown-item text-center small text-gray-500" href="<?php echo(base_url()) ?>admin/message">Voir tous les messages</a>
+                                <a class="dropdown-item text-center small text-gray-500" href="<?php echo(base_url()) ?>entreprise/message">Voir tous les messages</a>
                             </div>
                         </li>
 

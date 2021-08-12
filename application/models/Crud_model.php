@@ -291,6 +291,40 @@ class crud_model extends CI_Model{
       return $my_nombre;
   }
 
+  function statistiques_somme_montant($query, $type){
+      $montant;
+      $data_ok = $this->db->query("SELECT SUM(montant_nombre) AS montant from ".$query." WHERE type='".$type."' AND etat_validation=1 ");
+      if ($data_ok->num_rows() > 0) {
+
+        foreach ($data_ok->result_array() as $key) {
+          $montant = $key['montant'];
+        }
+        # code...
+      }
+      else{
+           $montant = 0;
+      }
+
+      return $montant;
+  }
+
+  function statistiques_somme_paiement($query){
+      $montant;
+      $data_ok = $this->db->query("SELECT SUM(montant) AS montant from ".$query." WHERE  etat_paiement=1 ");
+      if ($data_ok->num_rows() > 0) {
+
+        foreach ($data_ok->result_array() as $key) {
+          $montant = $key['montant'];
+        }
+        # code...
+      }
+      else{
+           $montant = 0;
+      }
+
+      return $montant;
+  }
+
   
 
   function statistiques_nombre_tag($query, $idpersonne){
@@ -1479,6 +1513,167 @@ class crud_model extends CI_Model{
         return $output;
     }
 
+    // impression paiement de galerie
+    function fetch_single_details_facture_depense($iddepense)
+    {
+
+        $this->db->where('iddepense', $iddepense);
+        $data = $this->db->get('profile_depense');
+
+        $nom_site = '';
+        $icone    = '';
+        $email    = '';
+
+        $info = $this->db->get('tbl_info')->result_array();
+        foreach ($info as $key) {
+          $nom_site = $key['nom_site'];
+          $icone    = $key['icone'];
+          $email    = $key['email'];
+          
+        }
+
+        $output = '';
+        $nomf;
+        $created_at;
+        $nom;
+        $icone;
+
+         
+
+         $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br/>
+         <h3>
+            EVALUATION DE COMPTE  AU SYSTEME ".$nom_site."
+         <h3>
+         ";
+
+         $output = '<div align="right">';
+         $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data" >';
+         $output .= '
+         <tr>
+          <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100"/></td>
+          <td width="50%" align="center">
+           <p><b>'.$message.' </b></p>
+           <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+           <hr>
+           
+          </td>
+
+          <td width="25%">
+          <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" />
+          </td>
+
+
+         </tr>
+         ';
+      
+        $output .= '</table>';
+
+         $output .= '</div>';
+
+         $output .= '
+            <div class="table-responsive">
+             
+             <br />
+             <table class="table table-bordered panier_table" width="100%" cellspacing="5" cellpadding="5"  id="user_data" border="0">
+              <tr>
+               <th width="5%">Nom complet</th>
+               <th width="20%">libellé</th>
+               <th width="20%">Motif</th>
+
+               <th width="5%">Montant en chiffre</th>
+               <th width="15%">Montant en lettre</th>
+               <th width="15%">livré par</th>
+
+               <th width="10%">Date</th>
+               
+              </tr>
+
+          ';
+
+            foreach($data->result_array() as $items)
+            {
+              $nomPer = $items["nomPer"];
+              $libelle   = $items["libelle"];
+              $motif   = $items["motif"];
+              $comptable   = $items["first_name"]." ".$items["last_name"];
+              $montant_nombre   = $items["montant_nombre"];
+              $montant_lettre   = $items["montant_lettre"];
+              $montantT;
+              $montantRestant;
+
+              $montant_a_payer = 30;
+
+
+            $data_paie = $this->db->query("SELECT SUM(montant_nombre) AS montant FROM profile_depense WHERE iddepense=".$iddepense." ");
+            if ($data_paie->num_rows() > 0) {
+              # code...
+              foreach($data_paie->result_array() as $items2)
+                {
+                  $montantT =  $items2["montant"];
+                }
+            }
+            else{
+              $montantT = 0;
+            }
+
+            // $montantRestant =  $montant_a_payer - $montantT;
+            $retour = "javascript:history.go(-1);";
+
+
+
+              $nom_complet = $items["first_name"].' '.$items["last_name"];
+               $output .= '
+               <tr>
+                <td>'.$nomPer.'</td>
+                <td>'.$libelle.'</td>
+                <td>'.$motif.'</td>
+                <td>'.$montant_nombre.'$</td>
+                <td>'.$montant_lettre.'</td>
+                <td>'.$comptable.'</td>
+                
+                <td width="15%">'.nl2br(substr(date(DATE_RFC822, strtotime($items["jour"])), 0, 23)).'</td>
+
+               </tr>
+               ';
+
+               $output .= '
+               <tr>
+                <td colspan="6">
+                  <div align="right">Total montant payé</div>
+                </td> 
+                <td >'.$montantT.'$</td>
+                
+               </tr>
+               ';
+
+               
+            }
+            $output .= '
+             
+        </table>
+
+        </div>
+
+        <hr>
+    
+        <div align="right" style="margin-botton:20px;">
+
+            <a href="'.base_url().'admin/paiement_normale" style="text-decoration: none; color: black;">signature:</a>
+      
+        </div>
+        <div align="center" style="
+
+         background-image: url('.base_url().'upload/tbl_info/'.$icone.'); background-repeat: no-repeat; background-size: 40%; background-position: center; height:100px;">
+        </div>
+        
+        ';
+
+
+      
+        return $output;
+    }
+
      // impression paiement entreprise
     function fetch_single_details_facture_entreprise($codeFacture)
     {
@@ -1648,6 +1843,12 @@ class crud_model extends CI_Model{
     {  
          $this->db->where("codeFacture", $codeFacture);  
          $this->db->update("paiement", $data);  
+    }
+
+    function update_depense_etat($iddepense, $data)  
+    {  
+         $this->db->where("iddepense", $iddepense);  
+         $this->db->update("depense", $data);  
     }
 
     function fetch_idv_candiat()
@@ -6558,10 +6759,43 @@ class crud_model extends CI_Model{
     }
 
     // pour le paiement 
+    function fetch_data_search_depense($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_depense");
+       
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('jour', $query);
+         $this->db->or_like('nomPer', $query);
+         $this->db->or_like('montant_nombre', $query);
+         $this->db->or_like('montant_lettre', $query);
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('telephone', $query);
+        }
+        return $this->db->get();
+    }
+
+    // pour le paiement 
     function fetch_data_limit_paiement($query)
     {
         $this->db->select("*");
         $this->db->from("profile_paiement");
+       
+        if($query != '')
+        {
+          $this->db->limit($query);
+        }
+        return $this->db->get();
+    }
+
+    function fetch_data_limit_depense($query)
+    {
+        $this->db->select("*");
+        $this->db->where("etat_validation", 1);
+        $this->db->from("profile_depense");
        
         if($query != '')
         {
@@ -6577,11 +6811,59 @@ class crud_model extends CI_Model{
         return $query;
     }
 
+    // pour le depense 
+    function fetch_data_depense_date($jour1, $jour2)
+    {
+        $query = $this->db->query("SELECT * FROM profile_depense WHERE jour BETWEEN '".$jour1."' AND '".$jour2."' AND etat_validation=1 ");
+        return $query;
+    }
+
     // pour la somme du paiement 
     function fetch_sum_data_paiement_date($jour1, $jour2)
     {
         $montant;
         $query = $this->db->query("SELECT SUM(montant) AS montant FROM profile_paiement WHERE date_paie BETWEEN '".$jour1."' AND '".$jour2."' ");
+        if ($query->num_rows() > 0) {
+          # code...
+
+          foreach ($query->result_array() as $key) {
+            # code...
+            $montant = $key['montant'];
+          }
+        }
+        else{
+          $montant = 0;
+        }
+
+        return $montant;
+    }
+
+    // pour la somme du paiement 
+    function fetch_sum_data_depense_date_valide($jour1, $jour2)
+    {
+        $montant;
+        $query = $this->db->query("SELECT SUM(montant_nombre) AS montant FROM profile_depense WHERE jour BETWEEN '".$jour1."' AND '".$jour2."' AND etat_validation=1 ");
+        if ($query->num_rows() > 0) {
+          # code...
+
+          foreach ($query->result_array() as $key) {
+            # code...
+            $montant = $key['montant'];
+          }
+        }
+        else{
+          $montant = 0;
+        }
+
+        return $montant;
+    }
+
+
+    // pour la somme du depense 
+    function fetch_sum_data_depense_date($jour1, $jour2)
+    {
+        $montant;
+        $query = $this->db->query("SELECT SUM(montant_nombre) AS montant FROM profile_depense WHERE jour BETWEEN '".$jour1."' AND '".$jour2."' AND etat_validation=1 ");
         if ($query->num_rows() > 0) {
           # code...
 
@@ -6632,6 +6914,38 @@ class crud_model extends CI_Model{
           foreach ($nom as $key) {
 
             $sexe = "jour:".nl2br(substr(date(DATE_RFC822, strtotime($key["date_paie"])), 0, 23));
+            $montant = $key["montant"];
+            $chart_data .= "{ indexLabel:'".$sexe."', y:".$montant."}, ";
+            
+          }
+
+          return $chart_data;
+
+    }
+
+    function get_stat_depense(){
+          $chart_data = '';
+          $montant;
+          $nom = $this->db->query("SELECT SUM(montant_nombre) AS montant,jour,type FROM profile_depense WHERE etat_validation=1 GROUP BY jour")->result_array();
+          foreach ($nom as $key) {
+
+            $sexe = "jour:".nl2br(substr(date(DATE_RFC822, strtotime($key["jour"])), 0, 23));
+            $montant = $key["montant"];
+            $chart_data .= "{ indexLabel:'".$sexe."', y:".$montant."}, ";
+            
+          }
+
+          return $chart_data;
+
+    }
+
+    function get_stat_depense_par_nature(){
+          $chart_data = '';
+          $montant;
+          $nom = $this->db->query("SELECT SUM(montant_nombre) AS montant,jour,type FROM profile_depense WHERE etat_validation=1 GROUP BY type")->result_array();
+          foreach ($nom as $key) {
+
+            $sexe = "jour:".nl2br(substr(date(DATE_RFC822, strtotime($key["jour"])), 0, 23))." ".$key['type'];
             $montant = $key["montant"];
             $chart_data .= "{ indexLabel:'".$sexe."', y:".$montant."}, ";
             
@@ -6792,6 +7106,418 @@ class crud_model extends CI_Model{
       
         return $output;
     }
+
+    // script pour information  des depenses 
+    function count_all_view_depense()
+    {
+
+      $this->db->limit(30);
+      $query = $this->db->get("profile_depense");
+      return $query->num_rows();
+    }
+
+    function fetch_details_view_depense($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_depense");
+      $this->db->order_by("iddepense","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($query->result() as $row)
+        {
+
+          if ($row->etat_validation == 0) {
+            # code...
+            $btn1 = '<div class="form-inline"><button type="button" name="update" iddepense="'.$row->iddepense.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>
+            &nbsp;&nbsp; 
+            <a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="text-primary print" ><i class="fa fa-print"></i> </a>
+            </div>
+            ';
+
+
+            $btn2 = '<button type="button" name="delete" iddepense="'.$row->iddepense.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>
+
+            ';  
+
+            $etat = '<span class="badge badge-danger"> Invalidée</span>';
+          }
+          else{
+
+            $btn1 = '<div class="form-inline">
+              <a href="javascript:void(0);" class="btn btn-success btn-sm print" ><i class="fa fa-eye"></i> </a>
+            
+            </div>
+            ';
+            $btn2 = '<a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="btn btn-primary btn-sm print" ><i class="fa fa-print"></i> </a>';
+            $etat = '<span class="badge badge-success"> Valide</span>';
+          }
+          
+
+          
+
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->iddepense.'" class="delete_checkbox">
+              '.$etat.'
+            </td>
+
+             <td>'.$row->nomPer.' </td>
+
+             <td>'.$row->type.'</td>
+
+             <td>'.$row->libelle.'</td>
+             <td>'.$row->montant_nombre.'$</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->jour)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          
+                          
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+      return $output;
+    }
+
+
+    /*
+      *script pour les operations depense
+      *==========================
+      *==========================
+      *depense
+      *=================================
+
+    */
+    // retour de nom de jours
+    function get_info_mois(){
+        $journee='';
+        $nom = $this->db->query("SELECT MONTHNAME(now()) AS jour");
+        foreach ($nom->result_array() as $key) {
+          $journee=$key['jour'];
+        }
+        return $journee;
+    }
+
+     // retour de nom de jours
+    function get_info_annee(){
+        $journee='';
+        $nom = $this->db->query("SELECT YEAR(now()) AS jour");
+        foreach ($nom->result_array() as $key) {
+          $journee=$key['jour'];
+        }
+        return $journee;
+    }
+
+    function insert_depense($data){
+        $this->db->insert('depense', $data);
+    }
+
+    function update_depense($iddepense, $data)  
+    {  
+         $this->db->where("iddepense", $iddepense);  
+         $this->db->update("depense", $data);  
+    }
+
+    function delete_depense($iddepense)  
+    {  
+         $this->db->where("iddepense", $iddepense);  
+         $this->db->delete("depense");  
+    }
+
+    function fetch_single_depense($iddepense)  
+    {  
+         $this->db->where("iddepense", $iddepense);  
+         $query=$this->db->get('profile_depense');  
+         return $query->result();  
+    }
+
+    // impression paiement de galerie
+    function fetch_single_details_listeDepense($jour1,$jour2)
+    {
+
+       $data = $this->db->query("SELECT * FROM profile_depense WHERE jour BETWEEN '".$jour1."' AND '".$jour2."' AND etat_validation=1 ");
+
+        $montantT = $this->fetch_sum_data_depense_date_valide($jour1, $jour2);
+       
+
+        $nom_site = '';
+        $icone    = '';
+        $email    = '';
+        $retour = "javascript:history.go(-1);";
+
+        $info = $this->db->get('tbl_info')->result_array();
+        foreach ($info as $key) {
+          $nom_site = $key['nom_site'];
+          $icone    = $key['icone'];
+          $email    = $key['email'];
+          
+        }
+
+        $output = '';
+        $nomf;
+        $created_at;
+        $nom;
+        $icone;
+
+         
+
+         $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br/>
+         <h3>
+            EVALUATION DE COMPTE LISTE  DU  ".nl2br(substr(date(DATE_RFC822, strtotime($jour1)), 0, 23))." AU 
+            ".nl2br(substr(date(DATE_RFC822, strtotime($jour2)), 0, 23))." AU SYSTEME ".$nom_site."
+         <h3>
+         ";
+
+         $output = '<div align="right">';
+         $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data" >';
+         $output .= '
+         <tr>
+          <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100"/></td>
+          <td width="50%" align="center">
+           <p><b>'.$message.' </b></p>
+           <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+           <hr>
+           
+          </td>
+
+          <td width="25%">
+          <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" />
+          </td>
+
+
+         </tr>
+         ';
+      
+        $output .= '</table>';
+
+        $output .= '</div>';
+
+        $output .= '
+            <div class="table-responsive">
+             
+             <br />
+             <table class="table table-bordered panier_table" width="100%" cellspacing="5" cellpadding="5"  id="user_data" border="0">
+              <tr>
+               <th width="5%">Nom complet</th>
+               <th width="20%">libellé</th>
+               <th width="20%">Motif</th>
+
+               <th width="5%">Montant en chiffre</th>
+               <th width="15%">Montant en lettre</th>
+               <th width="15%">livré par</th>
+
+               <th width="10%">Date</th>
+               
+              </tr>
+
+          ';
+
+            foreach($data->result_array() as $items)
+            {
+              $nomPer = $items["nomPer"];
+              $libelle   = $items["libelle"];
+              $motif   = $items["motif"];
+              $comptable   = $items["first_name"]." ".$items["last_name"];
+              $montant_nombre   = $items["montant_nombre"];
+              $montant_lettre   = $items["montant_lettre"];
+              $montantT;
+              $montantRestant;
+
+              $montant_a_payer = 30;
+
+
+           
+            // $montantRestant =  $montant_a_payer - $montantT;
+            $retour = "javascript:history.go(-1);";
+
+
+
+              $nom_complet = $items["first_name"].' '.$items["last_name"];
+               $output .= '
+               <tr>
+                <td>'.$nomPer.'</td>
+                <td>'.$libelle.'</td>
+                <td>'.$motif.'</td>
+                <td>'.$montant_nombre.'$</td>
+                <td>'.$montant_lettre.'</td>
+                <td>'.$comptable.'</td>
+                
+                <td width="15%">'.nl2br(substr(date(DATE_RFC822, strtotime($items["jour"])), 0, 23)).'</td>
+
+               </tr>
+               ';
+
+               $output .= '
+               <tr>
+                <td colspan="6">
+                  <div align="right">Total montant payé</div>
+                </td> 
+                <td >'.$montantT.'$</td>
+                
+               </tr>
+               ';
+
+               
+            }
+            $output .= '
+             
+        </table>
+
+        </div>
+
+        <hr>
+    
+        <div align="right" style="margin-botton:20px;">
+
+            <a href="'.$retour.'" style="text-decoration: none; color: black;">signature:</a>
+      
+        </div>
+        <div align="center" style="
+
+         background-image: url('.base_url().'upload/tbl_info/'.$icone.'); background-repeat: no-repeat; background-size: 40%; background-position: center; height:100px;">
+        </div>
+        
+        ';
+
+       
+
+      
+        return $output;
+    }
+
+
+
+    // fin operation categorie
+
 
 
 

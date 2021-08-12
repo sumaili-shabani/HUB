@@ -3,63 +3,69 @@
 defined('BASEPATH') OR exit('No direct script access allowed');  
 class comptable extends CI_Controller
 {
-	private $token;
-	private $connected;
-	public function __construct()
-	{
-	  parent::__construct();
-	  if(!$this->session->userdata('comptable_login'))
-	  {
-	      	redirect(base_url().'login');
-	  }
-	  $this->load->library('form_validation');
-	  $this->load->library('encryption');
-      // $this->load->library('pdf');
-	  $this->load->model('crud_model'); 
+  	private $token;
+  	private $connected;
+  	public function __construct()
+  	{
+  	  parent::__construct();
+  	  if(!$this->session->userdata('comptable_login'))
+  	  {
+  	      	redirect(base_url().'login');
+  	  }
+  	  $this->load->library('form_validation');
+  	  $this->load->library('encryption');
+        // $this->load->library('pdf');
+  	  $this->load->model('crud_model'); 
 
-	  $this->load->helper('url');
+  	  $this->load->helper('url');
 
-	  $this->token = "sk_test_51GzffmHcKfZ3B3C9DATC3YXIdad2ummtHcNgVK4E5ksCLbFWWLYAyXHRtVzjt8RGeejvUb6Z2yUk740hBAviBSyP00mwxmNmP1";
-	  $this->connected = $this->session->userdata('comptable_login');
+  	  $this->token = "sk_test_51GzffmHcKfZ3B3C9DATC3YXIdad2ummtHcNgVK4E5ksCLbFWWLYAyXHRtVzjt8RGeejvUb6Z2yUk740hBAviBSyP00mwxmNmP1";
+  	  $this->connected = $this->session->userdata('comptable_login');
 
-	  /*
-	  je script pour les galeries du contrat d'expiration
-	
-		// $this->crud_model->show_galery_expire();
-		$this->crud_model->show_galery_expire();
-	  */
-
-
-
-	}
-
-	function index(){
-		$data['title']="mon profile entreprise";
-		$this->load->view('backend/comptable/templete_admin', $data);
-  		// $this->load->view('backend/comptable/templete_admin', $data);
-	}
-
-	
-
-	function dashbord(){
-		   $data['title']="Tableau de bord";
-	     
-	      $data['nombre_paie'] = $this->crud_model->statistiques_nombre("profile_paiement");
-
-        $data['nombre_paie_padding'] = $this->crud_model->statistiques_nombre("profile_paiement_padding");
-
-	      $data['nombre_coach'] = $this->crud_model->statistiques_nombre_tag_by_column("users", 2);
-        $data['nombre_comptable'] = $this->crud_model->statistiques_nombre_tag_by_column("users", 4);
-
-	      $data['nombre_paiement'] = $this->crud_model->statistiques_nombre("paiement");
-
-	      $data['nombre_users'] = $this->crud_model->statistiques_nombre("users");
-        $data['chart_data'] = $this->crud_model->get_stat_paie();
-	      $this->load->view('backend/comptable/dashbord', $data);
-	}
+  	  /*
+  	  je script pour les galeries du contrat d'expiration
+  	
+  		// $this->crud_model->show_galery_expire();
+  		$this->crud_model->show_galery_expire();
+  	  */
 
 
-  /*
+
+  	}
+
+  	function index(){
+  		$data['title']="mon profile entreprise";
+  		$this->load->view('backend/comptable/templete_admin', $data);
+    		// $this->load->view('backend/comptable/templete_admin', $data);
+  	}
+
+  	function dashbord(){
+  		   $data['title']="Tableau de bord";
+  	     
+  	      $data['nombre_paie'] = $this->crud_model->statistiques_nombre("profile_paiement");
+
+          $data['nombre_paie_padding'] = $this->crud_model->statistiques_nombre("profile_paiement_padding");
+
+  	      $data['nombre_coach'] = $this->crud_model->statistiques_nombre_tag_by_column("users", 2);
+          $data['nombre_comptable'] = $this->crud_model->statistiques_nombre_tag_by_column("users", 4);
+
+  	      $data['nombre_paiement'] = $this->crud_model->statistiques_nombre("paiement");
+
+  	      $data['nombre_users'] = $this->crud_model->statistiques_nombre("users");
+          $data['chart_data'] = $this->crud_model->get_stat_paie();
+  	      $this->load->view('backend/comptable/dashbord', $data);
+  	}
+
+
+
+    function operation(){
+      $data['title']="Opération de gestion";
+      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+      $this->load->view('backend/comptable/operation', $data);
+    }
+
+
+    /*
 
       FIN DEBIT FONCTION APPEL DES VIEWS UTILISATION DE PORTALI HUB
       MES SCRIPTS HUB COMMENCE DEJE
@@ -127,6 +133,63 @@ class comptable extends CI_Controller
         $data['chart_data'] = $this->crud_model->get_stat_paie();
         $this->load->view('backend/comptable/evaluation_paiement', $data);
 	  }
+
+    function show_depense(){
+      $data['title']="Evaluation de compte";
+      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+      $data['Hommes']   = $this->crud_model->fetch_membre_apprenant_inscrit();
+
+        $data['dates']    = $this->crud_model->fetch_categores_dates_compt();
+        $data['chart_data'] = $this->crud_model->get_stat_depense();
+        $this->load->view('backend/comptable/show_depense', $data);
+    }
+
+    function stat_depense(){
+      $data['title']  ="Evaluation de compte";
+      $data['users']  = $this->crud_model->fetch_connected($this->connected);
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+      $data['Hommes']   = $this->crud_model->fetch_membre_apprenant_inscrit();
+
+        $data['dates']    = $this->crud_model->fetch_categores_dates_compt();
+        $data['chart_data'] = $this->crud_model->get_stat_depense();
+        $data['chart_data2'] = $this->crud_model->get_stat_depense_par_nature();
+        $this->load->view('backend/comptable/stat_depense', $data);
+    }
+
+    function caisse(){
+      $data['title']  ="Evaluation de compte";
+      $data['users']  = $this->crud_model->fetch_connected($this->connected);
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+      $data['Hommes']   = $this->crud_model->fetch_membre_apprenant_inscrit();
+
+      $data['dates']    = $this->crud_model->fetch_categores_dates_compt();
+      $data['chart_data'] = $this->crud_model->get_stat_depense();
+      $data['chart_data2'] = $this->crud_model->get_stat_depense_par_nature();
+
+      $data['m_entree'] = $this->crud_model->statistiques_somme_montant("profile_depense","entree");
+      $data['m_sortie'] = $this->crud_model->statistiques_somme_montant("profile_depense","sortie");
+
+      $data['m_paiement'] = $this->crud_model->statistiques_somme_paiement("paiement");
+      // entree
+      $n1 = $this->crud_model->statistiques_somme_montant("profile_depense","entree");
+      $n2 = $this->crud_model->statistiques_somme_paiement("paiement");
+      // sortie 
+      $reste = $this->crud_model->statistiques_somme_montant("profile_depense","sortie");
+
+      // resultat
+      $entree =$n1+$n2;
+      $resultat = $entree -$reste;
+
+      $data['entree'] = $entree;
+      $data['m_resultat'] = $resultat;
+
+
+      $this->load->view('backend/comptable/caisse', $data);
+    }
 
     function paiement_pading($param1=''){
     	$data['title']="Les transactions de paiement!";
@@ -976,6 +1039,23 @@ class comptable extends CI_Controller
        $this->pdf->loadHtml($html_content);
        $this->pdf->render();
        $this->pdf->stream("paiement reçu_".$customer_id.".pdf", array("Attachment"=>0));
+    }
+
+    function pdfimpression($param1=''){
+       $customer_id = "Evaluation de Compte paiement facture ".$param1;
+       $html_content = '';
+       $html_content .= $this->crud_model->fetch_single_details_facture_depense($param1);
+
+       $dataUpdate = array(
+        'etat_validation' =>  1
+       );
+       $cool = $this->crud_model->update_depense_etat($param1, $dataUpdate);
+
+       // echo($html_content);
+       $this->load->library('pdf');
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("Evaluation dépense  reçu_".$customer_id.".pdf", array("Attachment"=>0));
     }
 
 
@@ -2186,6 +2266,753 @@ class comptable extends CI_Controller
          }  
          echo json_encode($output);  
   }
+
+  /*
+  *script pour les operations depense
+  *==========================
+  *==========================
+  *depense
+  *=================================
+
+  */
+
+  function operation_depense(){
+
+        $month = $this->crud_model->get_info_mois();
+        $year = $this->crud_model->get_info_annee();
+        $insert_data = array( 
+             'type'                 =>     $this->input->post('type'), 
+             'nomPer'               =>     $this->input->post('nomPer'), 
+             'libelle'              =>     $this->input->post('libelle'), 
+             'motif'                =>     $this->input->post('motif'),   
+             'jour'                 =>     $this->input->post('jour'), 
+             'montant_lettre'       =>     $this->input->post('montant_lettre'), 
+             'montant_nombre'       =>     $this->input->post('montant_nombre'), 
+             'mois'                 =>     $month, 
+             'annee'                =>     $year, 
+             'id_user'              =>     $this->connected 
+        );  
+         
+        $requete=$this->crud_model->insert_depense($insert_data);
+        echo("Enregistrement avec succès");
+
+  }
+
+  function modification_depense()  
+  {  
+         
+         $month = $this->crud_model->get_info_mois();
+         $year  = $this->crud_model->get_info_annee();
+         $updated_data = array(  
+             'type'                 =>     $this->input->post('type'), 
+             'nomPer'               =>     $this->input->post('nomPer'), 
+             'libelle'              =>     $this->input->post('libelle'), 
+             'motif'                =>     $this->input->post('motif'),   
+             'jour'                 =>     $this->input->post('jour'), 
+             'montant_lettre'       =>     $this->input->post('montant_lettre'), 
+             'montant_nombre'       =>     $this->input->post('montant_nombre'), 
+             'mois'                 =>     $month, 
+             'annee'                =>     $year
+         );   
+
+        $this->crud_model->update_depense($this->input->post("iddepense"), $updated_data);
+        echo("information mise à jour avec succès"); 
+  }
+
+  function suppression_depense()  
+  {  
+        $this->crud_model->delete_depense($this->input->post("iddepense"));      
+         echo("suppression avec succès");  
+  }  
+
+
+  function fetch_single_depense()  
+  {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_depense($this->input->post("iddepense"));  
+         foreach($data as $row)  
+         {  
+              $output['type']   = $row->type; 
+              $output['nomPer']   = $row->nomPer;
+              $output['libelle']   = $row->libelle;
+              $output['motif']   = $row->motif;
+              $output['jour']   = $row->jour;
+              $output['montant_lettre']   = $row->montant_lettre;
+              $output['montant_nombre']   = $row->montant_nombre;
+              $output['mois']   = $row->mois;
+              $output['annee']   = $row->annee;
+
+              $output['first_name']   = $row->first_name;
+              $output['last_name']   = $row->last_name;
+              $output['telephone']   = $row->telephone;
+
+              $output['created_at']   =nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));
+         }  
+         echo json_encode($output);  
+  }  
+
+  function pagination_view_depense()
+  {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_view_depense();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="nav pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_details_view_depense($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+
+  function fetch_search_view_depense()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('query'))
+    {
+     $query = $this->input->post('query');
+    }
+    $data = $this->crud_model->fetch_data_search_depense($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          if ($row->etat_validation == 0) {
+            # code...
+            $btn1 = '<div class="form-inline"><button type="button" name="update" iddepense="'.$row->iddepense.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>
+            &nbsp;&nbsp; 
+            <a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="text-primary print" ><i class="fa fa-print"></i> </a>
+            </div>
+            ';
+
+
+            $btn2 = '<button type="button" name="delete" iddepense="'.$row->iddepense.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>
+
+            ';  
+
+            $etat = '<span class="badge badge-danger"> Invalidée</span>';
+          }
+          else{
+
+            $btn1 = '<div class="form-inline">
+              <a href="javascript:void(0);" class="btn btn-success btn-sm print" ><i class="fa fa-eye"></i> </a>
+            
+            </div>
+            ';
+            $btn2 = '<a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="btn btn-primary btn-sm print" ><i class="fa fa-print"></i> </a>';
+            $etat = '<span class="badge badge-success"> Valide</span>';
+          }
+          
+
+          
+
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->iddepense.'" class="delete_checkbox">
+              '.$etat.'
+            </td>
+
+             <td>'.$row->nomPer.' </td>
+
+             <td>'.$row->type.'</td>
+
+             <td>'.$row->libelle.'</td>
+             <td>'.$row->montant_nombre.'$</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->jour)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          
+                          
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+  function fetch_limit_view_depense()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('limit'))
+    {
+     $query = $this->input->post('limit');
+    }
+    $data = $this->crud_model->fetch_data_limit_depense($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          if ($row->etat_validation == 0) {
+            # code...
+            $btn1 = '<div class="form-inline"><button type="button" name="update" iddepense="'.$row->iddepense.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>
+            &nbsp;&nbsp; 
+            <a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="text-primary print" ><i class="fa fa-print"></i> </a>
+            </div>
+            ';
+
+
+            $btn2 = '<button type="button" name="delete" iddepense="'.$row->iddepense.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>
+
+            ';  
+
+            $etat = '<span class="badge badge-danger"> Invalidée</span>';
+          }
+          else{
+
+            $btn1 = '<div class="form-inline">
+              <a href="javascript:void(0);" class="btn btn-success btn-sm print" ><i class="fa fa-eye"></i> </a>
+            
+            </div>
+            ';
+            $btn2 = '<a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="btn btn-primary btn-sm print" ><i class="fa fa-print"></i> </a>';
+            $etat = '<span class="badge badge-success"> Valide</span>';
+          }
+          
+
+          
+
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->iddepense.'" class="delete_checkbox">
+              '.$etat.'
+            </td>
+
+             <td>'.$row->nomPer.' </td>
+
+             <td>'.$row->type.'</td>
+
+             <td>'.$row->libelle.'</td>
+             <td>'.$row->montant_nombre.'$</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->jour)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          
+                          
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+
+  // filtrage de piement par date 
+  function fetch_datebetwine_depense_filtre()
+  {
+    $output = '';
+    $query = '';
+    $total;
+    $jour1 =$this->input->post('jour1');
+    $jour2 =$this->input->post('jour2');
+    if($jour1 > $jour2)
+    {
+     $data = $this->crud_model->fetch_data_depense_date($jour2, $jour1);
+     $total = $this->crud_model->fetch_sum_data_depense_date($jour2, $jour1);
+    }
+    else{
+      $data = $this->crud_model->fetch_data_depense_date($jour1, $jour2);
+      $total = $this->crud_model->fetch_sum_data_depense_date($jour1, $jour2);
+    }
+    
+    $output .= '
+      <a class="btn btn-outline-warning pull-right mt-2 mb-2" 
+      href="'.base_url().'comptable/pdf_liste_facture_depense/'.$jour1.'/'.$jour2.' "><i class="fa fa-print mr-1"></i> PDF</a>
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+           <thead>
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+         </thead>
+         <tbody id="example-tbody">
+      ';
+       if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          if ($row->etat_validation == 0) {
+            # code...
+            $btn1 = '<div class="form-inline"><button type="button" name="update" iddepense="'.$row->iddepense.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>
+            &nbsp;&nbsp; 
+            <a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="text-primary print" ><i class="fa fa-print"></i> </a>
+            </div>
+            ';
+
+
+            $btn2 = '<button type="button" name="delete" iddepense="'.$row->iddepense.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>
+
+            ';  
+
+            $etat = '<span class="badge badge-danger"> Invalidée</span>';
+          }
+          else{
+
+            $btn1 = '<div class="form-inline">
+              <a href="javascript:void(0);" class="btn btn-success btn-sm print" ><i class="fa fa-eye"></i> </a>
+            
+            </div>
+            ';
+            $btn2 = '<a href="'.base_url().'comptable/pdfimpression/'.$row->iddepense.'" class="btn btn-primary btn-sm print" ><i class="fa fa-print"></i> </a>';
+            $etat = '<span class="badge badge-success"> Valide</span>';
+          }
+          
+
+          
+
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+              <input type="checkbox" name="delete_checkbox" value="'.$row->iddepense.'" class="delete_checkbox">
+              '.$etat.'
+            </td>
+
+             <td>'.$row->nomPer.' </td>
+
+             <td>'.$row->type.'</td>
+
+             <td>'.$row->libelle.'</td>
+             <td>'.$row->montant_nombre.'$</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->jour)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                            <div class="col-md-12">
+                            '.$row->first_name.'
+                            '.$row->last_name.'
+                          </div>
+                          
+                          
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+
+      $output .='
+      <tr>
+        <td colspan="8">Montant total </td>
+        <td><h4>'.$total.'$</h4></td>
+        
+      </tr>
+      
+      ';
+
+
+      $output .= '
+          </tbody>
+        <tfoot role="row" class="odd">
+            <tr>
+              <td>
+                Etat de l\'opération
+              </td>
+
+              <td>
+                Profile complet de l\'opérationnel
+
+              </td>
+              <td>
+               Type
+              </td>
+              
+              <td>
+                Libellé
+              </td>
+              <td>
+                Montant
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+               Action
+              </td>
+
+              <td>
+                Imprimmer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>     
+            
+        </table>';
+    echo $output;
+  }
+
+   function pdf_liste_facture_depense($jour1='', $jour2=''){
+       $customer_id = "Liste de paiement et évaluation de compte du ".$jour1." au ".$jour2;
+       $html_content = '';
+      
+       if ($jour1 > $jour2) {
+         # code...
+        $html_content .= $this->crud_model->fetch_single_details_listeDepense($jour2, $jour1);
+
+       }
+       else{
+        $html_content .= $this->crud_model->fetch_single_details_listeDepense($jour1, $jour2);
+
+       }
+
+       // echo($html_content);
+       $this->load->library('pdf');
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("".$customer_id.".pdf", array("Attachment"=>0));
+    }
+
+
+
+  // fin de script categorie
 
 
 

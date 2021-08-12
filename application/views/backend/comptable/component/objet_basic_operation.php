@@ -1,5 +1,5 @@
 <div class="col-md-12">
-  <div class="row mb-2">
+	<div class="row mb-2">
       <div class="col-md-4">
             <button class="btn btn-hub btn-md  pull-left mt-2  mb-4" id="add_button" data-toggle="modal" data-target="#userModal"><i class="fa fa-plus"></i>Effectuer l'opération</button>
       </div>
@@ -29,20 +29,20 @@
     </div>
 
     <div class="table-responsive" id="country_table" style="margin-top: 10px;">
-                                
+		                            
     </div>
 
-    <div class="col-md-12 mb-2">
-      <div class="row">
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-          <nav class="pagination" id="pagination_link">
-        
-          </nav>
-        </div>
-        <div class="col-md-4"></div>
-      </div>
-    </div>
+  	<div class="col-md-12 mb-2">
+  	  <div class="row">
+  	    <div class="col-md-4"></div>
+  	    <div class="col-md-4">
+  	      <nav class="pagination" id="pagination_link">
+  	    
+  	      </nav>
+  	    </div>
+  	    <div class="col-md-4"></div>
+  	  </div>
+  	</div>
 
 
 </div>

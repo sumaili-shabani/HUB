@@ -27,30 +27,28 @@
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-           <!--  <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
-                    <span>Composants</span>
+                    <span>Evaluation de compte</span>
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Applications:</h6>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/profile_entrep">Profile comptable</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/galery">Galerie</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/paiement">paiement</a>
+                        <h6 class="collapse-header">Mouvement de compte:</h6>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/operation">Mouvement de gestion</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/show_depense">Evaluation de dépenses</a>
+                       
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/stat_depense">Stat sur dépenses</a>
+
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/caisse">Etat de la caisse</a>
                         
-                        <div class="dropdown-divider"></div>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/canavas">Link Canavas</a>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/swot">swot</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/newprojet">Nouveau projet</a>
                        
                     </div>
                 </div>
-            </li> -->
+            </li>
 
 
             <!-- Nav Item - Charts -->

@@ -30,6 +30,7 @@
 													<a href="" class="btn btn-outline-warning"><i class="fa fa-refresh"></i></a>
 													
 												</div>
+												
 											</div>	
 										</div>
 										<div class="col-md-2"></div>
@@ -62,7 +63,7 @@
 													<div class="col-md-12 mb-2">
 														<div class="card">
 															<div class="card-header bg-hub text-white text-center">
-																Statistiques de paiement par rapport aux dates
+																Statistique des activité par rapport à la nature de mouvement
 															</div>
 															<div class="card-body">
 																<div id="chartContainer" style="height: 200px; width: 100%;"></div>
@@ -79,7 +80,7 @@
 													<div class="col-md-12 mb-2">
 														<div class="card">
 															<div class="card-header bg-hub text-white text-center">
-																Statistiques de paiement par rapport aux dates
+																Statistique des activité par rapport à la nature de mouvement
 															</div>
 															<div class="card-body">
 																<div id="chartContainer2" style="height: 200px; width: 100%;"></div>
