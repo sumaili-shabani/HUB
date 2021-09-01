@@ -5,6 +5,10 @@ class user extends CI_Controller
 {
   private $token;
   private $connected;
+  protected $email_sites;
+  protected $logos_sites;
+  protected $num_dev;
+  protected $token_sms;
   public function __construct()
   {
     parent::__construct();
@@ -22,6 +26,13 @@ class user extends CI_Controller
     $this->token = "sk_test_51GzffmHcKfZ3B3C9DATC3YXIdad2ummtHcNgVK4E5ksCLbFWWLYAyXHRtVzjt8RGeejvUb6Z2yUk740hBAviBSyP00mwxmNmP1";
     $this->connected = $this->session->userdata('id');
 
+    $this->email_sites = $this->crud_model->get_email_du_site();
+    $this->logos_sites = $this->crud_model->get_logo_du_site();
+
+    // pour les envoies des sms 
+    $this->num_dev  = $this->crud_model->get_info_du_site("tel3");
+    $this->token_sms  = $this->crud_model->get_info_du_site("token_sms");
+
     /*
     je script pour les galeries du contrat d'expiration
   
@@ -37,6 +48,31 @@ class user extends CI_Controller
     $data['title']="mon profile entreprise";
     $this->load->view('backend/user/templete_admin', $data);
       // $this->load->view('backend/user/templete_admin', $data);
+  }
+
+  function module(){
+    $data['title']="Ajout de module";
+    $data['users'] = $this->crud_model->fetch_connected($this->connected);
+    $this->load->view('backend/user/module', $data);
+  }
+
+  function sms(){
+    $data['title']="Paramètrage de l'inscription aux formations";
+    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+    $data['formations']     = $this->crud_model->Select_formations_ok("idf","profile_inscription");
+    $data['annees']     = $this->crud_model->Select_formations_ok("annee","profile_inscription");
+
+    $data['formateurs']   = $this->crud_model->statistiques_nombre_tag_by_column("users", 2);
+
+    $data['entreprises']  = $this->crud_model->statistiques_nombre_tag_by_column("users", 3);
+
+    $data['admins']     = $this->crud_model->statistiques_nombre_tag_by_column("users", 1);
+    $data['comptables']   = $this->crud_model->statistiques_nombre_tag_by_column("users", 4);
+
+    $data['roles']      = $this->crud_model->Select_formations_ok("idrole","role");
+
+
+    $this->load->view('backend/user/sms', $data);
   }
 
 
@@ -2034,6 +2070,990 @@ class user extends CI_Controller
          }  
          echo json_encode($output);  
   }
+
+
+  /*
+  *script pour les operations module
+  *==========================
+  *==========================
+  *module
+  *=================================
+
+  */
+
+  function operation_module(){
+
+        $month = $this->crud_model->get_info_mois();
+        $year = $this->crud_model->get_info_annee();
+
+        $code = rand().'-'.$year;
+
+        $data['annee']      = $year;
+        $data['code']       = $code;
+        $data['id_user']    = $this->connected;
+        $data['titre']      = $this->input->post('titre');
+        $data['description']  = $this->input->post('description');
+
+      if($_FILES["user_image"]["size"] > 0)  
+      {  
+            $data['logoImage'] =     $this->upload_image_module();      
+      }
+      else{
+          $data['logoImage'] = "livre.jpg";
+      } 
+
+      if($_FILES["user_image2"]["size"] > 0)  
+      {  
+            $data['fichier'] =     $this->upload_image_module_fichier();     
+      }
+      else{
+        $data['fichier'] = "";
+      } 
+         
+        $requete=$this->crud_model->insert_module($data);
+
+        if ($requete > 0) {
+
+          $users_cool = $this->crud_model->get_info_user();
+            foreach ($users_cool as $key) {
+
+                if ($key['idrole'] == 3) {
+                 
+                  $id_user_recever = $key['id'];
+                  # code...
+              $url    ="entreprise/module/". $code;
+                $nom    = $this->crud_model->get_name_user($this->connected);
+
+                $message ="Bonjour!  ".$nom." vient d'ajouter un module ".$this->input->post('titre');
+
+
+                $notification = array(
+                  'titre'     =>    "Vous avez peut être raté un module",
+                  'icone'     =>    "fa fa-book",
+                  'message'   =>     $message,
+                  'url'       =>     $url,
+                  'id_user'   =>     $id_user_recever
+                );
+                
+                $not = $this->crud_model->insert_notification($notification);
+
+              }
+
+              
+              
+                # code...
+            }
+
+          echo("Enregistrement avec succès");
+            
+        }
+
+
+
+  }
+
+  function modification_module()  
+  {  
+         
+        $month = $this->crud_model->get_info_mois();
+        $year = $this->crud_model->get_info_annee();
+
+        
+        // $data['id_user']    = $this->connected;
+        $data['titre']      = $this->input->post('titre');
+        $data['description']  = $this->input->post('description');
+
+      if($_FILES["user_image"]["size"] > 0)  
+      {  
+            $data['logoImage'] =     $this->upload_image_module();      
+      }
+      
+      if($_FILES["user_image2"]["size"] > 0)  
+      {  
+            $data['fichier'] =     $this->upload_image_module_fichier();     
+      }
+     
+
+        $this->crud_model->update_module($this->input->post("idmodule"), $data);
+        echo("information mise à jour avec succès"); 
+  }
+
+  function suppression_module()  
+  {  
+        $this->crud_model->delete_module($this->input->post("idmodule"));      
+         echo("suppression avec succès");  
+  }  
+
+
+  function fetch_single_module()  
+  {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_module($this->input->post("idmodule"));  
+         foreach($data as $row)  
+         {  
+              $output['titre']      = $row->titre;
+            $output['description']  = $row->description;
+
+            $output['first_name']       = $row->first_name;
+            $output['last_name']      = $row->last_name;
+
+              $output['created_at']   =nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));
+              if($row->logoImage != '')  
+            {  
+                   $output['user_image'] = '<img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->logoImage.'" />';  
+            }  
+            else  
+            {  
+                   $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+            }  
+         }  
+         echo json_encode($output);  
+  }  
+
+
+   // module
+
+    function pagination_view_module()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_view_module_user($this->connected);
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="nav pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_details_view_module_ok_user($config["per_page"], $start, $this->connected)
+    );
+    echo json_encode($output);
+  }
+
+
+  function fetch_search_view_module()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('query'))
+    {
+     $query = $this->input->post('query');
+    }
+    $data = $this->crud_model->fetch_data_search_module_user_tag($query, $this->connected);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+                Action
+              </td>
+
+              <td>
+                Modele
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+          if ($row->id_user == $this->connected) {
+            # code...
+             $btn1 = '<button type="button" name="update" idmodule="'.$row->idmodule.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+             $btn2 = '<button type="button" name="delete" idmodule="'.$row->idmodule.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>'; 
+          }
+          else{
+
+            $btn1 = '<button type="button" name="delete" idmodule="'.$row->idmodule.'" class="btn btn-success btn-sm"><i class="fa fa-eye"></i></button>'; 
+            $btn2 = '<a download="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'"  idmodule="'.$row->idmodule.'" class="btn btn-primary btn-sm"><i class="fa fa-download"></i></a>';
+
+          }
+          
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+  function fetch_limit_view_module()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('limit'))
+    {
+     $query = $this->input->post('limit');
+    }
+    $data = $this->crud_model->fetch_data_limit_module($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+              
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<a download="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'"  idmodule="'.$row->idmodule.'" class="btn btn-primary btn-sm"><i class="fa fa-download"></i></a>';
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+            
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+  function upload_image_module()  
+  {  
+       if(isset($_FILES["user_image"]))  
+       {  
+            $extension = explode('.', $_FILES['user_image']['name']);  
+            $new_name = rand() . '.' . $extension[1];  
+            $destination = './upload/module/cours/image/' . $new_name;  
+            move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+            return $new_name;  
+       }  
+  }
+
+  function upload_image_module_fichier()  
+  {  
+       if(isset($_FILES["user_image2"]))  
+       {  
+            $extension = explode('.', $_FILES['user_image2']['name']);  
+            $new_name = rand() . '.' . $extension[1];  
+            $destination = './upload/module/cours/fichier/' . $new_name;  
+            move_uploaded_file($_FILES['user_image2']['tmp_name'], $destination);  
+            return $new_name;  
+       }  
+  }
+
+
+
+  /*
+  // script pour les sms 
+  /*====================
+  *
+  */
+   function infomation_telephone()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+
+              $website = $this->email_sites;
+                $to =$id[$count];
+                $message = htmlentities($this->input->post('message'));
+                $num_dev = $this->num_dev;
+                $token_sms = $this->token_sms;
+
+                // echo("tél:".$to." message:".$message." num_dev:".$num_dev." 
+                //  token:".$token_sms);
+
+                $this->envoieSMS($to, $message, $num_dev, $token_sms);
+
+           }
+
+        }
+    }
+    // fin contact
+
+    function envoieSMS($tel, $message, $num_dev,$token)
+    {
+        $etat = false;
+        try {
+            //form's fields name:
+            $value = '{
+              "outboundSMSMessageRequest":{
+                  "address": "tel:' . $tel . '", 
+                  "senderAddress":"tel:'.$num_dev.'", 
+                  "outboundSMSTextMessage":{ 
+                      "message": "' .$message. '" 
+                  } 
+              }
+          }';
+            //API url:
+            $url = 'https://api.orange.com/smsmessaging/v1/outbound/tel:'.$num_dev.'/requests';
+            //JSON data(not exact, but will be compiled to JSON) file: 
+            // use key 'http' even if you send the request to https://...
+            $options = array(
+                'http' => array(
+                    'header'  => "Content-Type: application/json\r\n" .
+                        "Authorization:Bearer ".$token."\r\n",
+                    'method'  => 'POST',
+                    'content' => $value
+                )
+            );
+            //engine:
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            $etat = false;
+            if ($result === FALSE) { /* Handle error */
+                $etat = false;
+            } else {
+                $etat = true;
+
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage();
+        }
+
+        if ($etat) {
+                  # code...
+          $data = array(
+            'tel'   => $tel,
+            'message'   => $message,
+            'etat'  =>  'ok'
+          );
+          $query = $this->crud_model->insert_message_sender($data);
+          echo("📞 ".$tel." envoyé 🆗");
+        }
+        else{
+
+          $data = array(
+            'tel'   => $tel,
+            'message'   => $message,
+            'etat'  =>  'faux'
+          );
+          $query = $this->crud_model->insert_message_sender($data);
+          echo(" échec !!!!");
+        }
+       
+        // return $etat;
+    }
+
+    function supression_message_sender(){
+
+        $this->crud_model->delete_message_sender($this->input->post("idsms"));
+        echo("suppression avec succès");
+      
+  }
+
+  function renvoie_message_sender(){
+
+       $data = $this->crud_model->fetch_single_message_sender($this->input->post('idsms')); 
+       $idsms = $this->input->post('idsms'); 
+         foreach($data as $row)  
+         {  
+              $to = $row->tel; 
+              $message = $row->message; 
+              $etat = $row->etat;
+
+                $num_dev = $this->num_dev;
+                $token_sms = $this->token_sms;
+
+                // echo("tél:".$to." message:".$message." num_dev:".$num_dev." 
+                //  token:".$token_sms);
+
+                if ($message !='') {
+                  # code...
+                  $this->envoieSMS($to, $message, $num_dev, $token_sms);
+                  $data = array(
+                    'tel'   => $to,
+                    'message'   => $message,
+                    'etat'  =>  'ok'
+                  );
+                  $query = $this->crud_model->update_message_sender($idsms, $data);
+              
+                }
+
+
+         }  
+         
+      
+  }
+
+    // pagination sms sender 
+    function pagination_message_sender()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_message_sender();
+    $config["per_page"] = 5;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detailsmessage_sender($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_message_sender()
+   {
+    $output = '';
+    $query = '';
+
+    if($this->input->post('query'))
+    {
+     $query = $this->input->post('query');
+    }
+    $data = $this->crud_model->fetch_data_sms_sender($query);
+     $output .= '
+   
+      <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+       <theader>
+         <tr>
+          <th width="5%">Avatar</th>
+          <th width="15%">Télephone</th>
+          <th width="10%">Etat</th>
+          <th width="40%">Message</th>
+          <th width="20%">Mise à jour</th>
+          <th width="5%">Renvoyer</th>
+          <th width="5%">Supprimer</th>
+         </tr>
+       <theader>
+       <tbody>
+      ';
+
+      if ($data->num_rows() <= 0) {
+        # code...
+      }
+      else{
+
+        foreach($data->result() as $row)
+        {
+
+            if ($row->etat == "ok") {
+              $etat ='<span class="badge badge-success"><i class="fa fa-check"></i> bien envoyé</span>';
+            }
+            else if ($row->etat == "faux") {
+              $etat ='<span class="badge badge-danger"><i class="fa fa-close"></i> échec d\'envoie</span>';
+            }
+            else{
+              $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+            }
+
+            $link = '<a href="tel:'.$row->tel.'" class="text-primary"><i class="fa fa-phone"></i></a>';
+
+
+            $btn1 = '<button type="button" name="delete" idsms="'.$row->idsms.'" class="btn btn-hub btn-circle btn-sm renvoyer"><i class="fa fa-send"></i></button>';
+
+            $btn2 = '<button type="button" name="delete" idsms="'.$row->idsms.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>';
+             $output .= '
+             <tr>
+              <td>'.$link.'</td>
+               <td>'.$row->tel.'</td>
+              <td>'.$etat.'</td>
+              <td>'.substr($row->message, 0,40).'...</td>
+              <td>'.substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23).'</td>
+              <td>'.$btn1.'</td>
+              <td>'.$btn2.'</td>
+             </tr>
+             ';
+
+        }
+
+      }
+        
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Avatar</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Etat</th>
+              <th width="40%">Message</th>
+              <th width="20%">Mise à jour</th>
+              <th width="5%">Renvoyer</th>
+              <th width="5%">Supprimer</th>
+             </tr>
+           <tfooter>
+        </table>';
+      echo $output;
+  }
+
+  // pour les personnes 
+
+  // pagination user to sms 
+    function pagination_message_users()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_message_users();
+    $config["per_page"] = 10;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination pagination2">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detailsmessage_users($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_message_users()
+   {
+    $output = '';
+    $query = '';
+
+    if($this->input->post('query'))
+    {
+     $query = $this->input->post('query');
+    }
+    $data = $this->crud_model->fetch_data_sms_users($query);
+     $output .= '
+     
+      <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+       <theader>
+         <tr>
+          <th width="5%">Selectionner</th>
+          <th width="5%">Avatar</th>
+          <th width="20%">Nom complet</th>
+          <th width="15%">Télephone</th>
+          <th width="10%">Statut</th>
+          <th width="20%">Email</th>
+          <th width="5%">Sexe</th>
+          <th width="20%">Mise à jour</th>
+          
+          
+         </tr>
+       <theader>
+       <tbody>
+      ';
+      if ($data->num_rows() <= 0) {
+        # code...
+      }
+      else{
+
+        foreach($data->result() as $row)
+        {
+
+              
+              if ($row->idrole == 1) {
+                $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+              }
+              else if ($row->idrole == 2) {
+                $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+              }
+              else if ($row->idrole == 3) {
+                $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+              }
+              else if ($row->idrole == 4) {
+                $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+              }
+              else{
+                $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+              }
+
+              $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+               <input type="checkbox" name="tel" value="'.$row->telephone.'" class="tels delete_checkbox">
+              ';
+
+               $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+              
+              ';
+
+               $output .= '
+               <tr>
+                <td>'.$link.'</td>
+                <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+                 <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+                <td>'.$row->telephone.'</td>
+                <td>'.$etat.'</td>
+                <td>'.$email.'</td>
+                <td>'.$row->sexe.'</td>
+
+
+                <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+               
+               </tr>
+               ';
+            
+
+        }
+
+      }
+        
+          $output .= '
+          <tbody>
+          <tfooter>
+           <tr>
+            <th width="5%">Selectionner</th>
+            <th width="5%">Avatar</th>
+            <th width="20%">Nom complet</th>
+            <th width="15%">Télephone</th>
+            <th width="10%">Statut</th>
+            <th width="20%">Email</th>
+            <th width="5%">Sexe</th>
+            <th width="20%">Mise à jour</th>
+            
+           </tr>
+         <tfooter>
+      </table>';
+      echo $output;
+  }
+
+  // filtrage par categorie 
+  // pagination user to sms 
+    function pagination_message_users_byrole()
+  {
+    sleep(1);
+    $idrole = $this->input->post('idrole');
+
+      $this->load->library("pagination");
+      $config = array();
+      $config["base_url"] = "#";
+      $config["total_rows"] = $this->crud_model->count_all_message_users_byrole($idrole);
+      $config["per_page"] = 5;
+      $config["uri_segment"] = 3;
+      $config["use_page_numbers"] = TRUE;
+      $config["full_tag_open"] = '<ul class="pagination pagination_filter">';
+      $config["full_tag_close"] = '</ul>';
+      $config["first_tag_open"] = '<li class="page-item">';
+      $config["first_tag_close"] = '</li>';
+      $config["last_tag_open"] = '<li class="page-item">';
+      $config["last_tag_close"] = '</li>';
+      $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+      $config["next_tag_open"] = '<li class="page-item">';
+      $config["next_tag_close"] = '</li>';
+      $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+      $config["prev_tag_open"] = "<li class='page-item'>";
+      $config["prev_tag_close"] = "</li>";
+      $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+      $config["cur_tag_close"] = "</a></li>";
+      $config["num_tag_open"] = "<li class='page-item'>";
+      $config["num_tag_close"] = "</li>";
+      $config["num_links"] = 1;
+      $this->pagination->initialize($config);
+      $page = $this->uri->segment(3);
+      $start = ($page - 1) * $config["per_page"];
+
+      $output = array(
+       'pagination_link2'  => $this->pagination->create_links(),
+       'country_table'   => $this->crud_model->fetch_detailsmessage_users_byrole($config["per_page"], $start, $idrole)
+      );
+      echo json_encode($output);
+  }
+
+
+
 
 
 

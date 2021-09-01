@@ -70,6 +70,22 @@ class admin extends CI_Controller
 			$this->load->view('backend/admin/templete_admin', $data);
 		}
 
+		function add_news(){
+	      $data['title']="Information de base!";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+
+	      $this->load->view('backend/admin/add_news', $data);
+	    }
+
+	    function news(){
+	      $data['title']="Information de base!";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $this->load->view('backend/admin/news', $data);
+	    }
+
 		function category_news(){
 
 			$data['title']="Paramètrage cétegorie produit";
@@ -134,7 +150,11 @@ class admin extends CI_Controller
 
 		
 
-		
+		function module(){
+	      $data['title']="Ajout de module";
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $this->load->view('backend/admin/module', $data);
+	    }
 
 		function blog(){
 			$data['title']="Paramétrage  des Blogs et publication";
@@ -1527,6 +1547,30 @@ class admin extends CI_Controller
 	  	            return $new_name;  
 	  	       }  
 	  	  }
+
+	  	  function upload_image_module()  
+	      {  
+	           if(isset($_FILES["user_image"]))  
+	           {  
+	                $extension = explode('.', $_FILES['user_image']['name']);  
+	                $new_name = rand() . '.' . $extension[1];  
+	                $destination = './upload/module/cours/image/' . $new_name;  
+	                move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+	                return $new_name;  
+	           }  
+	      }
+
+	      function upload_image_module_fichier()  
+	      {  
+	           if(isset($_FILES["user_image2"]))  
+	           {  
+	                $extension = explode('.', $_FILES['user_image2']['name']);  
+	                $new_name = rand() . '.' . $extension[1];  
+	                $destination = './upload/module/cours/fichier/' . $new_name;  
+	                move_uploaded_file($_FILES['user_image2']['tmp_name'], $destination);  
+	                return $new_name;  
+	           }  
+	      }
 
 	  	  // debit des scripts pays
     function fetch_pays(){  
@@ -5918,7 +5962,7 @@ class admin extends CI_Controller
 		        		'etat' 	=>	'ok'
 		        	);
                 	$query = $this->crud_model->update_message_sender($idsms, $data);
-        			echo("échec !!!!");
+        			
                 }
 
 
@@ -6707,6 +6751,578 @@ class admin extends CI_Controller
         </table>';
 	  echo $output;
 	}
+
+	/*
+  *script pour les operations module
+  *==========================
+  *==========================
+  *module
+  *=================================
+
+  */
+
+  function operation_module(){
+
+        $month = $this->crud_model->get_info_mois();
+        $year = $this->crud_model->get_info_annee();
+
+        $code = rand().'-'.$year;
+
+        $data['annee'] 			= $year;
+        $data['code'] 			= $code;
+        $data['id_user'] 		= $this->connected;
+        $data['titre'] 			= $this->input->post('titre');
+        $data['description'] 	= $this->input->post('description');
+
+	    if($_FILES["user_image"]["size"] > 0)  
+	    {  
+	          $data['logoImage'] =     $this->upload_image_module();      
+	    }
+	    else{
+	    	  $data['logoImage'] = "livre.jpg";
+	    } 
+
+	    if($_FILES["user_image2"]["size"] > 0)  
+	    {  
+	          $data['fichier'] =     $this->upload_image_module_fichier();     
+	    }
+	    else{
+	    	$data['fichier'] = "";
+	    } 
+         
+        $requete=$this->crud_model->insert_module($data);
+
+        if ($requete > 0) {
+
+        	$users_cool = $this->crud_model->get_info_user();
+            foreach ($users_cool as $key) {
+
+                if ($key['idrole'] == 3) {
+	               
+	                $id_user_recever = $key['id'];
+	                # code...
+		        	$url    ="entreprise/module/". $code;
+		            $nom    = $this->crud_model->get_name_user($this->connected);
+
+		            $message ="Bonjour!  ".$nom." vient d'ajouter un module ".$this->input->post('titre');
+
+
+		            $notification = array(
+		              'titre'     =>    "Vous avez peut être raté un module",
+		              'icone'     =>    "fa fa-book",
+		              'message'   =>     $message,
+		              'url'       =>     $url,
+		              'id_user'   =>     $id_user_recever
+		            );
+		            
+		            $not = $this->crud_model->insert_notification($notification);
+
+	            }
+
+	            
+              
+                # code...
+            }
+
+        	echo("Enregistrement avec succès");
+            
+        }
+
+
+
+  }
+
+  function modification_module()  
+  {  
+         
+        $month = $this->crud_model->get_info_mois();
+        $year = $this->crud_model->get_info_annee();
+
+        
+        // $data['id_user'] 		= $this->connected;
+        $data['titre'] 			= $this->input->post('titre');
+        $data['description'] 	= $this->input->post('description');
+
+	    if($_FILES["user_image"]["size"] > 0)  
+	    {  
+	          $data['logoImage'] =     $this->upload_image_module();      
+	    }
+	    
+	    if($_FILES["user_image2"]["size"] > 0)  
+	    {  
+	          $data['fichier'] =     $this->upload_image_module_fichier();     
+	    }
+	   
+
+        $this->crud_model->update_module($this->input->post("idmodule"), $data);
+        echo("information mise à jour avec succès"); 
+  }
+
+  function suppression_module()  
+  {  
+        $this->crud_model->delete_module($this->input->post("idmodule"));      
+         echo("suppression avec succès");  
+  }  
+
+
+  function fetch_single_module()  
+  {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_module($this->input->post("idmodule"));  
+         foreach($data as $row)  
+         {  
+              $output['titre']   	  = $row->titre;
+	          $output['description']  = $row->description;
+
+	          $output['first_name']   	  = $row->first_name;
+	          $output['last_name']   	  = $row->last_name;
+
+              $output['created_at']   =nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));
+              if($row->logoImage != '')  
+	          {  
+	                 $output['user_image'] = '<img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->logoImage.'" />';  
+	          }  
+	          else  
+	          {  
+	                 $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+	          }  
+         }  
+         echo json_encode($output);  
+  }  
+
+
+   // module
+
+    function pagination_view_module()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_view_module();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="nav pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_details_view_module($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+
+  function fetch_search_view_module()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('query'))
+    {
+     $query = $this->input->post('query');
+    }
+    $data = $this->crud_model->fetch_data_search_module($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idmodule="'.$row->idmodule.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idmodule="'.$row->idmodule.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+  function fetch_limit_view_module()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('limit'))
+    {
+     $query = $this->input->post('limit');
+    }
+    $data = $this->crud_model->fetch_data_limit_module($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idmodule="'.$row->idmodule.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idmodule="'.$row->idmodule.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+
+  function operation_news($param1='',$param2='',$param3=''){
+
+      
+      	  if($param1 =="ajout")  
+          {  
+                $insert_data = array(  
+		           'apropos'      	=>     $this->input->post('apropos'),
+		           'don'      		=>     $this->input->post('don'), 
+		           'structure'      =>     $this->input->post('structure'),
+		           'apropos_text'   =>     $this->input->post('apropos_text'),  
+		           'financement'    =>     $this->input->post('financement'), 
+		           'carierre'      	=>     $this->input->post('carierre'), 
+		           'partenariat'    =>     $this->input->post('partenariat')
+			  	); 
+
+			  	$requete=$this->crud_model->insert_news($insert_data);
+	      		$this->session->set_flashdata('message',"Enregistrement avec succès!!!");
+	            redirect(base_url() . 'admin/add_news/', 'refresh');
+          }  
+
+          if($param1 =="modification")  
+          {  
+                $update_data = array(  
+		           'apropos'      	=>     $this->input->post('apropos'), 
+		           'don'      		=>     $this->input->post('don'), 
+		           'structure'      =>     $this->input->post('structure'),
+		           'apropos_text'   =>     $this->input->post('apropos_text'), 
+		           'financement'    =>     $this->input->post('financement'), 
+		           'carierre'      	=>     $this->input->post('carierre'), 
+		           'partenariat'    =>     $this->input->post('partenariat')
+			  	); 
+
+			  	$requete=$this->crud_model->update_news($param2, $update_data);
+	      		$this->session->set_flashdata('message',"Modification avec succès!!!");
+	            redirect(base_url() . 'admin/operation_news/detail/'.$param2, 'refresh');
+          }  
+
+          if($param1 =="suppression")  
+          {  
+                
+
+			  	$requete=$this->crud_model->delete_news($param2);
+	      		$this->session->set_flashdata('message',"Suppression avec succès!!!");
+	            redirect(base_url() . 'admin/news/', 'refresh');
+          } 
+
+          if($param1 =="detail")  
+          {  
+                
+			  	$data['variable'] = $this->crud_model->fetch_news($param2);
+	            $data['title']="Détail de la configuration";
+			    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+			    $data['users'] = $this->crud_model->fetch_connected($this->connected);
+			    $this->load->view('backend/admin/edit_news', $data);
+          }  
+          else  
+          {  
+               redirect(base_url() . 'admin/news/', 'refresh');
+          }
+   
+    }
+
 
 
 	

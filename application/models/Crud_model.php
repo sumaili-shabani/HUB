@@ -608,6 +608,13 @@ class crud_model extends CI_Model{
          return $query->result();  
     }
 
+    function fetch_single_users_info($idtinfo_user)  
+    {  
+         $this->db->where("idtinfo_user", $idtinfo_user);  
+         $query=$this->db->get('tinfo_user');  
+         return $query->result();  
+    }
+
     //fin de script users
 
     // operation pays
@@ -5376,7 +5383,8 @@ class crud_model extends CI_Model{
 
     function insert_inscription_formations($data)  
     {  
-         $this->db->insert('inscription_formations', $data);  
+         $this->db->insert('inscription_formations', $data); 
+         return $this->db->insert_id(); 
     }
 
     function update_inscription_formations($idinscription, $data)  
@@ -5406,6 +5414,17 @@ class crud_model extends CI_Model{
               'idf'     =>    $idf,
               'email'   =>    $email,
               'annee'   =>    $annee
+            )
+         );  
+         return $query->num_rows();  
+    } 
+
+     function fetch_single_test_inscription_formations_home($idf,$email)  
+    {  
+         $query=$this->db->get_where('profile_inscription',
+            array(
+              'idf'     =>    $idf,
+              'email'   =>    $email
             )
          );  
          return $query->num_rows();  
@@ -5704,10 +5723,16 @@ class crud_model extends CI_Model{
     {
       $output = '';
       $etat = '';
+      $nom_formation ='';
       $query = $this->db->get_where("profile_inscription", array(
         'idf'     =>  $idf,
         'annee'   =>  $annee
       ));
+
+      foreach($query->result() as $row)
+      {
+        $nom_formation = $row->nom;
+      }
 
         $icone    = '';
         $email    = '';
@@ -5721,11 +5746,12 @@ class crud_model extends CI_Model{
         }
 
 
+
        $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br/>
-         <h3>
-            Liste des apprenants iscrits à la formation
-         <h3>
-         ";
+         <h5>
+            Liste des apprenants iscrits à la formation ".$nom_formation."
+         <h5>
+        ";
 
          $img =  base_url().'upload/tbl_info/'.$icone;
 
@@ -5738,7 +5764,7 @@ class crud_model extends CI_Model{
            <p><b>'.$message.' </b></p>
            <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
 
-           <a href="'.base_url().'upload/tbl_info/'.$icone.'" class="btn btn-primary"> voir l\'image</a>
+           <!--<a href="'.base_url().'upload/tbl_info/'.$icone.'" class="btn btn-primary"> voir l\'image</a>-->
 
            <hr>
            
@@ -5784,7 +5810,7 @@ class crud_model extends CI_Model{
 
                   <th width="5%">Niveau d\'étude</th> 
                   <th width="5%">Téléphone</th> 
-                  <th width="5%">Adresse domicile</th>   
+                  
               </tr>  
          </thead> 
 
@@ -5814,7 +5840,6 @@ class crud_model extends CI_Model{
 
           <td>'.nl2br(substr($row->niveau_etude, 0,30)).' ....'.'</td>
           <td>'.nl2br(substr($row->telephone, 0,15)).'</td>
-          <td>'.nl2br(substr($row->domicile, 0,15)).'</td>
          
 
          </tr>
@@ -5837,8 +5862,7 @@ class crud_model extends CI_Model{
 
                   <th width="5%">Niveau d\'étude</th> 
                   <th width="5%">Téléphone</th> 
-                  <th width="5%">Adresse domicile</th>    
-
+                  
               </tr>  
          </tfoot>   
           
@@ -6779,6 +6803,47 @@ class crud_model extends CI_Model{
     }
 
     // pour le paiement 
+    function fetch_data_search_module($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_module");
+       
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('titre', $query);
+         $this->db->or_like('description', $query);
+         $this->db->or_like('created_at', $query);
+         $this->db->or_like('annee', $query);
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('code', $query);
+        }
+        return $this->db->get();
+    }
+
+    // pour le paiement 
+    function fetch_data_search_module_user_tag($query, $id_user)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_module");
+       
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('titre', $query);
+         $this->db->or_like('description', $query);
+         $this->db->or_like('created_at', $query);
+         $this->db->or_like('annee', $query);
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('code', $query);
+        }
+        $this->db->where('id_user', $id_user);
+        return $this->db->get();
+    }
+
+    // pour le paiement 
     function fetch_data_limit_paiement($query)
     {
         $this->db->select("*");
@@ -6796,6 +6861,18 @@ class crud_model extends CI_Model{
         $this->db->select("*");
         $this->db->where("etat_validation", 1);
         $this->db->from("profile_depense");
+       
+        if($query != '')
+        {
+          $this->db->limit($query);
+        }
+        return $this->db->get();
+    }
+
+     function fetch_data_limit_module($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_module");
        
         if($query != '')
         {
@@ -7115,6 +7192,25 @@ class crud_model extends CI_Model{
       $query = $this->db->get("profile_depense");
       return $query->num_rows();
     }
+
+    // script pour information  des module 
+    function count_all_view_module()
+    {
+
+      $this->db->limit(30);
+      $query = $this->db->get("profile_module");
+      return $query->num_rows();
+    }
+
+    function count_all_view_module_user($id_user)
+    {
+
+      $this->db->limit(30);
+      $this->db->where("id_user",$id_user);
+      $query = $this->db->get("profile_module");
+      return $query->num_rows();
+    }
+   
 
     function fetch_details_view_depense($limit, $start)
     {
@@ -7517,6 +7613,1095 @@ class crud_model extends CI_Model{
 
 
     // fin operation categorie
+
+    /*
+    *script pour module
+    *====================
+    */
+    function insert_module($data){
+        $this->db->insert('module', $data);
+        return $this->db->insert_id();
+    }
+
+    function update_module($idmodule, $data)  
+    {  
+         $this->db->where("idmodule", $idmodule);  
+         $this->db->update("module", $data);  
+    }
+
+    function delete_module($idmodule)  
+    {  
+         $this->db->where("idmodule", $idmodule);  
+         $this->db->delete("module");  
+    }
+
+    function fetch_single_module($idmodule)  
+    {  
+         $this->db->where("idmodule", $idmodule);  
+         $query=$this->db->get('profile_module');  
+         return $query->result();  
+    }
+    // script module 
+    function fetch_details_view_module($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_module");
+      $this->db->order_by("idmodule","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($query->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idmodule="'.$row->idmodule.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idmodule="'.$row->idmodule.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+      return $output;
+    }
+
+     function fetch_details_view_module_ok_user($limit, $start, $id_user)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_module");
+      $this->db->where("id_user",$id_user);
+      $this->db->order_by("idmodule","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($query->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idmodule="'.$row->idmodule.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idmodule="'.$row->idmodule.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+              <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Modifier
+              </td>
+
+              <td>
+                Supprimer
+              </td>
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+      return $output;
+    }
+
+    // users view modules 
+    // script module 
+    function fetch_details_view_module_user($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_module");
+      $this->db->order_by("idmodule","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+             Télécharger
+              </td>
+
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($query->result() as $row)
+        {
+
+           $btn1 = '<a download="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'"  idmodule="'.$row->idmodule.'" class="btn btn-primary btn-sm"><i class="fa fa-download"></i></a>';
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+             
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+             
+              
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+      return $output;
+    }
+
+    /*
+    *========================
+    * script pour les fronts 
+    /*========================
+    */
+
+    function Select_category_menu()
+    {
+        $this->db->order_by('nom','ASC');
+        $this->db->limit(6);
+        return $this->db->get('category');
+    }
+
+    function Select_carousel_slider()
+    {
+        return $this->db->query("SELECT * FROM carousel ORDER BY RAND() LIMIT 1");
+    }
+
+    function Select_infopersonnel_slider()
+    {
+        $this->db->order_by('titre','ASC');
+        $this->db->limit(3);
+        return $this->db->get('tinfo_personnel');
+    }
+
+    function Select_tinfo_member_slider()
+    {
+        $this->db->order_by('first_name','ASC');
+        $this->db->limit(100);
+        return $this->db->get('tinfo_user');
+    }
+
+    function Select_tinfo_choix_slider()
+    {
+        $this->db->order_by('titre','ASC');
+        $this->db->limit(6);
+        return $this->db->get('tinfo_techno');
+    }
+
+    function Select_tinfo_services_slider()
+    {
+        $this->db->order_by('titre','ASC');
+        $this->db->limit(6);
+        return $this->db->get('tinfo_service');
+    }
+
+    function Select_partenaires_slider()
+    {
+        $this->db->order_by('created_at','ASC');
+        $this->db->limit(50);
+        return $this->db->get('galery2');
+    }
+
+    // operation  news 
+    function insert_news($data)  
+    {  
+         $this->db->insert('news', $data);  
+    }
+    // modification de news 
+    function update_news($idnews, $data)  
+    {  
+         $this->db->where("idnews", $idnews);  
+         $this->db->update("news", $data);  
+    }
+    //suppression des photos pour la galerie
+    function delete_news($idnews)  
+    {  
+         $this->db->where("idnews", $idnews);  
+         $this->db->delete("news");  
+    }
+
+    //detail des photos pour la galerie
+    function fetch_news($idnews)  
+    {    $this->db->limit(1); 
+         $this->db->where("idnews", $idnews);  
+         $query = $this->db->get("news");  
+         return $query;
+    }
+
+    // detail all 
+    function Select_all_news()
+    {   
+        return $this->db->query('SELECT * FROM news');
+    }
+
+    function Select_all_to_news()
+    {
+        return $this->db->query("SELECT * FROM news  LIMIT 1 ");
+    }
+
+    // contact 
+    function insert_contact($data)  
+    {  
+         $this->db->insert('contact', $data);  
+         return $this->db->insert_id();
+    }
+
+    function fetch_pagination_articles()
+    {
+      $this->db->limit(50);
+      $this->db->order_by('created_at', 'DESC');
+      $query = $this->db->query("SELECT * FROM profile_article");
+      return $query->num_rows();
+    }
+
+    function fetch_pagination_formations()
+    {
+      $this->db->limit(50);
+      $this->db->order_by('created_at', 'DESC');
+      $query = $this->db->query("SELECT * FROM formations");
+      return $query->num_rows();
+    }
+
+    function fetch_pagination_formations_latest()
+    {
+      $jour = date("Y-m-d");
+      $this->db->limit(4);
+      $this->db->order_by('created_at', 'DESC');
+      $this->db->where("fin_inscription >=", $jour);
+      $query = $this->db->get("formations");
+      return $query->num_rows();
+    }
+
+    function fetch_pagination_articles_bycat($idcat)
+    {
+      $this->db->limit(50);
+      $this->db->order_by('created_at', 'DESC');
+      $query = $this->db->get_where("profile_article", array(
+        'idcat' =>  $idcat
+      ));
+      return $query->num_rows();
+    }
+
+    function Select_padding_articles_tri()
+    {
+        return $this->db->query('SELECT * FROM profile_article  ORDER BY RAND() LIMIT 3');
+    }
+
+    // recherche de articles
+    function fetch_data_search_articles($query)
+    {
+      $this->db->select("*");
+      $this->db->from("profile_article");
+      $this->db->limit(8);
+      if($query != '')
+      {
+       $this->db->like('nom', $query);
+       $this->db->or_like('description', $query);
+
+      }
+      $this->db->order_by('nom', 'ASC');
+      return $this->db->get();
+    }
+
+    // recherche de articles
+    function fetch_data_search_formations($query)
+    {
+      $this->db->select("*");
+      $this->db->from("formations");
+      $this->db->limit(8);
+      if($query != '')
+      {
+       $this->db->like('nom', $query);
+       $this->db->or_like('description', $query);
+
+      }
+      $this->db->order_by('created_at', 'DESC');
+      return $this->db->get();
+    }
+
+     // detail des articles par formations
+    function fetch_details_pagination_articles($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_article");
+      $this->db->order_by("created_at", "DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+
+
+
+      foreach($query->result() as $key)
+      {
+
+
+        $vues  =  $this->db->query("SELECT COUNT(idart) AS total FROM vues WHERE idart=".$key->idart." ");
+        if ($vues->num_rows() <=0) {
+          $nombre_vue = 0;
+        }
+        else{
+          foreach ($vues->result_array() as $key_vue) {
+            $nombre_vue = $key_vue['total'];
+          }
+        }
+
+       $output .= '
+        <div class="col-md-6 p-r-25 p-r-15-sr991 mb-2">
+          <!-- Item latest -->
+          <div class="col-md-12 m-b-45">
+            <a href="'.base_url().'home/blog/'.$key->idart.'" class="img-fluid">
+              <img src="'.base_url().'upload/article/'.$key->image.'" alt="IMG" class="img img-responsive img-thumbnail" style="height: 200px; border-color:#DC4405;">
+            </a>
+            <div class="col-md-12 p-t-16">
+              <h5 class="p-b-5">
+                <a href="'.base_url().'home/blog/'.$key->idart.'" class="f1-m-3 cl2 hov-cl10 trans-03">
+                  '.nl2br(substr($key->nom, 0,200)).'...
+                </a>
+              </h5>
+
+              <span class="cl8">
+               
+                <span class="f1-s-3 m-rl-3">
+                  <i class="fa fa-eye"></i>  '.$nombre_vue.' vue(s) &nbsp;&nbsp; - &nbsp;&nbsp;
+                </span>
+                <span class="f1-s-3">
+                  '.nl2br(substr(date(DATE_RFC822, strtotime($key->created_at)), 0, 23)).'
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        
+       ';
+      }
+      
+      return $output;
+    }
+
+
+     // detail des articles par formations
+    function fetch_details_pagination_articles_bycat($limit, $start, $idcat)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_article");
+      $this->db->order_by("created_at", "DESC");
+      $this->db->where("idcat", $idcat);
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+
+
+
+      foreach($query->result() as $key)
+      {
+
+
+        $vues  =  $this->db->query("SELECT COUNT(idart) AS total FROM vues WHERE idart=".$key->idart." ");
+        if ($vues->num_rows() <=0) {
+          $nombre_vue = 0;
+        }
+        else{
+          foreach ($vues->result_array() as $key_vue) {
+            $nombre_vue = $key_vue['total'];
+          }
+        }
+
+       $output .= '
+        <div class="col-md-6 p-r-25 p-r-15-sr991 mb-2">
+          <!-- Item latest -->
+          <div class="col-md-12 m-b-45">
+            <a href="'.base_url().'home/blog/'.$key->idart.'" class="img-fluid">
+              <img src="'.base_url().'upload/article/'.$key->image.'" alt="IMG" class="img img-responsive img-thumbnail" style="height: 200px; border-color:#DC4405;">
+            </a>
+            <div class="col-md-12 p-t-16">
+              <h5 class="p-b-5">
+                <a href="'.base_url().'home/blog/'.$key->idart.'" class="f1-m-3 cl2 hov-cl10 trans-03">
+                  '.nl2br(substr($key->nom, 0,200)).'...
+                </a>
+              </h5>
+
+              <span class="cl8">
+               
+                <span class="f1-s-3 m-rl-3">
+                  <i class="fa fa-eye"></i>  '.$nombre_vue.' vue(s) &nbsp;&nbsp; - &nbsp;&nbsp;
+                </span>
+                <span class="f1-s-3">
+                  '.nl2br(substr(date(DATE_RFC822, strtotime($key->created_at)), 0, 23)).'
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        
+       ';
+      }
+      
+      return $output;
+    }
+
+    function get_name_article_pub($idart){
+        $this->db->where("idart", $idart);
+        $nom = $this->db->get("profile_article")->result_array();
+        foreach ($nom as $key) {
+          $titre = $key["nom"];
+          return $titre ;
+        }
+
+    }
+
+    function get_name_article_publication($idcat){
+        $this->db->where("idcat", $idcat);
+        $nom = $this->db->get("profile_article")->result_array();
+        foreach ($nom as $key) {
+          $titre = $key["nom_cat"];
+          return $titre ;
+        }
+
+    }
+
+    function Select_article_by_tag($idart)
+    {
+        return $this->db->query("SELECT * FROM profile_article  WHERE idart=".$idart." ORDER BY created_at DESC LIMIT 1");
+    }
+
+
+
+    function Select_our_articles_tag($idart)
+    {   
+        $this->db->limit(1);
+        return $this->db->get_where("profile_article", array(
+          'idart' =>  $idart
+        ));
+    }
+
+    function Select_our_commentaire_to_articles_tag($idart)
+    {   
+        $this->db->limit(1);
+        return $this->db->get_where("commentaire", array(
+          'idart' =>  $idart
+        ));
+    }
+
+    function Select_article_all_ok()
+    {
+        return $this->db->query("SELECT * FROM profile_article  ORDER BY created_at DESC LIMIT 10");
+    }
+
+    // insertion des vues 
+    function insert_vues_ip($data)  
+    {  
+       $this->db->insert('vues', $data);  
+    }
+
+    function Select_idart_tag_insert($idart, $machine)
+    {   
+        $this->db->limit(1);
+        return $this->db->get_where("vues", array(
+          'idart'   =>  $idart,
+          'machine' =>  $machine
+        ));
+    }
+
+    // script pour formation 
+     // detail des articles par formations
+    function fetch_details_pagination_formations($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("formations");
+      $this->db->order_by("created_at", "DESC");
+
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+
+      $link ='';
+      $jour = date('Y-m-d');
+
+
+      foreach($query->result() as $key)
+      {
+
+
+        if ($key->fin_inscription >= $jour) {
+          # code...
+          $link = '
+          <a class="btn btn-dark btn-sm" href="'.base_url().'home/formation/'.$key->idf.'"><i class="fa fa-eye"></i> voir plus</a>
+
+          <a class="btn btn-hub btn-sm" href="'.base_url().'home/formation/'.$key->idf.'"><i class="fa fa-hand-o-right"></i> Je m\'inscris à cette formation</a>';
+        }
+        else{
+          $link = '<a class="btn btn-dark btn-sm" href="'.base_url().'home/formation/'.$key->idf.'"><i class="fa fa-eye"></i> voir plus</a>
+
+          <a class="btn btn-danger btn-sm" href="javascript:void(0);"><i class="fa fa-calendar"></i> L\'inscription s\'est cloturée</a>
+
+          ';
+        }
+
+
+       $output .= '
+        <div class="col-md-12 p-r-25 p-r-15-sr991 mb-2">
+
+          <div class="card">
+            <div class="card-body">
+              <div class="col-md-12">
+
+                <div class="row">
+
+                  <div class="col-md-4">
+                    <a href="'.base_url().'home/formation/'.$key->idf.'" class="img-fluid">
+                      <img src="'.base_url().'upload/formations/'.$key->image.'" alt="IMG" class="img img-responsive img-thumbnail" style="height: 200px; border-color:#DC4405;">
+                    </a>
+                  </div>
+
+                  <div class="col-md-8">
+
+                    <h5 class="card-title">'. substr($key->nom, 0,100).'</h5>
+                   
+                    <div class="card-text">
+                      Debit inscription: <span class="text-warning">
+                        <i class="fa fa-calendar mr-1"></i> '.nl2br(substr(date(DATE_RFC822, strtotime($key->date_debit)), 0, 23)).'
+                      </span>
+                    </div>
+                    <div class="card-text">
+                      Fin inscription: <span class="text-warning">
+                        <i class="fa fa-calendar mr-1"></i> '.nl2br(substr(date(DATE_RFC822, strtotime($key->fin_inscription)), 0, 23)).'
+                      </span>
+                    </div>
+                    
+                    
+                    '.$link.'
+
+                  </div>
+
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+        
+       ';
+      }
+      
+      return $output;
+    }
+
+    function fetch_details_pagination_formations_latest($limit, $start)
+    {
+      $output = '';
+      $jour =date("Y-m-d");
+      $this->db->select("*");
+      $this->db->from("formations");
+      $this->db->order_by("created_at", "DESC");
+      $this->db->where("fin_inscription >=", $jour);
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+
+      $link ='';
+      $jour = date('Y-m-d');
+
+
+      foreach($query->result() as $key)
+      {
+
+
+        if ($key->fin_inscription >= $jour) {
+          # code...
+          $link = '
+          <a class="btn btn-dark btn-sm" href="'.base_url().'home/formation/'.$key->idf.'"><i class="fa fa-eye"></i> voir plus</a>
+
+          <a class="btn btn-hub btn-sm" href="'.base_url().'home/formation/'.$key->idf.'"><i class="fa fa-hand-o-right"></i> Je m\'inscris à cette formation</a>';
+        }
+        else{
+          $link = '<a class="btn btn-dark btn-sm" href="'.base_url().'home/formation/'.$key->idf.'"><i class="fa fa-eye"></i> voir plus</a>
+
+          <a class="btn btn-danger btn-sm" href="javascript:void(0);"><i class="fa fa-calendar"></i> L\'inscription s\'est cloturée</a>
+
+          ';
+        }
+
+
+       $output .= '
+        <div class="col-md-12 p-r-25 p-r-15-sr991 mb-2">
+
+          <div class="card">
+            <div class="card-body">
+              <div class="col-md-12">
+
+                <div class="row">
+
+                  <div class="col-md-4">
+                    <a href="'.base_url().'home/formation/'.$key->idf.'" class="img-fluid">
+                      <img src="'.base_url().'upload/formations/'.$key->image.'" alt="IMG" class="img img-responsive img-thumbnail" style="height: 200px; border-color:#DC4405;">
+                    </a>
+                  </div>
+
+                  <div class="col-md-8">
+
+                    <h5 class="card-title">'. substr($key->nom, 0,100).'</h5>
+                   
+                    <div class="card-text">
+                      Debit inscription: <span class="text-warning">
+                        <i class="fa fa-calendar mr-1"></i> '.nl2br(substr(date(DATE_RFC822, strtotime($key->date_debit)), 0, 23)).'
+                      </span>
+                    </div>
+                    <div class="card-text">
+                      Fin inscription: <span class="text-warning">
+                        <i class="fa fa-calendar mr-1"></i> '.nl2br(substr(date(DATE_RFC822, strtotime($key->fin_inscription)), 0, 23)).'
+                      </span>
+                    </div>
+                    
+                    
+                    '.$link.'
+
+                  </div>
+
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+        
+       ';
+      }
+      
+      return $output;
+    }
+
+
+    function get_name_formation_pub($idf){
+        $this->db->where("idf", $idf);
+        $nom = $this->db->get("formations")->result_array();
+        foreach ($nom as $key) {
+          $titre = $key["nom"];
+          return $titre ;
+        }
+
+    }
+
+    function Select_our_formation_tag($idf)
+    {   
+        $this->db->limit(1);
+        return $this->db->get_where("formations", array(
+          'idf' =>  $idf
+        ));
+    }
+
+    // auto complete text offres d'emplois automatique
+   function recherche_data_auto_articles($query)
+   {
+
+      $this->db->like('nom', $query);
+      $this->db->or_like('description', $query);
+      $this->db->or_like('nom_cat', $query);
+      
+      $query = $this->db->get('profile_article');
+      if($query->num_rows() > 0)
+      {
+         foreach($query->result_array() as $row)
+         {
+          $output[] = array(
+           'idart'  => $row["idart"],
+           'name'  => $row["nom"],
+           'image'  => $row["image"]
+          );
+         }
+       echo json_encode($output);
+      }
+   }
+
+
+
+
+
+
 
 
 

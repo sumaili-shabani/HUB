@@ -193,7 +193,7 @@
             
 
             <!-- Nav Item - Charts -->
-             <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseUtilities2"
                     aria-expanded="true" aria-controls="collapseUtilities2">
                     <i class="fas fa-fw fa-calendar"></i>
@@ -230,6 +230,7 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Nos paramètres:</h6>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/news">Configuration News</a>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/site">Configuration Site</a>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/role">Fonction et privilège</a>
 
@@ -241,7 +242,8 @@
 
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/sms">Envoie SMS</a>
-
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/module">Module de cours</a>
 
 
                         <div class="dropdown-divider"></div>

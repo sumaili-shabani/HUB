@@ -14,7 +14,7 @@ class entreprise extends CI_Controller
 	  }
 	  $this->load->library('form_validation');
 	  $this->load->library('encryption');
-      // $this->load->library('pdf');
+      $this->load->library('pdf');
 	  $this->load->model('crud_model'); 
 
 	  $this->load->helper('url');
@@ -39,8 +39,13 @@ class entreprise extends CI_Controller
   		// $this->load->view('backend/entreprise/templete_admin', $data);
 	}
 
+  function module($param1=''){
+    $data['title']="Ajout de module";
+    $data['token'] = $param1;
+    $data['users'] = $this->crud_model->fetch_connected($this->connected);
+    $this->load->view('backend/entreprise/module', $data);
+  }
 	
-
 	function dashbord(){
 		  $data['title']="Tableau de bord";
 	      // $data['nombre_location'] = $this->crud_model->statistiques_nombre("profile_location");
@@ -1624,6 +1629,368 @@ class entreprise extends CI_Controller
       $this->crud_model->delete_chat_messagerie($this->input->post("idgroupe"));
       
   }
+
+  /*
+  // SCRIPT POUR LE MODULE 
+  *=========================
+  *=========================
+  */
+
+  // module
+
+    function pagination_view_module()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_view_module();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="nav pagination">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_details_view_module_user($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+
+  function fetch_search_view_module()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('query'))
+    {
+     $query = $this->input->post('query');
+    }
+    $data = $this->crud_model->fetch_data_search_module($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+              
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<a download="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'"  idmodule="'.$row->idmodule.'" class="btn btn-primary btn-sm"><i class="fa fa-download"></i></a>';
+
+          $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+            
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+   
+    echo $output;
+  }
+
+  function fetch_limit_view_module()
+  {
+    $output = '';
+    $query = '';
+    if($this->input->post('limit'))
+    {
+     $query = $this->input->post('limit');
+    }
+    $data = $this->crud_model->fetch_data_limit_module($query);
+    $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+          <thead>
+            <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+              
+              
+              
+            </tr>
+
+        </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<a download="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'"  idmodule="'.$row->idmodule.'" class="btn btn-primary btn-sm"><i class="fa fa-download"></i></a>';
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>
+               <img src="'.base_url().'upload/module/cours/image/'.$row->logoImage.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+            </td>
+
+             <td>'.substr($row->titre, 0,20).'...</td>
+
+             <td>'.substr($row->description, 0,20).'</td>
+
+             <td><a href="'.base_url().'upload/module/cours/fichier/'.$row->fichier.'" target="_blank"><i class="fa fa-file mr-1"></i> Lire le module</a></td>
+             <td>'.$row->annee.'</td>
+             <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+              
+              <td>
+
+                <div class="col-md-12">
+                  <div class="row">
+
+                    <div class="col-md-4">
+                      <img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb img img-thumbnail" style="height: 50px;width: 50px;" alt="">
+                      
+                    </div>
+
+                    <div class="col-md-8">
+                      
+                      <div class="col-md-12">
+                        '.$row->first_name.'
+                        '.$row->last_name.'
+                      </div>
+                         
+                    </div>
+                  </div>
+                </div>
+                
+              </td>
+
+              <td>'.$btn1.'</td>
+
+            
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+        <tfoot role="row" class="odd">
+           <tr>
+              <td>
+                Image
+              </td>
+
+              <td>
+                Titre
+
+              </td>
+              <td>
+               Description
+              </td>
+              
+              <td>
+                Lire le module
+              </td>
+              <td>
+                Année
+              </td>
+              <td>
+                Date
+              </td>
+
+              <td>
+               Utilisateur action
+              </td>
+
+              <td>
+              Télécharger
+              </td>
+
+              
+            </tr>
+
+        </tfoot>   
+            
+        </table>';
+    echo $output;
+  }
+
+
 
 
 

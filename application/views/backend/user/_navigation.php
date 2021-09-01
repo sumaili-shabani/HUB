@@ -37,6 +37,10 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Applications:</h6>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/newcompterendu">Nouveau compte rendu</a>
+
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/module">Module de cours</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/sms">Envoie SMS</a>
                         
                        
                     </div>
@@ -60,7 +64,10 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/evaluation">Evaluation des projets</a>
 
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/compterendu">Compte rendu</a>
+
                         
+                        
+                       
 
                     </div>
                 </div>

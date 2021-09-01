@@ -44,6 +44,8 @@
 
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/caisse">Etat de la caisse</a>
+
+
                         
                        
                     </div>
@@ -68,6 +70,8 @@
                        <!--  <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/stat_paiement">Statistique sur paiement</a> -->
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/paiement_pading">Paiement en attente</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/sms">Envoie SMS</a>
                        
                     </div>
                 </div>
