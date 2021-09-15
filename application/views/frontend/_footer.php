@@ -68,6 +68,8 @@
               <li class="nav-item"><a class="nav-link" href="mailto:<?php echo($email_info) ?>"><?php echo($email_info) ?></a></li>
               <li class="nav-item"><a class="nav-link" href="tel:<?php echo($tel1_info) ?>"><?php echo($tel1_info) ?></a></li>
               <li class="nav-item"><a class="nav-link" href="tel:<?php echo($tel2_info) ?>"><?php echo($tel2_info) ?></a></li>
+               <li class="nav-item"><a class="nav-link" target="_blank" href="https://forms.gle/vZf4CeR6eU1Q3Dws5">Je crée ma start-up</a>
+              </li>
             </ul>
             <!-- End Nav Link -->
           </div>

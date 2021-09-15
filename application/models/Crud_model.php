@@ -20,6 +20,22 @@ class crud_model extends CI_Model{
   var $order_column3 = array(null, "nom", "created_at");
   // fin category
 
+  // opertion conference
+  var $table4 = "profile_conference";  
+  var $select_column4 = array("idconference", "nom","date_debit","heure_debit","date_fin","heure_fin",
+  "first_name","last_name","telephone","id_user", "created_at");  
+  var $order_column4 = array(null, "nom","date_debit","heure_debit","date_fin","heure_fin",
+  "first_name","last_name","telephone","id_user", "created_at");
+  // fin conference
+
+   // opertion profile_invite
+  var $table5 = "profile_invite";  
+  var $select_column5 = array("idinvite","idconference", "nom","date_debit","heure_debit","date_fin","heure_fin",
+  "first_name","last_name","telephone","id_user","link", "created_at");  
+  var $order_column5 = array(null, "nom","date_debit","heure_debit","date_fin","heure_fin",
+  "first_name","last_name","telephone","id_user","link", "created_at");
+  // fin profile_invite
+
    //users
   var $table8 = "users";  
   var $select_column8 = array("id", "first_name", "last_name", "email","image","telephone","full_adresse","biographie","date_nais","facebook","twitter","linkedin","idrole","sexe");  
@@ -1080,6 +1096,24 @@ class crud_model extends CI_Model{
           $nom = $this->db->get("users")->result_array();
           foreach ($nom as $key) {
             return $key["first_name"];
+          }
+
+      }
+
+      function get_role_user($id){
+          $this->db->where("id", $id);
+          $nom = $this->db->get("users")->result_array();
+          foreach ($nom as $key) {
+            return $key["idrole"];
+          }
+
+      }
+
+      function get_telephone_user($id){
+          $this->db->where("id", $id);
+          $nom = $this->db->get("users")->result_array();
+          foreach ($nom as $key) {
+            return $key["telephone"];
           }
 
       }
@@ -8696,6 +8730,742 @@ class crud_model extends CI_Model{
        echo json_encode($output);
       }
    }
+
+
+    /*
+    script pour la conference
+    ===========================
+    zoom conference
+    ==========================
+    ****************************
+    ****************************
+
+    */
+    // script pour reservation du site
+   function make_query_conference()  
+   {  
+          
+         $this->db->select($this->select_column4);  
+         $this->db->from($this->table4);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idconference", $_POST["search"]["value"]);  
+              $this->db->or_like("first_name", $_POST["search"]["value"]);
+              $this->db->or_like("last_name", $_POST["search"]["value"]);
+              $this->db->or_like("date_debit", $_POST["search"]["value"]);
+              $this->db->or_like("heure_debit", $_POST["search"]["value"]);
+              $this->db->or_like("date_fin", $_POST["search"]["value"]);
+              $this->db->or_like("heure_fin", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column7[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idconference', 'DESC');  
+         }  
+    }
+
+   function make_datatables_conference(){  
+         $this->make_query_conference();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_conference(){  
+         $this->make_query_conference();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_conference()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table4);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_conference($data)  
+    {  
+         $this->db->insert('conference', $data); 
+    }
+
+    
+    function update_conference($idconference, $data)  
+    {  
+         $this->db->where("idconference", $idconference);  
+         $this->db->update("conference", $data);  
+    }
+
+
+    function delete_conference($idconference)  
+    {  
+         $this->db->where("idconference", $idconference);  
+         $this->db->delete("conference");  
+    }
+
+    function fetch_single_conference($idconference)  
+    {  
+         $this->db->where("idconference", $idconference);  
+         $query=$this->db->get('profile_conference');  
+         return $query->result();  
+    } 
+
+    function fetch_single_conference_in_stadium($id_user,$nom)  
+    {    
+         $query=$this->db->get_where("conference",array(
+            'id_user'     =>  $id_user,
+            'nom'         =>  $nom
+         ));  
+         return $query->num_rows();  
+    } 
+    // fin de script place
+
+    // pagination users 
+   function fetch_detail_conference($limit, $start)
+   {
+    $output = '';
+    $sexe = '';
+    $adresse = "";
+    $this->db->select("*");
+    $this->db->from("profile_conference");
+    $this->db->order_by("idconference", "DESC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        
+        <th width="10%">Avatar</th>
+        <th width="20%">Nom de la Conférence</th>
+        <th width="10%">Date debit</th>
+        <th width="10%">Heure debit</th>
+        
+        <th width="10%">Date fin</th>
+        <th width="10%">Heure fin</th>
+        <th width="20%">Mise à jour</th>
+
+        <th width="5%">Editer</th>
+        <th width="5%">Supprimer</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+          
+
+          $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> Client </span>';
+
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+         
+           $output .= '
+           <tr>
+            
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+            <td>'.substr($row->nom, 0,20).'...</td>
+
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+            <td>'.$row->heure_debit.'</td>
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+            <td>'.$row->heure_fin.'</td>
+
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+
+            <td>
+              <button type="button" name="update" idconference="'.$row->idconference.'" class="btn btn-warning btn-circle btn-sm update mr-2"><i class="fa fa-edit"></i></button> 
+            </td>
+            <td>
+            <button type="button" name="delete" idconference="'.$row->idconference.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>
+            </td>
+            
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="10%">Avatar</th>
+              <th width="20%">Nom de la Conférence</th>
+              <th width="10%">Date debit</th>
+              <th width="10%">Heure debit</th>
+              
+              <th width="10%">Date fin</th>
+              <th width="10%">Heure fin</th>
+              <th width="20%">Mise à jour</th>
+
+              <th width="5%">Editer</th>
+              <th width="5%">Supprimer</th>
+              
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+    // pagination users 
+   function fetch_detail_conference_tug($limit, $start, $id_user)
+   {
+    $output = '';
+    $sexe = '';
+    $adresse = "";
+    $this->db->select("*");
+    $this->db->from("profile_conference");
+    $this->db->where("id_user", $id_user);
+    $this->db->order_by("idconference", "DESC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        
+        <th width="10%">Avatar</th>
+        <th width="20%">Nom de la Conférence</th>
+        <th width="10%">Date debit</th>
+        <th width="10%">Heure debit</th>
+        
+        <th width="10%">Date fin</th>
+        <th width="10%">Heure fin</th>
+        <th width="20%">Mise à jour</th>
+
+        <th width="5%">Editer</th>
+        <th width="5%">Supprimer</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+          
+
+          $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> Client </span>';
+
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+         
+           $output .= '
+           <tr>
+            
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+            <td>'.substr($row->nom, 0,20).'...</td>
+
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+            <td>'.$row->heure_debit.'</td>
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+            <td>'.$row->heure_fin.'</td>
+
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+
+            <td>
+              <button type="button" name="update" idconference="'.$row->idconference.'" class="btn btn-warning btn-circle btn-sm update mr-2"><i class="fa fa-edit"></i></button> 
+            </td>
+            <td>
+            <button type="button" name="delete" idconference="'.$row->idconference.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>
+            </td>
+            
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="10%">Avatar</th>
+              <th width="20%">Nom de la Conférence</th>
+              <th width="10%">Date debit</th>
+              <th width="10%">Heure debit</th>
+              
+              <th width="10%">Date fin</th>
+              <th width="10%">Heure fin</th>
+              <th width="20%">Mise à jour</th>
+
+              <th width="5%">Editer</th>
+              <th width="5%">Supprimer</th>
+              
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+    // voir tous les conference 
+   function count_all_conferences()
+   {
+    $query = $this->db->get("profile_conference");
+    return $query->num_rows();
+   }
+
+    // voir tous les conference 
+   function count_all_conferences_tug($id_user)
+   {
+      $query = $this->db->get_where("profile_conference", array(
+        'id_user'   =>  $id_user
+      ));
+      return $query->num_rows();
+   }
+
+   function fetch_data_conference_ok($query)
+   {
+      $this->db->select("*");
+      $this->db->limit(10);
+      $this->db->from("profile_conference");
+     
+      if($query != '')
+      {
+       $this->db->like('nom', $query);
+       $this->db->or_like('date_debit', $query);
+       $this->db->or_like('heure_debit', $query);
+
+       $this->db->or_like('date_fin', $query);
+       $this->db->or_like('heure_fin', $query);
+
+       $this->db->or_like('first_name', $query);
+       $this->db->or_like('last_name', $query);
+       $this->db->or_like('telephone', $query);
+      
+      }
+     
+      $this->db->order_by('first_name', 'ASC');
+      return $this->db->get();
+   }
+
+
+   /*
+    script pour la conference
+    ===========================
+    zoom conference
+    ==========================
+    ****************************
+    ****************************
+
+    */
+    // script pour invite du site
+   function make_query_invite()  
+   {  
+          
+         $this->db->select($this->select_column5);  
+         $this->db->from($this->table5);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idinvite", $_POST["search"]["value"]);  
+              $this->db->or_like("first_name", $_POST["search"]["value"]);
+              $this->db->or_like("last_name", $_POST["search"]["value"]);
+              $this->db->or_like("date_debit", $_POST["search"]["value"]);
+              $this->db->or_like("heure_debit", $_POST["search"]["value"]);
+              $this->db->or_like("date_fin", $_POST["search"]["value"]);
+              $this->db->or_like("heure_fin", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column5[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idinvite', 'DESC');  
+         }  
+    }
+
+   function make_datatables_invite(){  
+         $this->make_query_invite();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_invite(){  
+         $this->make_query_invite();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_invite()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table4);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_invite($data)  
+    {  
+         $this->db->insert('invite', $data); 
+         return $this->db->insert_id(); 
+    }
+
+    
+    function update_invite($idinvite, $data)  
+    {  
+         $this->db->where("idinvite", $idinvite);  
+         $this->db->update("invite", $data);  
+    }
+
+
+    function delete_invite($idinvite)  
+    {  
+         $this->db->where("idinvite", $idinvite);  
+         $this->db->delete("invite");  
+    }
+
+    function fetch_single_invite($idinvite)  
+    {  
+         $this->db->where("idinvite", $idinvite);  
+         $query=$this->db->get('profile_invite');  
+         return $query->result();  
+    } 
+
+    function fetch_single_invite_in_stadium($id_user,$idconference)  
+    {    
+         $query=$this->db->get_where("invite",array(
+            'id_user'         =>  $id_user,
+            'idconference'    =>  $idconference
+         ));  
+         return $query->num_rows();  
+    } 
+    // fin de script place
+
+    // pagination users 
+   function fetch_detail_invite($limit, $start)
+   {
+    $output = '';
+    $sexe = '';
+    $adresse = "";
+    $this->db->select("*");
+    $this->db->from("profile_invite");
+    $this->db->order_by("idinvite", "DESC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        
+        <th width="10%">Avatar</th>
+        <th width="20%">Nom de la Conférence</th>
+        <th width="10%">Date debit</th>
+        <th width="10%">Heure debit</th>
+        
+        <th width="10%">Date fin</th>
+        <th width="10%">Heure fin</th>
+        <th width="20%">Mise à jour</th>
+
+        <th width="5%">Profil</th>
+        <th width="5%">Supprimer</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+          
+
+          $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> Client </span>';
+
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+         
+           $output .= '
+           <tr>
+            
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+            <td>'.substr($row->nom, 0,20).'...</td>
+
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+            <td>'.$row->heure_debit.'</td>
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+            <td>'.$row->heure_fin.'</td>
+
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+
+            <td>
+              <button type="button" name="update" id="'.$row->id.'" class="btn btn-warning btn-circle btn-sm update mr-2"><i class="fa fa-user"></i></button> 
+            </td>
+            <td>
+            <button type="button" name="delete" idinvite="'.$row->idinvite.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>
+            </td>
+            
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="10%">Avatar</th>
+              <th width="20%">Nom de la Conférence</th>
+              <th width="10%">Date debit</th>
+              <th width="10%">Heure debit</th>
+              
+              <th width="10%">Date fin</th>
+              <th width="10%">Heure fin</th>
+              <th width="20%">Mise à jour</th>
+
+              <th width="5%">Profil</th>
+              <th width="5%">Supprimer</th>
+              
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+    // voir tous les invite 
+   function count_all_invites()
+   {
+    $query = $this->db->get("profile_invite");
+    return $query->num_rows();
+   }
+
+   function fetch_data_invite_ok($query)
+   {
+      $this->db->select("*");
+      $this->db->limit(10);
+      $this->db->from("profile_invite");
+     
+      if($query != '')
+      {
+         $this->db->like('nom', $query);
+         $this->db->or_like('date_debit', $query);
+         $this->db->or_like('heure_debit', $query);
+
+         $this->db->or_like('date_fin', $query);
+         $this->db->or_like('heure_fin', $query);
+
+         $this->db->or_like('first_name', $query);
+         $this->db->or_like('last_name', $query);
+         $this->db->or_like('telephone', $query);
+        
+      }
+     
+      $this->db->order_by('first_name', 'ASC');
+      return $this->db->get();
+   }
+
+
+   // pagination users 
+   function fetch_detailsmessage_users_zoom($limit, $start)
+   {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("profile_user");
+    $this->db->order_by("first_name", "ASC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        <th width="5%">Selectionner</th>
+        <th width="5%">Avatar</th>
+        <th width="20%">Nom complet</th>
+        <th width="15%">Télephone</th>
+        <th width="10%">Statut</th>
+       
+        <th width="5%">Sexe</th>
+        <th width="20%">Mise à jour</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+
+          if ($row->idrole == 1) {
+            $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 2) {
+            $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 3) {
+            $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 4) {
+            $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+          }
+          else{
+            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+          }
+
+          $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+           <input type="checkbox" name="id" value="'.$row->id.'" class="tels delete_checkbox">
+          ';
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+           $output .= '
+           <tr>
+            <td>'.$link.'</td>
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+             <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+            <td>'.$row->telephone.'</td>
+            <td>'.$etat.'</td>
+           
+            <td>'.$row->sexe.'</td>
+
+
+            <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+           
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Selectionner</th>
+              <th width="5%">Avatar</th>
+              <th width="20%">Nom complet</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Statut</th>
+              
+              <th width="5%">Sexe</th>
+              <th width="20%">Mise à jour</th>
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+   // pagination users 
+   function fetch_detailsmessage_users_byrole_zoom($limit, $start, $idrole)
+   {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("profile_user");
+    $this->db->where("idrole", $idrole);
+    $this->db->order_by("first_name", "ASC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+    $output .= '
+   
+    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+     <theader>
+       <tr>
+        <th width="5%">Selectionner</th>
+        <th width="5%">Avatar</th>
+        <th width="20%">Nom complet</th>
+        <th width="15%">Télephone</th>
+        <th width="10%">Statut</th>
+        
+        <th width="5%">Sexe</th>
+        <th width="20%">Mise à jour</th>
+        
+        
+       </tr>
+     <theader>
+     <tbody>
+    ';
+      foreach($query->result() as $row)
+      {
+
+          if ($row->idrole == 1) {
+            $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 2) {
+            $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 3) {
+            $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+          }
+          else if ($row->idrole == 4) {
+            $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+          }
+          else{
+            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+          }
+
+          $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+           <input type="checkbox" name="id" value="'.$row->id.'" class="tels delete_checkbox">
+          ';
+
+           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+          
+          ';
+
+           $output .= '
+           <tr>
+            <td>'.$link.'</td>
+            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+             <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+            <td>'.$row->telephone.'</td>
+            <td>'.$etat.'</td>
+            
+            <td>'.$row->sexe.'</td>
+
+
+            <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+           
+           </tr>
+           ';
+
+      }
+        $output .= '
+            <tbody>
+            <tfooter>
+             <tr>
+              <th width="5%">Selectionner</th>
+              <th width="5%">Avatar</th>
+              <th width="20%">Nom complet</th>
+              <th width="15%">Télephone</th>
+              <th width="10%">Statut</th>
+              
+              <th width="5%">Sexe</th>
+              <th width="20%">Mise à jour</th>
+              
+             </tr>
+           <tfooter>
+        </table>';
+        return $output;
+   }
+
+
+
 
 
 

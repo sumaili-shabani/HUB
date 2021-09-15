@@ -45,6 +45,9 @@
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/caisse">Etat de la caisse</a>
 
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>comptable/calendrier">conférence zoom</a>
+
 
                         
                        

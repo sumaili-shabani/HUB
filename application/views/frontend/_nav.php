@@ -177,11 +177,11 @@
                 </li>
                 
 
-               <!--  <li class="navbar-nav-item">
+                <li class="navbar-nav-item">
                     <a class="nav-link " href="<?php echo(base_url()) ?>home/travail">
                       <i class="fa fa-info font-size-1 mr-1"></i>Ce que nous faisons
                     </a>
-                </li> -->
+                </li>
 
                 <li class="hs-has-sub-menu navbar-nav-item">
                   <a id="pagesMegaMenu" class="hs-mega-menu-invoker nav-link nav-link-toggle " href="javascript:;" aria-haspopup="true" aria-expanded="false" aria-labelledby="pagesSubMenu">Pages</a>
@@ -189,11 +189,14 @@
                   <!-- Pages - Submenu -->
                   <div id="pagesSubMenu" class="hs-sub-menu dropdown-menu hs-sub-menu-desktop-lg" aria-labelledby="pagesMegaMenu" style="min-width: 230px; display: none;">
                     <!-- Account -->
+                     <a class="dropdown-item " href="<?php echo(base_url()) ?>home/about">A propos de nous</a>
+
                     <div class="hs-has-sub-menu">
                       <a id="navLinkPagesAccount" class="hs-mega-menu-invoker dropdown-item dropdown-item-toggle " href="javascript:;" aria-haspopup="true" aria-expanded="false" aria-controls="navSubmenuPagesAccount">Hub <span class="badge badge-success badge-pill ml-2">New</span></a>
 
                       <div id="navSubmenuPagesAccount" class="hs-sub-menu dropdown-menu hs-sub-menu-desktop-lg fadeOut" aria-labelledby="navLinkPagesAccount" style="min-width: 230px; display: none;">
-                        <a class="dropdown-item " href="<?php echo(base_url()) ?>home/travail">Ce que nous faisons </a>
+
+                        <!-- <a class="dropdown-item " href="<?php echo(base_url()) ?>home/travail">Ce que nous faisons </a> -->
                         <a class="dropdown-item " href="<?php echo(base_url()) ?>home/propositionvaleur">proposition de valeur</a>
                        
                         <a class="dropdown-item " href="<?php echo(base_url()) ?>home/domaine">Domaines d’activité principaux recensés</a>

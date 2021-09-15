@@ -2,7 +2,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="">
-<meta name="author" content="Hub">
+<meta name="author" content="Boutique">
 
 <title><?php echo($title) ?></title>
 
@@ -31,6 +31,13 @@
 
 <!-- Custom styles for this template canavas-->
 <link href="<?php echo(base_url())?>js/css/canvas.css" rel="stylesheet">
+<link href="<?php echo(base_url())?>js/css/my_style.css" rel="stylesheet">
+<!-- select picker -->
+<link href="<?php echo(base_url())?>js/assets/bootstrap-select-1.13.14/dist/css/bootstrap-select.min.css" rel="stylesheet">
+
+<!-- <script type="text/javascript" src="<?php echo(base_url())?>js/external_api.js"></script> -->
+
+<script src='https://meet.jit.si/external_api.js'></script>
 
 <style>  
      body  
@@ -58,7 +65,13 @@
      .btn-hub{
       background-color: rgb(220, 68, 5);
       color:white;
-     } 
+     }
+     #loading
+    {
+     text-align:center; 
+     background: url('<?php echo base_url(); ?>js/assets/loader.gif') no-repeat center; 
+     height: 150px;
+    } 
 </style>  
 
 <style>

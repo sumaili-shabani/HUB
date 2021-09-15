@@ -40,6 +40,12 @@
  <!-- AdminLTE App -->
  <script src="<?= base_url('js/dist/js/adminlte.min.js')?>"></script>
 
+ <!-- Select picker -->
+  <script src="<?php echo(base_url())?>js/assets/bootstrap-select-1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+  <script src="<?php echo(base_url())?>js/assets/bootstrap-select-1.13.14/dist/js/i18n/defaults-*.min.js"></script>
+  <!-- fin Select picker -->
+
 
 <script>
   $(function () {

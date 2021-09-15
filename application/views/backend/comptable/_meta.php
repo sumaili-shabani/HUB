@@ -32,6 +32,14 @@
 <!-- Custom styles for this template canavas-->
 <link href="<?php echo(base_url())?>js/css/canvas.css" rel="stylesheet">
 
+
+<!-- <script type="text/javascript" src="<?php echo(base_url())?>js/external_api.js"></script> -->
+
+
+<script src='https://meet.jit.si/external_api.js'></script>
+
+
+
 <style>  
      body  
      {  
@@ -59,6 +67,12 @@
       background-color: rgb(220, 68, 5);
       color:white;
      } 
+    #loading
+    {
+     text-align:center; 
+     background: url('<?php echo base_url(); ?>js/assets/loader.gif') no-repeat center; 
+     height: 150px;
+    } 
 </style>  
 
 <style>
@@ -109,12 +123,5 @@
       border-radius: 5px;
       margin-bottom: 24px;
       box-shadow: 10px 10px 5px #eeeeee;
-    }
-
-    #loading
-    {
-     text-align:center; 
-     background: url('<?php echo base_url(); ?>js/assets/loader.gif') no-repeat center; 
-     height: 150px;
     }
 </style>

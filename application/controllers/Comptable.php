@@ -50,6 +50,26 @@ class comptable extends CI_Controller
     		// $this->load->view('backend/comptable/templete_admin', $data);
   	}
 
+    function joinmetting($param =''){
+      $data['title']="Rejoindre la reunion";
+      $data['domain']=$param;
+
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+      $data['variable']  = $this->crud_model->Select_all_news();
+      $data['roles']      = $this->crud_model->Select_formations_ok("idrole","role");
+      $data['conference']     = $this->crud_model->Select_formations_ok("idconference","conference");
+      $this->load->view('backend/comptable/joinmetting', $data);
+    }
+
+    function calendrier(){
+      $data['title']="Calendrier d'activité pour une réunion";
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+      $data['variable']  = $this->crud_model->Select_all_news();
+      $this->load->view('backend/comptable/zoom_calendar', $data);
+    }
+
   	function dashbord(){
   		   $data['title']="Tableau de bord";
   	     

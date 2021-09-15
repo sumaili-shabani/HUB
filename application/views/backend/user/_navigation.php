@@ -65,6 +65,9 @@
 
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/compterendu">Compte rendu</a>
 
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/zoom">conférence zoom</a>
+
                         
                         
                        

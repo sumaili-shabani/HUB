@@ -32,6 +32,12 @@
 <!-- Custom styles for this template canavas-->
 <link href="<?php echo(base_url())?>js/css/canvas.css" rel="stylesheet">
 <link href="<?php echo(base_url())?>js/css/my_style.css" rel="stylesheet">
+<!-- select picker -->
+<link href="<?php echo(base_url())?>js/assets/bootstrap-select-1.13.14/dist/css/bootstrap-select.min.css" rel="stylesheet">
+
+<!-- <script type="text/javascript" src="<?php echo(base_url())?>js/external_api.js"></script> -->
+
+<script src='https://meet.jit.si/external_api.js'></script>
 
 <style>  
      body  

@@ -86,6 +86,63 @@ class admin extends CI_Controller
 	      $this->load->view('backend/admin/news', $data);
 	    }
 
+	    function zoom(){
+	      $data['title']="Paramètrage zoom!";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $this->load->view('backend/admin/zoom', $data);
+	    }
+
+	    function calendrier(){
+	      $data['title']="Calendrier d'activité pour une réunion";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $this->load->view('backend/admin/zoom_calendar', $data);
+	    }
+
+
+	    
+
+	    function invite(){
+	      $data['title']="Paramètrage des invités zoom!";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $data['roles']  		= $this->crud_model->Select_formations_ok("idrole","role");
+	      $data['conference']  		= $this->crud_model->Select_formations_ok("idconference","conference");
+	      $this->load->view('backend/admin/invite_zoom', $data);
+	    }
+
+	    function reunion(){
+	      $data['title']="Créer une reunion";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $data['roles']  		= $this->crud_model->Select_formations_ok("idrole","role");
+	      $data['conference']  		= $this->crud_model->Select_formations_ok("idconference","conference");
+	      $this->load->view('backend/admin/reunion', $data);
+	    }
+
+	    function joinmetting($param =''){
+	      $data['title']="Rejoindre la reunion";
+	      $data['domain']=$param;
+
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $data['roles']  		= $this->crud_model->Select_formations_ok("idrole","role");
+	      $data['conference']  		= $this->crud_model->Select_formations_ok("idconference","conference");
+	      $this->load->view('backend/admin/joinmetting', $data);
+	    }
+
+	    
+
+	    
+
+	    
+
 		function category_news(){
 
 			$data['title']="Paramètrage cétegorie produit";
@@ -7322,6 +7379,761 @@ class admin extends CI_Controller
           }
    
     }
+
+
+    /*
+    script pour la conference
+    ===========================
+    zoom conference
+    ==========================
+    ****************************
+    ****************************
+
+    */
+
+    // script de conference
+	
+	  function fetch_single_conference()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_conference($_POST["idconference"]);  
+	       foreach($data as $row)  
+	       {  
+	            $output['nom']    				= $row->nom;
+	            $output['date_debit']    		= $row->date_debit;
+	            $output['date_fin']    			= $row->date_fin;
+	            $output['heure_debit']    		= $row->heure_debit;
+	            $output['heure_fin']    		= $row->heure_fin;
+	            
+	            $output['first_name']    		= $row->first_name; 
+	            $output['last_name']   			= $row->last_name;
+	            $output['telephone']    		= $row->telephone; 
+	            
+	           
+	       }  
+	       echo json_encode($output);  
+	  }  
+
+
+	  function operation_conference(){
+
+	  	$id_user 	= $this->connected;
+	  	$nom 	= $this->input->post('nom');
+	  	
+	  	$codeReservation = str_shuffle(substr("0123456789", 0,10));
+
+	  	$query = $this->crud_model->fetch_single_conference_in_stadium($id_user, $nom);
+	  	if ($query > 0) {
+	  		# code...
+	  		echo "echec!!!";
+	  	}
+	  	else{
+
+		    $insert_data = array(  
+		           'nom'            	 =>     $this->input->post('nom'),
+		           'date_debit'          =>     $this->input->post('date_debit'),
+		           'heure_debit'         =>     $this->input->post('heure_debit'),
+		           'date_fin'            =>     $this->input->post('date_fin'),
+		           'heure_fin'           =>     $this->input->post('heure_fin'),
+		           'id_user'    		 =>     $id_user  
+		    );  
+
+		    $requete=$this->crud_model->insert_conference($insert_data);
+		    echo("Ajout information avec succès");
+	  	}
+
+	      
+	  }
+
+	  function modification_conference(){
+
+	      $updated_data = array(  
+	      	   'nom'            	 =>     $this->input->post('nom'),
+	           'date_debit'          =>     $this->input->post('date_debit'),
+	           'heure_debit'         =>     $this->input->post('heure_debit'),
+	           'date_fin'            =>     $this->input->post('date_fin'),
+	           'heure_fin'           =>     $this->input->post('heure_fin')
+	      );
+
+	      $this->crud_model->update_conference($this->input->post("idconference"), $updated_data);
+	      echo("modification avec succès");
+	  }
+
+	  
+
+	  function supression_conference(){
+
+	      $this->crud_model->delete_conference($this->input->post("idconference"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	   // pagination user to sms 
+    function pagination_conference_client()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_conferences();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination pagination2">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detail_conference($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_conference_client()
+   {
+	  $output = '';
+	  $query = '';
+
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_conference_ok($query);
+	  $output .= '
+   
+	    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	     <theader>
+	       <tr>
+	        
+	        <th width="10%">Avatar</th>
+	        <th width="20%">Nom de la Conférence</th>
+	        <th width="10%">Date debit</th>
+	        <th width="10%">Heure debit</th>
+	        
+	        <th width="10%">Date fin</th>
+	        <th width="10%">Heure fin</th>
+	        <th width="20%">Mise à jour</th>
+
+	        <th width="5%">Editer</th>
+	        <th width="5%">Supprimer</th>
+	        
+	        
+	       </tr>
+	     <theader>
+	     <tbody>
+	    ';
+	      foreach($data->result() as $row)
+	      {
+	          
+
+	          $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> Client </span>';
+
+
+	           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+	          
+	          ';
+
+	         
+	           $output .= '
+	           <tr>
+	            
+	            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+	            <td>'.substr($row->nom, 0,20).'...</td>
+
+	            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+	            <td>'.$row->heure_debit.'</td>
+	            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+	            <td>'.$row->heure_fin.'</td>
+
+	            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+
+	            <td>
+	              <button type="button" name="update" idconference="'.$row->idconference.'" class="btn btn-warning btn-circle btn-sm update mr-2"><i class="fa fa-edit"></i></button> 
+	            </td>
+	            <td>
+	            <button type="button" name="delete" idconference="'.$row->idconference.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>
+	            </td>
+	            
+	           </tr>
+	           ';
+
+	      }
+	      $output .= '
+	            <tbody>
+	            <tfooter>
+	             <tr>
+	              <th width="10%">Avatar</th>
+	              <th width="20%">Nom de la Conférence</th>
+	              <th width="10%">Date debit</th>
+	              <th width="10%">Heure debit</th>
+	              
+	              <th width="10%">Date fin</th>
+	              <th width="10%">Heure fin</th>
+	              <th width="20%">Mise à jour</th>
+
+	              <th width="5%">Editer</th>
+	              <th width="5%">Supprimer</th>
+	              
+	              
+	             </tr>
+	           <tfooter>
+	    </table>';
+	  	echo $output;
+	}
+
+	// fin conference
+
+	/*
+    script pour la invite
+    ===========================
+    zoom invite
+    ==========================
+    ****************************
+    ****************************
+
+    */
+
+    // script de invite
+	
+	  function fetch_single_invite()  
+	  {  
+	       $output = array();  
+	       $data = $this->crud_model->fetch_single_invite($_POST["idinvite"]);  
+	       foreach($data as $row)  
+	       {  
+	            $output['nom']    				= $row->nom;
+	            $output['date_debit']    		= $row->date_debit;
+	            $output['date_fin']    			= $row->date_fin;
+	            $output['heure_debit']    		= $row->heure_debit;
+	            $output['heure_fin']    		= $row->heure_fin;
+	            
+	            $output['first_name']    		= $row->first_name; 
+	            $output['last_name']   			= $row->last_name;
+	            $output['telephone']    		= $row->telephone; 
+	            
+	           
+	       }  
+	       echo json_encode($output);  
+	  }  
+
+
+	  function operation_invite(){
+
+	  	$id_user 	= $this->connected;
+	  	$idconference 	= $this->input->post('idconference');
+	  	
+	  	$codeReservation = str_shuffle(substr("0123456789", 0,10));
+
+	  	$query = $this->crud_model->fetch_single_invite_in_stadium($id_user, $idconference);
+	  	if ($query > 0) {
+	  		# code...
+	  		echo "echec!!!";
+	  	}
+	  	else{
+
+		    $insert_data = array(  
+		           'idconference'        =>     $this->input->post('idconference'),
+		           'id_user'    		 =>     $id_user  
+		    );  
+
+		    $requete=$this->crud_model->insert_invite($insert_data);
+		    echo("Ajout information avec succès");
+	  	}
+
+	      
+	  }
+
+	  function modification_invite(){
+	  	  $id_user 	= $this->connected;
+	      $updated_data = array(  
+      	    'idconference'        =>     $this->input->post('idconference'),
+	        'id_user'    		  =>     $id_user  
+	      );
+
+	      $this->crud_model->update_conference($this->input->post("idinvite"), $updated_data);
+	      echo("modification avec succès");
+	  }
+
+	  
+
+	  function supression_invite(){
+
+	      $this->crud_model->delete_invite($this->input->post("idinvite"));
+	      echo("suppression avec succès");
+	    
+	  }
+
+	   // pagination user to sms 
+    function pagination_invite_client()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_invites();
+    $config["per_page"] = 4;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination pagination2">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detail_invite($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_invite_client()
+   {
+	  $output = '';
+	  $query = '';
+
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_invite_ok($query);
+	  $output .= '
+   
+	    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	     <theader>
+	       <tr>
+	        
+	        <th width="10%">Avatar</th>
+	        <th width="20%">Nom de la Conférence</th>
+	        <th width="10%">Date debit</th>
+	        <th width="10%">Heure debit</th>
+	        
+	        <th width="10%">Date fin</th>
+	        <th width="10%">Heure fin</th>
+	        <th width="20%">Mise à jour</th>
+
+	        <th width="5%">Profil</th>
+	        <th width="5%">Supprimer</th>
+	        
+	        
+	       </tr>
+	     <theader>
+	     <tbody>
+	    ';
+	      foreach($data->result() as $row)
+	      {
+	          
+
+	          $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> Client </span>';
+
+
+	           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+	          
+	          ';
+
+	         
+	           $output .= '
+	           <tr>
+	            
+	            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+	            <td>'.substr($row->nom, 0,20).'...</td>
+
+	            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_debit)), 0, 23)).'</td>
+	            <td>'.$row->heure_debit.'</td>
+	            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+	            <td>'.$row->heure_fin.'</td>
+
+	            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->date_fin)), 0, 23)).'</td>
+
+	            <td>
+	              <button type="button" name="update" id="'.$row->id.'" class="btn btn-warning btn-circle btn-sm update mr-2"><i class="fa fa-user"></i></button> 
+	            </td>
+	            <td>
+	            <button type="button" name="delete" idinvite="'.$row->idinvite.'" class="btn btn-danger btn-circle btn-sm delete"><i class="fa fa-trash"></i></button>
+	            </td>
+	            
+	           </tr>
+	           ';
+
+	      }
+	      $output .= '
+	            <tbody>
+	            <tfooter>
+	             <tr>
+	              <th width="10%">Avatar</th>
+	              <th width="20%">Nom de la Conférence</th>
+	              <th width="10%">Date debit</th>
+	              <th width="10%">Heure debit</th>
+	              
+	              <th width="10%">Date fin</th>
+	              <th width="10%">Heure fin</th>
+	              <th width="20%">Mise à jour</th>
+
+	              <th width="5%">Profil</th>
+	              <th width="5%">Supprimer</th>
+	              
+	              
+	             </tr>
+	           <tfooter>
+	    </table>';
+	  	echo $output;
+	}
+	// fin invite
+
+	function fetch_single_personne_zoom()  
+	{  
+       $output = array();  
+       $data = $this->crud_model->fetch_single_personne_user($_POST["id"]);  
+       foreach($data as $row)  
+       {  
+            $output['first_name'] 		= $row->first_name;  
+            $output['last_name'] 		= $row->last_name; 
+            $output['email'] 			= $row->email; 
+            $output['date_nais'] 		= $row->date_nais; 
+            $output['telephone'] 		= $row->telephone; 
+            $output['full_adresse'] 	= $row->full_adresse; 
+
+            $output['sexe'] 			= $row->sexe;
+            
+            if($row->image != '')  
+            {  
+                $output['user_image'] = '<img src="'.base_url().'upload/photo/'.$row->image.'" class="img-thumbnail" width="200" height="200" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+            }  
+            else  
+            {  
+                $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+            }  
+       }  
+       echo json_encode($output);  
+	}
+
+
+
+	// pagination user to sms 
+    function pagination_message_users_zoom()
+   {
+
+    $this->load->library("pagination");
+    $config = array();
+    $config["base_url"] = "#";
+    $config["total_rows"] = $this->crud_model->count_all_message_users();
+    $config["per_page"] = 10;
+    $config["uri_segment"] = 3;
+    $config["use_page_numbers"] = TRUE;
+    $config["full_tag_open"] = '<ul class="pagination pagination2">';
+    $config["full_tag_close"] = '</ul>';
+    $config["first_tag_open"] = '<li class="page-item">';
+    $config["first_tag_close"] = '</li>';
+    $config["last_tag_open"] = '<li class="page-item">';
+    $config["last_tag_close"] = '</li>';
+    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+    $config["next_tag_open"] = '<li class="page-item">';
+    $config["next_tag_close"] = '</li>';
+    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+    $config["prev_tag_open"] = "<li class='page-item'>";
+    $config["prev_tag_close"] = "</li>";
+    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+    $config["cur_tag_close"] = "</a></li>";
+    $config["num_tag_open"] = "<li class='page-item'>";
+    $config["num_tag_close"] = "</li>";
+    $config["num_links"] = 1;
+    $this->pagination->initialize($config);
+    $page = $this->uri->segment(3);
+    $start = ($page - 1) * $config["per_page"];
+
+    $output = array(
+     'pagination_link'  => $this->pagination->create_links(),
+     'country_table'   => $this->crud_model->fetch_detailsmessage_users_zoom($config["per_page"], $start)
+    );
+    echo json_encode($output);
+  }
+
+   function search_message_users_zoom()
+   {
+	  $output = '';
+	  $query = '';
+
+	  if($this->input->post('query'))
+	  {
+	   $query = $this->input->post('query');
+	  }
+	  $data = $this->crud_model->fetch_data_sms_users($query);
+	   $output .= '
+	   
+	    <table class="table-striped table-bordered nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="true" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+	     <theader>
+	       <tr>
+	        <th width="5%">Selectionner</th>
+	        <th width="5%">Avatar</th>
+	        <th width="20%">Nom complet</th>
+	        <th width="15%">Télephone</th>
+	        <th width="10%">Statut</th>
+	        
+	        <th width="5%">Sexe</th>
+	        <th width="20%">Mise à jour</th>
+	        
+	        
+	       </tr>
+	     <theader>
+	     <tbody>
+	    ';
+	    if ($data->num_rows() <= 0) {
+	    	# code...
+	    }
+	    else{
+
+	    	foreach($data->result() as $row)
+		    {
+
+		          
+		          if ($row->idrole == 1) {
+		            $etat ='<span class="badge badge-success"><i class="fa fa-tag"></i> '.$row->nom.'</span>';
+		          }
+		          else if ($row->idrole == 2) {
+		            $etat ='<span class="badge badge-warning"><i class="fa fa-user"></i> '.$row->nom.'</span>';
+		          }
+		          else if ($row->idrole == 3) {
+		            $etat ='<span class="badge badge-secondary"><i class="fa fa-home"></i> '.$row->nom.'</span>';
+		          }
+		          else if ($row->idrole == 4) {
+		            $etat ='<span class="badge badge-primary"><i class="fa fa-money"></i> '.$row->nom.'</span>';
+		          }
+		          else{
+		            $etat ='<span class="badge badge-danger"><i class="fa fa-eye"></i></span>';
+		          }
+
+		          $link = '<a href="tel:'.$row->telephone.'" class="text-primary"><i class="fa fa-phone"></i></a>
+		           <input type="checkbox" name="id" value="'.$row->id.'" class="tels delete_checkbox">
+		          ';
+
+		           $email = '<a href="mailto:'.$row->email.'" class="text-primary"><i class="fa fa-google mr-1"></i> '.$row->email.'</a>
+		          
+		          ';
+
+		           $output .= '
+		           <tr>
+		            <td>'.$link.'</td>
+		            <td><img src="'.base_url().'upload/photo/'.$row->image.'" class="table-user-thumb" style="border-radius: 50%; width: 50px; height: 30px;" /></td>
+
+		             <td>'.substr($row->first_name.' '.$row->last_name, 0,20).'...</td>
+
+		            <td>'.$row->telephone.'</td>
+		            <td>'.$etat.'</td>
+		            
+		            <td>'.$row->sexe.'</td>
+
+
+		            <td>'.substr(date(DATE_RFC822, strtotime($row->debit_event)), 0, 23).'</td>
+		           
+		           </tr>
+		           ';
+		        
+
+		    }
+
+	    }
+	      
+          $output .= '
+	        <tbody>
+	        <tfooter>
+	         <tr>
+	          <th width="5%">Selectionner</th>
+	          <th width="5%">Avatar</th>
+	          <th width="20%">Nom complet</th>
+	          <th width="15%">Télephone</th>
+	          <th width="10%">Statut</th>
+	          
+	          <th width="5%">Sexe</th>
+	          <th width="20%">Mise à jour</th>
+	          
+	         </tr>
+	       <tfooter>
+	    </table>';
+	  	echo $output;
+	}
+
+	// pagination user to sms 
+    function pagination_message_users_byrole_zoom()
+	{
+		sleep(1);
+		$idrole = $this->input->post('idrole');
+
+	    $this->load->library("pagination");
+	    $config = array();
+	    $config["base_url"] = "#";
+	    $config["total_rows"] = $this->crud_model->count_all_message_users_byrole($idrole);
+	    $config["per_page"] = 5;
+	    $config["uri_segment"] = 3;
+	    $config["use_page_numbers"] = TRUE;
+	    $config["full_tag_open"] = '<ul class="pagination pagination_filter">';
+	    $config["full_tag_close"] = '</ul>';
+	    $config["first_tag_open"] = '<li class="page-item">';
+	    $config["first_tag_close"] = '</li>';
+	    $config["last_tag_open"] = '<li class="page-item">';
+	    $config["last_tag_close"] = '</li>';
+	    $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+	    $config["next_tag_open"] = '<li class="page-item">';
+	    $config["next_tag_close"] = '</li>';
+	    $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+	    $config["prev_tag_open"] = "<li class='page-item'>";
+	    $config["prev_tag_close"] = "</li>";
+	    $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	    $config["cur_tag_close"] = "</a></li>";
+	    $config["num_tag_open"] = "<li class='page-item'>";
+	    $config["num_tag_close"] = "</li>";
+	    $config["num_links"] = 1;
+	    $this->pagination->initialize($config);
+	    $page = $this->uri->segment(3);
+	    $start = ($page - 1) * $config["per_page"];
+
+	    $output = array(
+	     'pagination_link2'  => $this->pagination->create_links(),
+	     'country_table'   => $this->crud_model->fetch_detailsmessage_users_byrole_zoom($config["per_page"], $start, $idrole)
+	    );
+	    echo json_encode($output);
+	}
+
+	function infomation_zoom()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+
+           		$website 		= 	$this->email_sites;
+                $id_user 		=	$id[$count];
+                $url 			= 	htmlentities($this->input->post('link'));
+                $idconference 	= 	$this->input->post('idconference');
+
+                $mon_lien = $this->input->post('link');
+
+
+                $num_dev = $this->num_dev;
+                $token_sms = $this->token_sms;
+
+                // echo("id:".$id_user." message:".$url);
+
+               
+
+			  	
+			  	$codeReservation = str_shuffle(substr("0123456789", 0,10));
+
+			  	$query2 = $this->crud_model->fetch_single_invite_in_stadium($id_user, $idconference);
+			  	if ($query2 > 0) {
+			  		# code...
+			  		echo "echec!!!";
+			  	}
+			  	else{
+
+				    $insert_data = array(  
+				           'idconference'        =>     $this->input->post('idconference'),
+				           'id_user'    		 =>     $id_user  
+				    );  
+
+				    $query=$this->crud_model->insert_invite($insert_data);
+
+				    // invitation
+	                if ($query > 0) {
+
+	                	$nom_respect	= $this->crud_model->get_name_user($this->connected);
+
+	                    $nom    		= $this->crud_model->get_name_user($id_user);
+	                    $idrole     	= $this->crud_model->get_role_user($id_user);
+	                    $telephone    	= $this->crud_model->get_telephone_user($id_user);
+
+	                    if ($idrole == 1) {
+	                    	# code...
+	                    	$url    	="admin/joinmetting/". $url;
+	                    }
+	                    elseif ($idrole == 2) {
+	                    	# code...
+	                    	$url    	="user/joinmetting/". $url;
+	                    }
+	                    elseif ($idrole == 3) {
+	                    	# code...
+	                    	$url    	="entreprise/joinmetting/". $url;
+	                    }
+	                    elseif ($idrole == 4) {
+	                    	# code...
+	                    	$url    	="comptable/joinmetting/". $url;
+	                    }
+	                    else{
+	                    	$url = '';
+	                    }
+
+	                    $message =$nom_respect." Vient de vous ajouter pour faire part dans une conférence";
+
+	                    $notification = array(
+	                      'titre'     =>    "Bonjour  ".$nom." vous venez d'être sélectionné(e) dans une conférence",
+	                      'icone'     =>    "fa fa-video",
+	                      'message'   =>     $message,
+	                      'url'       =>     $url,
+	                      'id_user'   =>     $id_user
+	                    );
+	                    
+	                    $not = $this->crud_model->insert_notification($notification);
+
+	                    if ($telephone !='') {
+		                	# code...
+
+		                	//$this->envoieSMS($telephone, $message." votre lien: ".$mon_lien, $num_dev, $token_sms);
+		                }
+
+	                }
+ 
+				    // fin invitation
+
+
+			  	}
+
+                
+
+
+
+                
+
+           }
+
+        }
+    }
+
+
 
 
 

@@ -49,6 +49,9 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/newprojet">Nouveau projet</a>
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/module">Module de cours</a>
+
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/calendrier">conférence zoom</a>
                        
                     </div>
                 </div>
