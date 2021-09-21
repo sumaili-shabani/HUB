@@ -47,6 +47,10 @@
           <div class="col-md-8">
             <!-- contenu -->
             <?php include("component/partenariat.php") ?>
+
+            <div class="col-md-12">
+              <img src="<?php echo(base_url()) ?>upload/tbl_info/partenaire.jpeg" class="img img-thumbnail">
+            </div>
             <!-- fin contenu -->
           </div>
           <div class="col-md-4 text-primary">

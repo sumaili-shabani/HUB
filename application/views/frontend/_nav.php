@@ -109,6 +109,7 @@
 
           <div class="ml-auto">
            
+            
             <a class="dropdown-item" href="<?php echo(base_url()) ?>home/contact">Contacts</a>
 
            
@@ -201,7 +202,7 @@
                        
                         <a class="dropdown-item " href="<?php echo(base_url()) ?>home/domaine">Domaines d’activité principaux recensés</a>
                         <a class="dropdown-item " href="<?php echo(base_url()) ?>home/entreprise">Les entreprises et les entrepreneurs </a>
-                        <a class="dropdown-item " href="<?php echo(base_url()) ?>home/scriptnail">Cryptnail : l'academie du code du nord-kivu</a>
+                        <a class="dropdown-item " href="<?php echo(base_url()) ?>home/cryptnail">Cryptnail : l'academie du code du nord-kivu</a>
                         <a class="dropdown-item " href="<?php echo(base_url()) ?>home/academie">Académie de leadership </a>
                        
                       </div>
@@ -212,7 +213,7 @@
                     <a class="dropdown-item " href="<?php echo(base_url()) ?>home/secteur">Secteur d'activité</a>
                     <!-- Company -->
                      <!-- Company -->
-                    <a class="dropdown-item " href="<?php echo(base_url()) ?>home/carriere">Carrière</a>
+                    <a class="dropdown-item " href="<?php echo(base_url()) ?>home/ecosysteme">Ecosystème</a>
                     <!-- Company -->
                      <!-- Company -->
                     <a class="dropdown-item " href="<?php echo(base_url()) ?>home/partenariat">Partenariat</a>
@@ -368,6 +369,34 @@
 
                      ?>
 
+                     <!-- Promo Item -->
+                    <div class="navbar-promo-item">
+                      <a class="navbar-promo-link" href="<?php echo(base_url()) ?>home/galery">
+                        <div class="media align-items-center">
+                          <img class="navbar-promo-icon" src="<?php echo base_url(); ?>js/dev/assets/svg/icons/icon-2.svg" alt="SVG">
+                          <div class="media-body">
+                            <span class="navbar-promo-title">Evènement</span>
+                            <small class="navbar-promo-text">Notre galerie Photos</small>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    <!-- End Promo Item -->
+
+                     <!-- Promo Item -->
+                    <div class="navbar-promo-item">
+                      <a class="navbar-promo-link" href="<?php echo(base_url()) ?>home/event">
+                        <div class="media align-items-center">
+                          <img class="navbar-promo-icon" src="<?php echo base_url(); ?>js/dev/assets/svg/icons/icon-13.svg" alt="SVG">
+                          <div class="media-body">
+                            <span class="navbar-promo-title">Nos activités</span>
+                            <small class="navbar-promo-text">Soyez à jour sur nos activités</small>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    <!-- End Promo Item -->
+
                    
 
                     <div class="navbar-promo-footer">
@@ -393,11 +422,106 @@
                 </li>
                 <!-- End Docs -->
 
-                <!-- Button -->
-                <li class="navbar-nav-last-item">
-                  <a class="btn btn-sm btn-primary transition-3d-hover" href="<?php echo(base_url()) ?>login" >Se connecter</a>
-                </li>
-                <!-- End Button -->
+                <?php 
+
+                 $first_name;
+                 $connected;
+                  if ($this->session->userdata('admin_login')) {
+                    $connected = $this->session->userdata('admin_login');
+                  }
+                  elseif($this->session->userdata('id'))
+                  {
+                        $connected = $this->session->userdata('id');
+                  }
+                  elseif($this->session->userdata('comptable_login'))
+                  {
+                        $connected = $this->session->userdata('comptable_login');
+                  }
+                  elseif($this->session->userdata('instuctor_login'))
+                  {
+
+                        $connected = $this->session->userdata('instuctor_login');
+                  }
+                  else{
+                    $connected = 0;
+                  }
+
+                  $this->db->where('id',$connected);
+                  $users = $this->db->get('users')->result_array();
+                 foreach ($users as $row) {
+                  $first_name   = $row["first_name"];
+                 }
+                   
+                  
+
+                if($this->session->userdata('admin_login'))
+                {
+                   
+                  ?>
+                  <!-- Button -->
+                  <li class="navbar-nav-item">
+                      <a class="nav-link " href="<?php echo(base_url()) ?>admin/profile">
+                        <i class="fa fa-user font-size-1 mr-1"></i><?php echo($first_name) ?>
+                      </a>
+                  </li>
+                  <!-- End Button -->
+                  <?php
+                }
+                elseif($this->session->userdata('id'))
+                {
+                     ?>
+                  <!-- Button -->
+                  <li class="navbar-nav-item">
+                      <a class="nav-link " href="<?php echo(base_url()) ?>user/profile">
+                        <i class="fa fa-user font-size-1 mr-1"></i><?php echo($first_name) ?>
+                      </a>
+                  </li>
+                  <!-- End Button -->
+                  <?php
+                }
+                elseif($this->session->userdata('comptable_login'))
+                {
+                  ?>
+                  <!-- Button -->
+                  <li class="navbar-nav-item">
+                      <a class="nav-link " href="<?php echo(base_url()) ?>comptable/profile">
+                        <i class="fa fa-user font-size-1 mr-1"></i><?php echo($first_name) ?>
+                      </a>
+                  </li>
+                  <!-- End Button -->
+                  <?php
+                     
+                }
+                elseif($this->session->userdata('instuctor_login'))
+                {
+
+                     ?>
+                    <!-- Button -->
+                    <li class="navbar-nav-item">
+                        <a class="nav-link " href="<?php echo(base_url()) ?>entreprise/profile">
+                          <i class="fa fa-user font-size-1 mr-1"></i><?php echo($first_name) ?>
+                        </a>
+                    </li>
+                    <!-- End Button -->
+                    <?php
+                }
+                else{
+
+                  ?>
+                  <!-- Button -->
+                  <li class="navbar-nav-last-item">
+                    <a class="btn btn-sm btn-primary transition-3d-hover" href="<?php echo(base_url()) ?>login" >Se connecter</a>
+                  </li>
+                  <!-- End Button -->
+                  <?php
+
+                }
+
+
+
+                 ?>
+
+                
               </ul>
             </div>
           </div>

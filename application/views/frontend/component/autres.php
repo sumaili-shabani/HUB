@@ -41,7 +41,7 @@
         <!-- bloc -->
 		<div class="col-md-6 mb-7 ">
           <!-- Icon Blocks -->
-          <h3>Hello, vous souhaitez vous inscrire pour la prochaine promotion hUB UJN ?</h3>
+          <h3>Hello, vous souhaitez vous inscrire pour la prochaine promotion HUB UJN ?</h3>
 	      <p>Répondez à aux questions pour vous pré-inscrire, si votre idée nous intéresse, nous reviendrons rapidement vers vous :)</p>
 	      <a href="https://forms.gle/vZf4CeR6eU1Q3Dws5" class="btn btn-warning btn-sm" data-target="_blank">Démarrer</a> appuyez sur Entrée ↵
 

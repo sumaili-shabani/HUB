@@ -208,6 +208,38 @@ class home extends CI_Controller
 		$this->load->view('frontend/about', $data);
 	}
 
+	function galery(){
+		$data['title']="Notre galerie Photos";
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+		$data['categories']  	= $this->crud_model->Select_category_menu();
+		$data['carousels']  	= $this->crud_model->Select_carousel_slider();
+
+		$data['t_info_choix']  	= $this->crud_model->Select_tinfo_choix_slider();
+		$data['t_info_service']  	= $this->crud_model->Select_tinfo_services_slider();
+		$data['t_info_partainare']  	= $this->crud_model->Select_partenaires_slider();
+
+		$data['t_info_personnel']  	= $this->crud_model->Select_infopersonnel_slider();
+		$data['t_info_member']  	= $this->crud_model->Select_tinfo_member_slider();
+		$data['infos_news']  = $this->crud_model->Select_all_to_news();
+		$this->load->view('frontend/galery', $data);
+	}
+
+	function event(){
+		$data['title']="Nous vous proposons d’être l’un des  Partenaires privilégiés de la vie du HUB UJN au travers de plusieurs activités!";
+		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+		$data['categories']  	= $this->crud_model->Select_category_menu();
+		$data['carousels']  	= $this->crud_model->Select_carousel_slider();
+
+		$data['t_info_choix']  	= $this->crud_model->Select_tinfo_choix_slider();
+		$data['t_info_service']  	= $this->crud_model->Select_tinfo_services_slider();
+		$data['t_info_partainare']  	= $this->crud_model->Select_partenaires_slider();
+
+		$data['t_info_personnel']  	= $this->crud_model->Select_infopersonnel_slider();
+		$data['t_info_member']  	= $this->crud_model->Select_tinfo_member_slider();
+		$data['infos_news']  = $this->crud_model->Select_all_to_news();
+		$this->load->view('frontend/event', $data);
+	}
+
 	function secteur(){
 		$data['title']="Secteur d'activité";
 		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
@@ -224,8 +256,8 @@ class home extends CI_Controller
 		$this->load->view('frontend/secteur', $data);
 	}
 
-	function carriere(){
-		$data['title']="carrière d'activité";
+	function ecosysteme(){
+		$data['title']="Ecosystème";
 		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
 		$data['categories']  	= $this->crud_model->Select_category_menu();
 		$data['carousels']  	= $this->crud_model->Select_carousel_slider();
@@ -303,7 +335,7 @@ class home extends CI_Controller
 		$this->load->view('frontend/entreprise', $data);
 	}
 
-	function scriptnail(){
+	function cryptnail(){
 		$data['title']="cryptnail : l’académie du code du nord kivu";
 		$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
 		$data['categories']  	= $this->crud_model->Select_category_menu();
@@ -422,13 +454,29 @@ class home extends CI_Controller
             $output['twitter'] = $row->twitter;
             $output['poste'] = $row->poste;
             $output['image'] = $row->image;
-
-            $output['media_social'] ='
+            $output['bio'] = substr($row->bio, 0,500).'...';
+            if ($row->cv !=null) {
+            	$output['media_social'] ='
                  <a href="'.$row->facebook.'" target="_blank" class="btn btn-primary btn-circle btn-xs mr-1"><i class="fa fa-facebook"></i></a>
 
                  <a href="'.$row->twitter.'" target="_blank" class="btn btn-info btn-circle btn-xs mr-1"><i class="fa fa-twitter"></i></a>
                  <a href="'.$row->linkedin.'" target="_blank" class="btn btn-primary btn-circle btn-xs mr-1"><i class="fa fa-linkedin"></i></a>
-            ';
+
+                 <a href="'.base_url().'upload/cv/'.$row->cv.'" target="_blank" class="btn btn-success btn-circle btn-xs mr-1"><i class="fa fa-user mr-1"></i> Voir son cv</a>
+            	';
+            }
+            else{
+            	 $output['media_social'] ='
+                 <a href="'.$row->facebook.'" target="_blank" class="btn btn-primary btn-circle btn-xs mr-1"><i class="fa fa-facebook"></i></a>
+
+                 <a href="'.$row->twitter.'" target="_blank" class="btn btn-info btn-circle btn-xs mr-1"><i class="fa fa-twitter"></i></a>
+                 <a href="'.$row->linkedin.'" target="_blank" class="btn btn-primary btn-circle btn-xs mr-1"><i class="fa fa-linkedin"></i></a>
+                 ';
+                
+            	
+            }
+
+           
 
             if($row->image != '')  
             {  
@@ -979,6 +1027,101 @@ class home extends CI_Controller
 	{
 	    echo $this->crud_model->recherche_data_auto_articles($this->uri->segment(3));
 	}
+
+	/*
+	script pour nos photos
+	**********************
+	=========================
+	=============================
+	*/
+	 // pagination de galery de la pages
+	function pagination__galeries()
+	{
+
+	  $this->load->library("pagination");
+	  $config = array();
+	  $config["base_url"] = "#";
+	  $config["total_rows"] = $this->crud_model->fetch_pagination_galeries();
+	  $config["per_page"] = 9;
+	  $config["uri_segment"] = 3;
+	  $config["use_page_numbers"] = TRUE;
+	  $config["full_tag_open"] = '<ul class="pagination">';
+	  $config["full_tag_close"] = '</ul>';
+	  $config["first_tag_open"] = '<li class="page-item">';
+	  $config["first_tag_close"] = '</li>';
+	  $config["last_tag_open"] = '<li class="page-item">';
+	  $config["last_tag_close"] = '</li>';
+	  $config['next_link'] = '<li class="page-item active"><i class="btn btn-info btn-sm">&gt;&gt;</i>';
+	  $config["next_tag_open"] = '<li class="page-item">';
+	  $config["next_tag_close"] = '</li>';
+	  $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info btn-sm">&lt;&lt;</i>';
+	  $config["prev_tag_open"] = "<li class='page-item'>";
+	  $config["prev_tag_close"] = "</li>";
+	  $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	  $config["cur_tag_close"] = "</a></li>";
+	  $config["num_tag_open"] = "<li class='page-item'>";
+	  $config["num_tag_close"] = "</li>";
+	  $config["num_links"] = 1;
+	  $this->pagination->initialize($config);
+	  $page = $this->uri->segment(3);
+	  $start = ($page - 1) * $config["per_page"];
+
+	  $output = array(
+	   'pagination_link' => $this->pagination->create_links(),
+	   'country_table'   => $this->crud_model->fetch_pagination_galery_page($config["per_page"], $start)
+	  );
+	  echo json_encode($output);
+	}
+
+
+	/*
+	script pour nos photos evenement
+	**********************
+	=========================
+	=============================
+	*/
+	 // pagination de galery de la pages
+	function pagination__galeries2()
+	{
+
+	  $this->load->library("pagination");
+	  $config = array();
+	  $config["base_url"] = "#";
+	  $config["total_rows"] = $this->crud_model->fetch_pagination_galeries2();
+	  $config["per_page"] = 9;
+	  $config["uri_segment"] = 3;
+	  $config["use_page_numbers"] = TRUE;
+	  $config["full_tag_open"] = '<ul class="pagination">';
+	  $config["full_tag_close"] = '</ul>';
+	  $config["first_tag_open"] = '<li class="page-item">';
+	  $config["first_tag_close"] = '</li>';
+	  $config["last_tag_open"] = '<li class="page-item">';
+	  $config["last_tag_close"] = '</li>';
+	  $config['next_link'] = '<li class="page-item active"><i class="btn btn-info btn-sm">&gt;&gt;</i>';
+	  $config["next_tag_open"] = '<li class="page-item">';
+	  $config["next_tag_close"] = '</li>';
+	  $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info btn-sm">&lt;&lt;</i>';
+	  $config["prev_tag_open"] = "<li class='page-item'>";
+	  $config["prev_tag_close"] = "</li>";
+	  $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	  $config["cur_tag_close"] = "</a></li>";
+	  $config["num_tag_open"] = "<li class='page-item'>";
+	  $config["num_tag_close"] = "</li>";
+	  $config["num_links"] = 1;
+	  $this->pagination->initialize($config);
+	  $page = $this->uri->segment(3);
+	  $start = ($page - 1) * $config["per_page"];
+
+	  $output = array(
+	   'pagination_link' => $this->pagination->create_links(),
+	   'country_table'   => $this->crud_model->fetch_pagination_galery_page2($config["per_page"], $start)
+	  );
+	  echo json_encode($output);
+	}
+
+
+
+
 
 
 

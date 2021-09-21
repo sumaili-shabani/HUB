@@ -66,7 +66,14 @@
                 
                 <li>Nous partageons le même idéal de voir la TECH Congolaise prendre sa place dans l ’échiquier africain et mondial</li>
                 <li>Nos souhaitons contribuer au développement de l’emploi en RDC par la promotion de l’ENTREPRENEURIAT et des JEUNES TALENTS , notamment dans le numérique!</li>
-               
+
+
+                <div class="col-md-12 mt-2 text-center">
+                  <a href="https://web.facebook.com/leadership.ujn" target="_blank" class="btn btn-hub btn-sm">
+                    <i class="fa fa-globe mr-1"></i> Suivez Académie de leadership 
+                  </a>
+                
+               </div>
 
               </ul>
               

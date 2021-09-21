@@ -11,7 +11,7 @@
             	
 
             	<td>
-            		Profile complet des ceo et leurs entreprises
+            		Profil complet des ceo et leurs entreprises
 
             	</td>
 

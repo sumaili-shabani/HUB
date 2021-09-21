@@ -9,7 +9,7 @@
 	    </div>
  	</li>
 
-	<li class="list-group-item"><a href="<?= base_url()?>user/zoom" class="text-muted"><i class="fa fa-globe mr-1"></i> Les Conférence</a></li>
+	<li class="list-group-item"><a href="<?= base_url()?>user/zoom" class="text-muted"><i class="fa fa-globe mr-1"></i> Les Conférences</a></li>
 	<li class="list-group-item">
 	  	<a href="<?= base_url()?>user/invite" class="text-muted"><i class="fa fa-group mr-1"></i> Les invités</a>
 	</li>

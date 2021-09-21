@@ -36,7 +36,7 @@
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Applications:</h6>
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/profile_entrep">Profile Entreprise</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/profile_entrep">Profil Entreprise</a>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/galery">Galerie</a>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/paiement">paiement</a>
                         

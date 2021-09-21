@@ -49,6 +49,11 @@
 
             <ul>
               <li>
+                 <div class="col-md-12">
+                  <img src="<?php echo(base_url()) ?>upload/tbl_info/dady.jpg" class="img img-thumbnail">
+                </div>
+              </li>
+              <li>
                 Un Jour Nouveau est une Organisation active dans la Protection, l’Education et l’Entrepreneuriat Social, déterminée à mettre ﬁn au cycle de violence, de pauvreté, et d’inégalités favorisés par l’ignorance, la mauvaise gouvernance, et l’absence d’opportunités.
               </li>
 
@@ -65,6 +70,14 @@
               <li>
                 L’Organisation partage la vision d’atteindre tous les hommes, les femmes et les enfants sans distinction de races, ethnies, nationalités ou classes sociales.
 
+              </li>
+              <li class="col-md-12">
+                <div class="row">
+                  <div class="col-md-9"></div>
+                  <div class="col-md-3">
+                    <b>Camille et Esther Ntoto</b>
+                  </div>
+                </div>
               </li>
 
 

@@ -166,13 +166,15 @@
                 <a href="#" class="close" data-dismiss="modal"><em class="icon ni ni-cross-sm"></em></a>
                 <div class="modal-body modal-body-lg">
                     
-                    <div class="nk-block">
+                    <div class="col-md-12">
 
                         <form method="post" id="user_form" enctype="multipart/form-data" class="col-md-12 row">
                             
                           <div class="col-md-12">
                           <div class="row">
-                          	
+                          	<div class="col-md-12">
+                             <div class="col-md-12" id="bio"></div> 
+                            </div>
                           	<div class="col-md-4">
                           		<span id="user_uploaded_image"></span>
                           	</div>
@@ -180,12 +182,12 @@
                           		<div class="col-md-12">
                           			<div class="row">
 
-                          				<div class="col-md-6">
+                          				<div class="col-md-12">
                               
 			                              <label><i class="fa fa-user"></i> nom: <span id="first_name"></span></label>  
 			                                  
 			                            </div>
-			                            <div class="col-md-6">
+			                            <div class="col-md-12">
 			                              <label><i class="fa fa-user"></i> postnom: <span id="last_name"></span></label>  
 			                                  
 			                            </div>
@@ -205,7 +207,7 @@
 			                            	<label><i class="fa fa-edit"></i> Fonction: <span class="etat text-primary" id="telephone"></span></label> 
 			                            </div>
 
-			                            <div class="col-md-4">
+			                            <div class="col-md-12">
 			                              <label><i class="fa fa-male"></i>Sexe: <span id="sexe"></span></label>  
 			                                 
 			                            </div>
@@ -213,7 +215,7 @@
 
 
 			                           
-			                            <div class="col-md-8 media_social form-inline" id="media_social">
+			                            <div class="col-md-12 media_social form-inline" id="media_social">
 
 			                            </div>
 
@@ -272,6 +274,7 @@
 	                      $('#linkedin').val(data.linkedin);
 	                      $('#twitter').val(data.twitter);
 	                      $('#idrole').val(data.idrole);
+                        $('#bio').text(data.bio);
 
 	                      $('.modal-title').text("détail de profile et information de  "+data.first_name);
 	                      $('#user_uploaded_image').html(data.user_image); 

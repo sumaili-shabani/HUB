@@ -171,10 +171,23 @@
                                 <input type="text" name="linkedin" id="linkedin" class="form-control" placeholder="Adresse linkedin" /> 
                           </div>
 
+                          <div class="form-group col-md-12">
+                            <label><i class="fa fa-book"></i> Biographie</label>  
+                               <textarea name="bio" id="bio" class="form-control" placeholder="Parler un peu sur la personne">
+                                 
+                               </textarea> 
+                          </div>
+
 
                           <div class="form-group col-md-12">
                             <label><i class="fa fa-camera"></i> Selectionner l'image de l'utilisateur</label>
                             <input type="file" name="user_image" id="user_image" class="form-control" />
+                            
+                         </div>
+
+                          <div class="form-group col-md-12">
+                            <label><i class="fa fa-file"></i> Attacher son CV</label>
+                            <input type="file" name="user_image2" id="user_image2" class="form-control" />
                             
                          </div>
 
@@ -239,7 +252,9 @@
           $('#add_button').click(function(){  
                $('#user_form')[0].reset();  
                $('.modal-title').text("Paramètrage des membres");  
-               $('#action').val("Add");  
+               $('#action').val("Add");
+               $('#user_uploaded_image').html("");
+               $('#user_uploaded_image2').html(""); 
           })  
           // var dataTable = $('#user_data').DataTable();
           var dataTable = $('#user_data').DataTable({  
@@ -269,6 +284,7 @@
               
 
                var extension  = $('#user_image').val().split('.').pop().toLowerCase(); 
+               var extension2  = $('#user_image2').val().split('.').pop().toLowerCase(); 
                
                var action = $('#action').val();
 
@@ -278,6 +294,16 @@
                     {  
                          alert("Invalid Image File");  
                          $('#user_image').val('');  
+                         return false;  
+                    }  
+               }
+
+               if(extension2 != '')  
+               {  
+                    if(jQuery.inArray(extension2, ['pdf']) == -1)  
+                    {  
+                         alert("Fichier invalide");  
+                         $('#user_image2').val('');  
                          return false;  
                     }  
                }
@@ -355,6 +381,7 @@
 
                          $('#linkedin').val(data.linkedin);
                          $('#twitter').val(data.twitter);
+                         $('#bio').val(data.bio);
 
                          $('#user_uploaded_image').html(data.user_image);
                          

@@ -9468,6 +9468,238 @@ class crud_model extends CI_Model{
 
 
 
+   /*
+   script pour lesinsertion des images
+   ************************************
+   =====================================
+   =====================================
+   */
+   
+    //insertion des photos pour les images
+    function insert_images_our_photos($data)  
+    {  
+        $this->db->insert('images', $data);  
+    }
+    // fin pagination
+    function fetch_pagination_galery_our_photos(){
+      $this->db->order_by("idg", "DESC");
+      $query = $this->db->get("images");
+      return $query->num_rows();
+    }
+
+    // pagination galery utilisateur
+    function fetch_details_pagination_our_photos($limit, $start){
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("images");
+      // $this->db->order_by("nom", "ASC");
+      $this->db->order_by("idg", "DESC");
+
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      
+      foreach($query->result() as $row)
+      {
+        
+       $output .= '
+
+          <div class="col-md-4" align="center" style="margin-bottom:24px;">
+              <img src="'.base_url().'upload/galery/'.$row->image.'" class="img-thumbnail img-responsive" style="height: 200px;" />
+                <br />
+            <input type="checkbox" name="images[]" idg="'.$row->idg.'" class="select checkbox_id image_galery" value="upload/galery/'.$row->image.'" /> &nbsp;
+            <a href="javascript:void(0);" class="text-danger supprimer" idg="'.$row->idg.'">
+              <i class="fa fa-trash"></i> supprimer
+            </a>
+
+           
+
+         </div>
+       ';
+      }
+      
+      return $output;
+    }
+    // fin pagination
+
+    //suppression des photos pour la galerie
+    function delete_photo_galery_our_photos($idg)  
+    {  
+         $this->db->where("idg", $idg);  
+         $this->db->delete("images");  
+    }
+    // pagination contact
+
+    // fin scripts images 
+
+    /*
+   script pour lesinsertion des images
+   ************************************
+   =====================================
+   =====================================
+   */
+   
+    //insertion des photos2 pour les images
+    function insert_images_our_photos2($data)  
+    {  
+        $this->db->insert('images2', $data);  
+    }
+    // fin pagination
+    function fetch_pagination_galery_our_photos2(){
+      $this->db->order_by("idg", "DESC");
+      $query = $this->db->get("images2");
+      return $query->num_rows();
+    }
+
+    // pagination galery utilisateur
+    function fetch_details_pagination_our_photos2($limit, $start){
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("images2");
+      // $this->db->order_by("nom", "ASC");
+      $this->db->order_by("idg", "DESC");
+
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      
+      foreach($query->result() as $row)
+      {
+        
+       $output .= '
+
+          <div class="col-md-4" align="center" style="margin-bottom:24px;">
+              <img src="'.base_url().'upload/galery/'.$row->image.'" class="img-thumbnail img-responsive" style="height: 200px;" />
+                <br />
+            <input type="checkbox" name="images[]" idg="'.$row->idg.'" class="select checkbox_id image_galery" value="upload/galery/'.$row->image.'" /> &nbsp;
+            <a href="javascript:void(0);" class="text-danger supprimer" idg="'.$row->idg.'">
+              <i class="fa fa-trash"></i> supprimer
+            </a>
+
+           
+
+         </div>
+       ';
+      }
+      
+      return $output;
+    }
+    // fin pagination
+
+    //suppression des photos pour la galerie
+    function delete_photo_galery_our_photos2($idg)  
+    {  
+         $this->db->where("idg", $idg);  
+         $this->db->delete("images2");  
+    }
+    // pagination contact
+
+    // fin scripts images
+
+
+  /*
+  script pour nos photos
+  **********************
+  =========================
+  =============================
+  */ 
+
+
+  // debit script galery 
+  function fetch_pagination_galeries()
+  {
+      $query = $this->db->query("SELECT * FROM images");
+      return $query->num_rows();
+  }
+
+  // detail de script galery de la page
+  function fetch_pagination_galery_page($limit, $start)
+  {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("images");
+    $this->db->order_by("created_at", "DESC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+
+    $today = date('Y-m-d');
+    $status = '';
+
+    foreach($query->result() as $key)
+    {
+
+      
+     $output .= '
+
+      <div class="col-md-4 mb-2">
+          <a  href="'.base_url().'upload/galery/'.$key->image.'">
+              <img src="'.base_url().'upload/galery/'.$key->image.'" alt="" class="img-thumbnail img-responsive"/>
+              
+          </a>
+      </div>
+
+
+     ';
+
+    }
+    
+    return $output;
+  }
+   // fin script galery de la page
+
+
+   /*
+  script pour nos photos evenement
+  **********************
+  =========================
+  =============================
+  */ 
+
+
+  // debit script galery 
+  function fetch_pagination_galeries2()
+  {
+      $query = $this->db->query("SELECT * FROM images2");
+      return $query->num_rows();
+  }
+
+  // detail de script galery de la page
+  function fetch_pagination_galery_page2($limit, $start)
+  {
+    $output = '';
+    $this->db->select("*");
+    $this->db->from("images2");
+    $this->db->order_by("created_at", "DESC");
+    $this->db->limit($limit, $start);
+    $query = $this->db->get();
+
+    $today = date('Y-m-d');
+    $status = '';
+
+    foreach($query->result() as $key)
+    {
+
+      
+     $output .= '
+
+      <div class="col-md-4 mb-2">
+          <a  href="'.base_url().'upload/galery/'.$key->image.'">
+              <img src="'.base_url().'upload/galery/'.$key->image.'" alt="" class="img-thumbnail img-responsive"/>
+              
+          </a>
+      </div>
+
+
+     ';
+
+    }
+    
+    return $output;
+  }
+   // fin script galery de la page
+
+
+
+
+
 
 
 
@@ -9635,7 +9867,7 @@ class crud_model extends CI_Model{
               'newline' => "\n"
           );
           $tables = array('');
-          $file_name = 'etsyetu';
+          $file_name = 'hubujn';
           $backup = & $this->dbutil->backup(array_merge($options, $tables));
           $this->load->helper('download');
           force_download($file_name . '.sql', $backup);

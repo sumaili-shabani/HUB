@@ -94,6 +94,22 @@ class admin extends CI_Controller
 	      $this->load->view('backend/admin/zoom', $data);
 	    }
 
+	    function activities(){
+	      $data['title']="Paramètrage activités!";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $this->load->view('backend/admin/activities', $data);
+	    }
+
+	    function event(){
+	      $data['title']="Paramètrage évènement!";
+	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
+	      $data['users'] = $this->crud_model->fetch_connected($this->connected);
+	      $data['variable']  = $this->crud_model->Select_all_news();
+	      $this->load->view('backend/admin/event', $data);
+	    }
+
 	    function calendrier(){
 	      $data['title']="Calendrier d'activité pour une réunion";
 	      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site(); 
@@ -1589,6 +1605,18 @@ class admin extends CI_Controller
 	                $new_name = rand() . '.' . $extension[1];  
 	                $destination = './upload/photo/' . $new_name;  
 	                move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+	                return $new_name;  
+	           }  
+	      }
+
+	       function upload_image_cv()  
+	      {  
+	           if(isset($_FILES["user_image2"]))  
+	           {  
+	                $extension = explode('.', $_FILES['user_image2']['name']);  
+	                $new_name = rand() . '.' . $extension[1];  
+	                $destination = './upload/cv/' . $new_name;  
+	                move_uploaded_file($_FILES['user_image2']['tmp_name'], $destination);  
 	                return $new_name;  
 	           }  
 	      }
@@ -4599,6 +4627,7 @@ class admin extends CI_Controller
               $output['twitter']    = $row->twitter;
               $output['linkedin']    = $row->linkedin;
               $output['poste']    = $row->poste;
+              $output['bio']    = $row->bio;
 
 
               if($row->image != '')  
@@ -4618,78 +4647,63 @@ class admin extends CI_Controller
 
     function operation_tinfo_user(){
 
-      if($_FILES["user_image"]["size"] > 0)  
-      {  
-           $insert_data = array(  
-               'first_name'     =>     $this->input->post('first_name'),
-               'last_name'      =>     $this->input->post('last_name'),
-               'email'          =>     $this->input->post('email'),
-               'sexe'           =>     $this->input->post('sexe'),
-               'telephone'      =>     $this->input->post('telephone'),
-               'poste'          =>     $this->input->post('poste'),
-               'facebook'       =>     $this->input->post('facebook'),
-               'twitter'        =>     $this->input->post('twitter'),
-               'linkedin'       =>     $this->input->post('linkedin'),
-               'image'          =>     $this->upload_image_users()
-            );    
-      }  
-      else  
-      {  
-             $user_image = "icone-user.png";   
-             $insert_data = array(  
-                 'first_name'     =>     $this->input->post('first_name'),
-                 'last_name'      =>     $this->input->post('last_name'),
-                 'email'          =>     $this->input->post('email'),
-                 'sexe'           =>     $this->input->post('sexe'),
-                 'telephone'      =>     $this->input->post('telephone'),
-                 'poste'          =>     $this->input->post('poste'),
-                 'facebook'       =>     $this->input->post('facebook'),
-                 'twitter'        =>     $this->input->post('twitter'),
-                 'linkedin'       =>     $this->input->post('linkedin'),
-                 'image'          =>     $user_image
-              );  
-      }
+    	$data['first_name'] 		= $this->input->post('first_name');
+    	$data['last_name'] 			= $this->input->post('last_name');
+    	$data['email'] 				= $this->input->post('email');
+    	$data['sexe'] 				= $this->input->post('sexe');
+    	$data['telephone'] 			= $this->input->post('telephone');
+    	$data['poste'] 				= $this->input->post('poste');
+    	$data['facebook'] 			= $this->input->post('facebook');
+    	$data['twitter'] 			= $this->input->post('twitter');
+    	$data['linkedin'] 			= $this->input->post('linkedin');
+    	$data['bio'] 				= $this->input->post('bio');
 
-        
+	    if($_FILES["user_image"]["size"] > 0)  
+	    {  
+	        $data['image'] = $this->upload_image_users();
+	    }  
+	    else  
+	    {  
+	        $data['image'] = "icone-user.png";   
+	            
+	    }
 
-      $requete=$this->crud_model->insert_tinfo_user($insert_data);
-      echo("Ajout information avec succès");
+	    if($_FILES["user_image2"]["size"] > 0)  
+	    {  
+	        $data['cv'] = $this->upload_image_cv();
+	    }  
+
+
+
+	    $requete=$this->crud_model->insert_tinfo_user($data);
+	    echo("Ajout information avec succès");
       
     }
 
     function modification_tinfo_user(){
 
-      if($_FILES["user_image"]["size"] > 0)  
-      {  
-           $updated_data = array(  
-               'first_name'     =>     $this->input->post('first_name'),
-               'last_name'      =>     $this->input->post('last_name'),
-               'email'          =>     $this->input->post('email'),
-               'sexe'           =>     $this->input->post('sexe'),
-               'telephone'      =>     $this->input->post('telephone'),
-               'poste'          =>     $this->input->post('poste'),
-               'facebook'       =>     $this->input->post('facebook'),
-               'twitter'        =>     $this->input->post('twitter'),
-               'linkedin'       =>     $this->input->post('linkedin'),
-               'image'            =>     $this->upload_image_users()
-            );    
-      }  
-      else  
-      {    
-             $updated_data = array(  
-                 'first_name'     =>     $this->input->post('first_name'),
-                 'last_name'      =>     $this->input->post('last_name'),
-                 'email'          =>     $this->input->post('email'),
-                 'sexe'           =>     $this->input->post('sexe'),
-                 'telephone'      =>     $this->input->post('telephone'),
-                 'poste'          =>     $this->input->post('poste'),
-                 'facebook'       =>     $this->input->post('facebook'),
-                 'twitter'        =>     $this->input->post('twitter'),
-                 'linkedin'       =>     $this->input->post('linkedin')
-            );  
-      }
+     	$data['first_name'] 		= $this->input->post('first_name');
+    	$data['last_name'] 			= $this->input->post('last_name');
+    	$data['email'] 				= $this->input->post('email');
+    	$data['sexe'] 				= $this->input->post('sexe');
+    	$data['telephone'] 			= $this->input->post('telephone');
+    	$data['poste'] 				= $this->input->post('poste');
+    	$data['facebook'] 			= $this->input->post('facebook');
+    	$data['twitter'] 			= $this->input->post('twitter');
+    	$data['linkedin'] 			= $this->input->post('linkedin');
+    	$data['bio'] 				= $this->input->post('bio');
 
-      $this->crud_model->update_tinfo_user($this->input->post("idtinfo_user"), $updated_data);
+	    if($_FILES["user_image"]["size"] > 0)  
+	    {  
+	        $data['image'] = $this->upload_image_users();
+	    }  
+	    
+	    if($_FILES["user_image2"]["size"] > 0)  
+	    {  
+	        $data['cv'] = $this->upload_image_cv();
+	    }  
+
+      $this->crud_model->update_tinfo_user($this->input->post("idtinfo_user"), $data);
 
       echo("modification avec succès");
 
@@ -8118,20 +8132,256 @@ class admin extends CI_Controller
 	                }
  
 				    // fin invitation
-
-
 			  	}
-
-                
-
-
-
-                
 
            }
 
         }
     }
+
+
+    /*
+
+	*upload galery
+	*===============================
+	*===============================
+
+	*/
+
+	function upload_our_photos()
+    {
+      sleep(3);
+      if($_FILES["files"]["name"] != '')
+      {
+       $output = '';
+       $config["upload_path"] = './upload/galery/';
+       $config["allowed_types"] = 'gif|jpg|png|webp';
+       $this->load->library('upload', $config);
+       $this->upload->initialize($config);
+       for($count = 0; $count<count($_FILES["files"]["name"]); $count++)
+       {
+        $extension = explode('.', $_FILES["files"]["name"][$count]);  
+        $new_name = rand() . '.' . $extension[1];
+
+        $_FILES["file"]["name"] = $new_name;
+        $_FILES["file"]["type"] = $_FILES["files"]["type"][$count];
+        $_FILES["file"]["tmp_name"] = $_FILES["files"]["tmp_name"][$count];
+        $_FILES["file"]["error"] = $_FILES["files"]["error"][$count];
+        $_FILES["file"]["size"] = $_FILES["files"]["size"][$count];
+
+        // echo($_FILES["files"]["name"][$count]).'<br>';
+        // echo($new_name).PHP_EOL;
+
+
+        if($this->upload->do_upload('file'))
+        {
+         $data = $this->upload->data();
+
+         $insert_data = array(  
+             'image'         =>     $new_name              
+         ); 
+         $requete=$this->crud_model->insert_images_our_photos($insert_data);
+
+         $output .= '
+         <div class="col-md-3" align="center" style="margin-bottom:24px;">
+          <img src="'.base_url().'upload/galery/'.$data["file_name"].'" class="img-thumbnail img-responsive" style="height: 200px;" />
+            <br />
+            <input type="checkbox" name="images[]" class="select" value="upload/galery/'.$data["file_name"].'" />
+         </div>
+         ';
+        }
+       }
+       echo $output;   
+      }
+    }
+
+
+     // pagination contact 
+	function pagination_galery_our_photos()
+	{
+
+	  $this->load->library("pagination");
+	  $config = array();
+	  $config["base_url"] = "#";
+	  $config["total_rows"] = $this->crud_model->fetch_pagination_galery_our_photos();
+	  $config["per_page"] = 6;
+	  $config["uri_segment"] = 3;
+	  $config["use_page_numbers"] = TRUE;
+	  $config["full_tag_open"] = '<ul class="pagination">';
+	  $config["full_tag_close"] = '</ul>';
+	  $config["first_tag_open"] = '<li class="page-item">';
+	  $config["first_tag_close"] = '</li>';
+	  $config["last_tag_open"] = '<li class="page-item">';
+	  $config["last_tag_close"] = '</li>';
+	  $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+	  $config["next_tag_open"] = '<li class="page-item">';
+	  $config["next_tag_close"] = '</li>';
+	  $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+	  $config["prev_tag_open"] = "<li class='page-item'>";
+	  $config["prev_tag_close"] = "</li>";
+	  $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	  $config["cur_tag_close"] = "</a></li>";
+	  $config["num_tag_open"] = "<li class='page-item'>";
+	  $config["num_tag_close"] = "</li>";
+	  $config["num_links"] = 1;
+	  $this->pagination->initialize($config);
+	  $page = $this->uri->segment(3);
+	  $start = ($page - 1) * $config["per_page"];
+
+	  $output = array(
+	   'pagination_link' => $this->pagination->create_links(),
+	   'country_table'   => $this->crud_model->fetch_details_pagination_our_photos($config["per_page"], $start)
+	  );
+	  echo json_encode($output);
+	  }
+
+	function supression_photo_galery_our_photos(){
+
+	    $this->crud_model->delete_photo_galery_our_photos($this->input->post("idg"));
+	    echo("suppression avec succès");
+
+	}
+
+	  
+
+    function download_photo_our_photos()
+   {
+      if($this->input->post('images'))
+      {
+        $this->load->library('zip');
+        $images = $this->input->post('images');
+        foreach($images as $image)
+        {
+          $this->zip->read_file($image);
+          // echo($image);
+        }
+        $this->zip->download(''.time().'.zip');
+      }
+   }
+
+   // FIN SCRIPT IMAGES 
+
+   /*
+
+	*upload galery
+	*===============================
+	*===============================
+
+	*/
+
+	function upload_our_photos2()
+    {
+      sleep(3);
+      if($_FILES["files"]["name"] != '')
+      {
+       $output = '';
+       $config["upload_path"] = './upload/galery/';
+       $config["allowed_types"] = 'gif|jpg|png|webp';
+       $this->load->library('upload', $config);
+       $this->upload->initialize($config);
+       for($count = 0; $count<count($_FILES["files"]["name"]); $count++)
+       {
+        $extension = explode('.', $_FILES["files"]["name"][$count]);  
+        $new_name = rand() . '.' . $extension[1];
+
+        $_FILES["file"]["name"] = $new_name;
+        $_FILES["file"]["type"] = $_FILES["files"]["type"][$count];
+        $_FILES["file"]["tmp_name"] = $_FILES["files"]["tmp_name"][$count];
+        $_FILES["file"]["error"] = $_FILES["files"]["error"][$count];
+        $_FILES["file"]["size"] = $_FILES["files"]["size"][$count];
+
+        // echo($_FILES["files"]["name"][$count]).'<br>';
+        // echo($new_name).PHP_EOL;
+
+
+        if($this->upload->do_upload('file'))
+        {
+         $data = $this->upload->data();
+
+         $insert_data = array(  
+             'image'         =>     $new_name              
+         ); 
+         $requete=$this->crud_model->insert_images_our_photos2($insert_data);
+
+         $output .= '
+         <div class="col-md-3" align="center" style="margin-bottom:24px;">
+          <img src="'.base_url().'upload/galery/'.$data["file_name"].'" class="img-thumbnail img-responsive" style="height: 200px;" />
+            <br />
+            <input type="checkbox" name="images[]" class="select" value="upload/galery/'.$data["file_name"].'" />
+         </div>
+         ';
+        }
+       }
+       echo $output;   
+      }
+    }
+
+
+     // pagination contact 
+	function pagination_galery_our_photos2()
+	{
+
+	  $this->load->library("pagination");
+	  $config = array();
+	  $config["base_url"] = "#";
+	  $config["total_rows"] = $this->crud_model->fetch_pagination_galery_our_photos2();
+	  $config["per_page"] = 6;
+	  $config["uri_segment"] = 3;
+	  $config["use_page_numbers"] = TRUE;
+	  $config["full_tag_open"] = '<ul class="pagination">';
+	  $config["full_tag_close"] = '</ul>';
+	  $config["first_tag_open"] = '<li class="page-item">';
+	  $config["first_tag_close"] = '</li>';
+	  $config["last_tag_open"] = '<li class="page-item">';
+	  $config["last_tag_close"] = '</li>';
+	  $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+	  $config["next_tag_open"] = '<li class="page-item">';
+	  $config["next_tag_close"] = '</li>';
+	  $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+	  $config["prev_tag_open"] = "<li class='page-item'>";
+	  $config["prev_tag_close"] = "</li>";
+	  $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+	  $config["cur_tag_close"] = "</a></li>";
+	  $config["num_tag_open"] = "<li class='page-item'>";
+	  $config["num_tag_close"] = "</li>";
+	  $config["num_links"] = 1;
+	  $this->pagination->initialize($config);
+	  $page = $this->uri->segment(3);
+	  $start = ($page - 1) * $config["per_page"];
+
+	  $output = array(
+	   'pagination_link' => $this->pagination->create_links(),
+	   'country_table'   => $this->crud_model->fetch_details_pagination_our_photos2($config["per_page"], $start)
+	  );
+	  echo json_encode($output);
+	  }
+
+	function supression_photo_galery_our_photos2(){
+
+	    $this->crud_model->delete_photo_galery_our_photos2($this->input->post("idg"));
+	    echo("suppression avec succès");
+
+	}
+
+	  
+
+    function download_photo_our_photos2()
+   {
+      if($this->input->post('images'))
+      {
+        $this->load->library('zip');
+        $images = $this->input->post('images');
+        foreach($images as $image)
+        {
+          $this->zip->read_file($image);
+          // echo($image);
+        }
+        $this->zip->download(''.time().'.zip');
+      }
+   }
+   // fin scripts
+
+
 
 
 

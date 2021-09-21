@@ -47,7 +47,7 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/commentaire">Commentaires des blogs</a>
                         <div class="dropdown-divider"></div>
                         
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/partenariat">Nos partennaires</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/partenariat">Nos partenaires</a>
 
                         <div class="dropdown-divider"></div>
                         <h6 class="collapse-header">Configuration:</h6>
@@ -73,7 +73,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Nos opérations:</h6>
 
-                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/entreprise">Entrprises</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/entreprise">Entreprises</a>
 
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/evaluation">Evaluation des projets</a>
 
@@ -94,6 +94,14 @@
                                     <span class="nk-menu-text"><i class="fa fa-dribbble"></i> Nos opérations  </span>
                                 </a>
                                 <ul class="nk-menu-sub">
+
+                                    <li class="nk-menu-item text-muted">
+                                        <a href="<?php echo(base_url()) ?>admin/activities" class="nk-menu-link text-muted" data-original-title="Nos membres" title="">
+                                            <span class="nk-menu-text"><i class="fa fa-trello"></i> Activités</span>
+                                        </a>
+                                    </li>
+
+
                                     <li class="nk-menu-item text-muted">
                                         <a href="<?php echo(base_url()) ?>admin/info_membre" class="nk-menu-link text-muted" data-original-title="Nos membres" title="">
                                             <span class="nk-menu-text"><i class="fa fa-trello"></i> Notre famille</span>
@@ -117,7 +125,7 @@
                                     <li class="nk-menu-item text-muted">
                                         
                                         <a href="<?php echo(base_url()) ?>admin/info_technologique" class="nk-menu-link text-muted" data-original-title="Notre galerie" title="">
-                                            <span class="nk-menu-text"><i class="fa fa-file"></i> Nos services technologique</span>
+                                            <span class="nk-menu-text"><i class="fa fa-file"></i> Nos services technologiques</span>
                                         </a>
                                     </li>
 

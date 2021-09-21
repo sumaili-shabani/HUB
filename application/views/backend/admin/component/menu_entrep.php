@@ -50,11 +50,11 @@
     			</div>
                 <div class="col-md-12 text-center">
                     <hr>
-                    <a href="<?php echo(base_url()) ?>admin/canavas/<?php echo($ceoE) ?>"> &nbsp; Canavas</a>
+                    <a href="<?php echo(base_url()) ?>admin/canavas/<?php echo($ceoE) ?>"> &nbsp;lean Canvas</a>
 
                     <i class="mr-2"></i>|
                     
-                    <a href="<?php echo(base_url()) ?>admin/swot/<?php echo($ceoE) ?>">&nbsp;Swot</a>
+                    <a href="<?php echo(base_url()) ?>admin/swot/<?php echo($ceoE) ?>">&nbsp;Swot personnel</a>
                     <i class="mr-2"></i>|
                     
                     <a href="<?php echo(base_url()) ?>admin/galery/<?php echo($ceoE) ?>">&nbsp;Galerie</a>

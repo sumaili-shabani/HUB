@@ -318,7 +318,7 @@
                 aria-labelledby="userDropdown">
                 <a class="dropdown-item" href="<?php echo(base_url())?>user/profile">
                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Profile
+                    Profil
                 </a>
                 <a class="dropdown-item" href="<?php echo(base_url())?>user/basic">
                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -327,6 +327,10 @@
                 <a class="dropdown-item" href="<?php echo(base_url())?>user/notification">
                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                     Mes Activités
+                </a>
+                <a class="dropdown-item" href="<?php echo(base_url())?>">
+                  <i class="fas fa-globe fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Visiter le site
                 </a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" onclick="return confirm('êtes-vous sûre de vouloire se deconnecter?');" href="<?php echo(base_url())?>login/logout">

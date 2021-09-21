@@ -9,7 +9,7 @@
 		<!-- DIRECT CHAT -->
         <div class="card direct-chat direct-chat-primary">
           <div class="card-header bg-hub">
-            <span class="card-title">Discutions instantanées</span>
+            <span class="card-title">Discussions instantanées</span>
 
             <div class="card-tools pull-right">
              
@@ -198,7 +198,7 @@
                 <label class="btn btn-link Attachez" data-toggle="tooltip" data-placement="top" title="Attachez un fichier">
                   <div class="affichier">
                     <a href="javascript:void(0);" class="btn btn-link affichier">
-                      <i class="fa fa-video-camera"></i>
+                      <i class="fa fa-file"></i>
                     </a>
                   </div>
                   <div class="form-group reponse" style="display: none;">
