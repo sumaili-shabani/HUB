@@ -30,7 +30,7 @@
                    <div class="col-md-12 card">
                        <div class="row card-body">
                             <!-- mes scripts commencent -->
-                        	<div class="col-md-12">
+                        	    <div class="col-md-12">
                                  <div class="row">
                                    <div class="col-md-12">
                                      <button class="btn btn-dim btn-sm btn-outline-secondary pull-right  mb-4" id="add_button" data-toggle="modal" data-target="#userModal"><i class="fa fa-plus"></i>Effectuer l'opération</button>
@@ -77,7 +77,7 @@
                                 </div>
                               </div>
                               <!-- fin insertion tableau -->
-                        	<!-- fin de mes scripts -->
+                        	  <!-- fin de mes scripts -->
                        </div>
                    </div>
 

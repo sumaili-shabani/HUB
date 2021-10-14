@@ -68,13 +68,15 @@
         </div>
 
         
-        <div class="col-md-12" style="margin-top: 10px;">
-        	<div class="form-group">
+        <div class="col-md-12 mb-4">
+        	<div class="form-group mb-4">
         		<input type="hidden" name="operation" id="operation" value="Add" />
 
         		<input type="submit" name="action" id="action" class="btn btn-hub btn-round pull-right" value="modifier" />
         	</div>
         </div>
+        
+        
 
 	  </form>
 	<!-- fin forme -->

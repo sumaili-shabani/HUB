@@ -9696,8 +9696,7 @@ class crud_model extends CI_Model{
   }
    // fin script galery de la page
 
-
-
+  
 
 
 
@@ -9867,7 +9866,7 @@ class crud_model extends CI_Model{
               'newline' => "\n"
           );
           $tables = array('');
-          $file_name = 'hubujn';
+          $file_name = 'casalind';
           $backup = & $this->dbutil->backup(array_merge($options, $tables));
           $this->load->helper('download');
           force_download($file_name . '.sql', $backup);
