@@ -1,0 +1,173 @@
+ALTER VIEW profile_paiement AS SELECT paiement.idp,paiement.first_name,paiement.last_name,
+paiement.email,paiement.telephone,paiement.adresse1,
+paiement.adresse2,paiement.date_paie,paiement.montant,paiement.motif,paiement.token,
+paiement.code,paiement.etat_paiement,paiement.year,paiement.month,
+paiement.created_at,paiement.idpersonne,
+users.image FROM paiement INNER JOIN users ON paiement.idpersonne=users.id
+======================================================================================
+
+CREATE TABLE entree(
+    ide int PRIMARY KEY AUTO_INCREMENT,
+    product_id int,
+    QteEntree int,
+    created_at datetime DEFAULT now(),
+    FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE
+    )
+
+========================================================================================
+ALTER VIEW profile_entree_stock AS SELECT ide,entree.product_id,QteEntree,entree.created_at, 
+product.product_name,product.product_price, product.product_image, product.Qte,category.nom, 
+category.idcat
+FROM entree INNER JOIN product ON entree.product_id=product.product_id INNER JOIN  category 
+ON product.category_id=category.idcat
+===========================================================================================
+CREATE TABLE sortie( 
+ids int PRIMARY KEY AUTO_INCREMENT, 
+product_id int, 
+QteEntree int, 
+created_at datetime DEFAULT now(), 
+FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE 
+)
+===========================================================================================
+ALTER VIEW profile_sortie_stock AS SELECT ids,sortie.product_id,sortie.QteEntree,
+sortie.created_at, product.product_name,product.product_price, product.product_image, 
+product.Qte,category.nom, category.idcat FROM sortie INNER JOIN product ON 
+sortie.product_id=product.product_id INNER JOIN category ON 
+product.category_id=category.idcat
+===========================================================================================
+
+CREATE VIEW fiche_de_stock AS
+SELECT product.product_id, product.product_name,product.Qte AS qte_stock,
+product.product_price AS pu_stock,(SELECT product.Qte * product.product_price) AS pt_stock, 
+entree.QteEntree AS qte_E,product.product_price AS pu_E, 
+(SELECT entree.QteEntree * product.product_price) AS pt_E, sortie.QteEntree AS qte_s, 
+product.product_price AS pu_s,(SELECT sortie.QteEntree * product.product_price) AS pt_s  
+FROM product INNER JOIN entree ON product.product_id=entree.product_id INNER JOIN 
+sortie ON product.product_id=sortie.product_id 
+==========================================================================================
+reserve pour faire la vraie fiche de stock
+*********************************************
+SELECT product.product_id, product.product_name,product.Qte AS qte_stock,
+product.product_price AS pu_stock,(SELECT product.Qte * product.product_price) AS pt_stock, 
+entree.QteEntree AS qte_E, product.product_price AS pu_E, 
+(SELECT entree.QteEntree * product.product_price) AS pt_E FROM product INNER JOIN 
+entree ON product.product_id=entree.product_id
+===========================================================================================
+CREATE TABLE `cart` (
+  `idc` int PRIMARY KEY AUTO_INCREMENT,
+  `product_id` int(11) DEFAULT NULL,
+  `product_name` varchar(300) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `product_priceTotal` int(11) DEFAULT NULL,
+  `product_image` varchar(300) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+   FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+  `product_price` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+===========================================================================================
+CREATE TABLE `favories` (
+  `idfovorie` int PRIMARY KEY AUTO_INCREMENT,
+  `id_user` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+   FOREIGN KEY(id_user) REFERENCES users(id) ON DELETE CASCADE,
+   FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+===========================================================================================
+CREATE VIEW profile_favory AS SELECT idfovorie,favories.id_user,favories.product_id,
+favories.created_at,product.product_name,product.product_image,product.product_price 
+FROM favories INNER JOIN product ON favories.product_id=product.product_id
+===========================================================================================
+
+CREATE TABLE `paiement_pading` (
+  `idp` int(11) NOT NULL AUTO_INCREMENT,
+   first_name varchar(300),
+   last_name varchar(300),
+   email varchar(300),
+   telephone varchar(300),
+   adresse1 varchar(300),
+   adresse2 varchar(300),
+  `idpersonne` int(11) DEFAULT NULL,
+  `date_paie` date DEFAULT NULL,
+  `montant` float DEFAULT NULL,
+  `motif` text,
+  `token` varchar(300) DEFAULT NULL,
+   code varchar(300),
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idp`),
+  KEY `idpersonne` (`idpersonne`),
+  CONSTRAINT `paiement_pading_ibfk_1` FOREIGN KEY (`idpersonne`) 
+REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+===========================================================================================
+
+CREATE TABLE `pading_vente` (
+  `idv` int PRIMARY KEY AUTO_INCREMENT,
+  `product_id` int(11) DEFAULT NULL,
+  `product_name` varchar(300) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `product_price` int(11) DEFAULT NULL,
+  `product_priceTotal` int(11) DEFAULT NULL,
+  `product_image` varchar(300) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `code` varchar(300) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+===========================================================================================
+ALTER VIEW profile_padding_vente AS SELECT idv,product_id,product_name,quantity, 
+product_price,product_priceTotal,product_image,user_id,pading_vente.created_at, 
+users.first_name,users.last_name,users.telephone,users.image, paiement_pading.motif,
+paiement_pading.montant,pading_vente.code,pading_vente.token, pading_vente.etat_vente FROM pading_vente 
+INNER JOIN users ON pading_vente.user_id=users.id INNER JOIN paiement_pading 
+ON paiement_pading.code=pading_vente.code
+===========================================================================================
+CREATE TABLE `paiement` (
+  `idp` int PRIMARY KEY AUTO_INCREMENT,
+   first_name varchar(300),
+   last_name varchar(300),
+   email varchar(300),
+   telephone varchar(300),
+   adresse1 varchar(300),
+   adresse2 varchar(300),
+  `idpersonne` int(11) DEFAULT NULL,
+  `date_paie` date DEFAULT NULL,
+  `montant` float DEFAULT NULL,
+  `motif` text,
+  `token` varchar(300) DEFAULT NULL,
+   etat_paiement int DEFAULT 0,
+   `code` varchar(300),
+  `year` varchar(50),
+  `month` varchar(50),
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(idpersonne) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+============================================================================================
+
+CREATE TABLE `cart2` (
+  `idc` int PRIMARY KEY AUTO_INCREMENT,
+  `product_id` int(11) DEFAULT NULL,
+  `product_name` varchar(300) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `product_priceTotal` int(11) DEFAULT NULL,
+  `product_image` varchar(300) DEFAULT NULL,
+   FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+  `product_price` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+======================================================================================
+CREATE TABLE `favories2` (
+  `idfovorie` int PRIMARY KEY AUTO_INCREMENT,
+  `product_id` int(11) DEFAULT NULL,
+   FOREIGN KEY(product_id) REFERENCES product(product_id) ON DELETE CASCADE,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+=====================================================================================
+CREATE VIEW profile_favory2 AS SELECT idfovorie,favories2.product_id,
+favories2.created_at,product.product_name,product.product_image,product.product_price 
+FROM favories2 INNER JOIN product ON favories2.product_id=product.product_id
+=====================================================================================

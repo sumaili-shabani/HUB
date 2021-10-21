@@ -1,0 +1,18 @@
+ACCOUNT SID
+AC6e269a214962c26b1d7eeac488c92b34
+AUTH TOKEN
+Hide
+57aff9f2670808aaf222bbd481aa3b6f
+=====================================
+SpringEdge
+****************************************
+Trail SMS API Configuration:
+Sender ID: SEDEMO
+API Key: 62659c5asfu4zvd7898g1kj013e77it8v
+
+**********************************************
+Here is trail SMS login credentials:
+URL: http://web.springedge.com/members/login
+Username: springedgedemo
+Password: 1ot3HdaP#2
+===================================================

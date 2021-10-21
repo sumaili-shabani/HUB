@@ -1,0 +1,9 @@
+CREATE VIEW profile_commentaire AS SELECT idcomment,commentaire.idart,etape1,etape2,commentaire.created_at,article.nom,
+article.description,article.lien,article.image,article.type,article.idcat, category.nom AS nomcat FROM commentaire 
+INNER JOIN article ON article.idart=commentaire.idart INNER JOIN category ON category.idcat=article.idcat
+
+
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v11.0&appId=301499887887474&autoLogAppEvents=1" nonce="C5oWUD7H"></script>
+
+<div class="fb-comments" data-href="https://web.facebook.com/fidbagraphics/posts/895403007707145" data-width="" data-numposts="5"></div>
