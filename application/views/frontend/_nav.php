@@ -60,13 +60,13 @@
                   <div class="nav nav-sm nav-x-0 flex-column">
                     
                     <a class="nav-link" href="<?php echo(base_url()) ?>home/contact">
-                      <i class="fa fa-double-right mr-1"></i> Contact
+                      <i class="fa fa-double-right mr-1"></i> Contacts
                     </a>
                     <a class="nav-link" href="<?php echo(base_url()) ?>login">
                       <i class="fa fa-double-right mr-1"></i> Se connecter
                     </a>
                     <a class="nav-link" href="<?php echo(base_url()) ?>">
-                      <i class="fa fa-double-right mr-1"></i> Domicile
+                      <i class="fa fa-double-right mr-1"></i> Accueil
                     </a>
                   </div>
                 </div>
@@ -173,7 +173,7 @@
                 
                 <li class="navbar-nav-item">
                     <a class="nav-link " href="<?php echo(base_url()) ?>">
-                      <i class="fa fa-home font-size-1 mr-1"></i>Domicile
+                      <i class="fa fa-home font-size-1 mr-1"></i>Accueil
                     </a>
                 </li>
                 
@@ -225,7 +225,7 @@
 
                 <li class="navbar-nav-item">
                     <a class="nav-link " href="<?php echo(base_url()) ?>home/contact">
-                      <i class="fa fa-envelope font-size-1 mr-1"></i>Contact
+                      <i class="fa fa-envelope font-size-1 mr-1"></i>Contacts
                     </a>
                 </li>
 

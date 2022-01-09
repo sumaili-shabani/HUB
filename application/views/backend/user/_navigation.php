@@ -41,6 +41,14 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/module">Module de cours</a>
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/sms">Envoie SMS</a>
+
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/statPresenceEntreprise">Statistique sur présence</a>
+                        <div class="dropdown-divider"></div>
+                        <h6 class="collapse-header">Evaluation de formations:</h6>
+                        <div class="dropdown-divider"></div>
+
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/statPresenceEntreprise">Statistique sur présence</a>
                         
                        
                     </div>
@@ -68,6 +76,11 @@
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>user/zoom">conférence zoom</a>
 
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/presence">Presence des start-up</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/qrcodepresence">QrCode présence</a>
+
                         
                         
                        
@@ -75,6 +88,35 @@
                     </div>
                 </div>
             </li>
+
+
+            <!-- Nav Item - Charts -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="javascript:void(0);" data-toggle="collapse" data-target="#collapseUtilities2"
+                    aria-expanded="true" aria-controls="collapseUtilities2">
+                    <i class="fas fa-fw fa-calendar"></i>
+                    <span>Gestion de formations</span>
+                </a>
+                <div id="collapseUtilities2" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Evaluation de formation:</h6>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/edition">Edition de la formation</a>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/formation">Nos formations</a>
+
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/rubrique">Les rubriques</a>
+
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/question">Les questions</a>
+
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>user/reponse">Les réponses</a>
+
+                       
+                       
+                       
+                    </div>
+                </div>
+            </li>
+
 
             <!-- Heading -->
             <div class="sidebar-heading">

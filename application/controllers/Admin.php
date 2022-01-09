@@ -69,6 +69,7 @@ class admin extends CI_Controller
 			$data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
 			$this->load->view('backend/admin/templete_admin', $data);
 		}
+		
 
 		function add_news(){
 	      $data['title']="Information de base!";
@@ -4656,7 +4657,7 @@ class admin extends CI_Controller
     	$data['facebook'] 			= $this->input->post('facebook');
     	$data['twitter'] 			= $this->input->post('twitter');
     	$data['linkedin'] 			= $this->input->post('linkedin');
-    	$data['bio'] 				= $this->input->post('bio');
+    	$data['bio'] 				= htmlspecialchars($this->input->post('bio'));
 
 	    if($_FILES["user_image"]["size"] > 0)  
 	    {  
@@ -4691,7 +4692,7 @@ class admin extends CI_Controller
     	$data['facebook'] 			= $this->input->post('facebook');
     	$data['twitter'] 			= $this->input->post('twitter');
     	$data['linkedin'] 			= $this->input->post('linkedin');
-    	$data['bio'] 				= $this->input->post('bio');
+    	$data['bio'] 				= htmlspecialchars($this->input->post('bio'));
 
 	    if($_FILES["user_image"]["size"] > 0)  
 	    {  
@@ -8380,6 +8381,69 @@ class admin extends CI_Controller
       }
    }
    // fin scripts
+
+
+
+
+
+	/*
+	  * mise à jour de mes scripts de la présence
+	  *===========================================
+	  *===========================================
+	*/
+    function statPresenceEntreprise(){
+        $param1 = $this->input->post('date1');
+        $param2 = $this->input->post('date2');
+         $data['title']="Statistique sur la présence des entreprises";
+
+        
+
+        $data['users']  = $this->crud_model->Select_etreprise();
+        $data['dates']  = $this->crud_model->fetch_categores_dates_presence();
+
+        if ($param1 > $param2) {
+          $data['dates1'] = $param2;
+          $data['dates2'] = $param1;
+
+          $data['title']="Statistique sur la présence des entreprises du ".nl2br(substr(date(DATE_RFC822, strtotime($param1)), 0, 23))." au ".nl2br(substr(date(DATE_RFC822, strtotime($param2)), 0, 23));
+          $data['donnees'] = $this->crud_model->fetch_all_presence_ap($param2,$param1);
+
+          $data['nombre_personne_m'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence", $param1,$param2);
+
+          $data['nombre_personne_f'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence",$param1,$param2);
+
+          $data['nombre_total_presence'] = $this->crud_model->statistiques_nombre_fultrage_presence("profile_presence",$param1,$param2);
+
+        }
+        else{
+          $data['dates1'] = $param1;
+          $data['dates2'] = $param2;
+
+          $data['title']="Statistique sur la présence des entreprises";
+          $data['donnees'] = $this->crud_model->fetch_all_presence_ap($param1,$param2);
+
+          $data['nombre_personne_m'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence", $param1,$param2,"M");
+
+          $data['nombre_personne_f'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence",$param1,$param2,"F");
+
+          $data['nombre_total_presence'] = $this->crud_model->statistiques_nombre_fultrage_presence("profile_presence",$param1,$param2);
+        }
+
+        $this->load->view('backend/admin/statPresenceEntreprise', $data);
+    }
+
+    function impression_pdf_presence_filtrage($param1='', $param2=''){
+       $customer_id = "liste de présence par fultrage du ".$param1."jusqu'au ".$param2;
+       
+       $html_content = $this->crud_model->fetch_single_details_presence_filtre($param1,$param2);
+
+       // echo($html_content);
+
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("liste".$customer_id.".pdf", array("Attachment"=>0));
+    }
+
 
 
 

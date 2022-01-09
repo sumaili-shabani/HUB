@@ -51,9 +51,9 @@
             <ul class="nav nav-sm nav-x-0 nav-white flex-column">
               <li class="nav-item"><a class="nav-link" href="<?php echo(base_url()) ?>home/formation">Formation</a></li>
               <li class="nav-item"><a class="nav-link" href="<?php echo(base_url()) ?>home/contact">Contact</a></li>
-              <li class="nav-item"><a class="nav-link" href="<?php echo(base_url()) ?>home/blog">Evènement</a></li>
+              <li class="nav-item"><a class="nav-link" href="<?php echo(base_url()) ?>home/galery">Evènements</a></li>
 
-              <li class="nav-item"><a class="nav-link" target="_blank" href="http://unjournouveau.org">Un jour nouveau</a>
+              <li class="nav-item"><a class="nav-link" target="_blank" href="http://unjournouveau.org">Un Jour Nouveau ASBL</a>
               </li>
               
             </ul>
@@ -100,7 +100,7 @@
                 <a class="nav-link" href="<?php echo(base_url()) ?>login/register">
                     <span class="media align-items-center">
                       <i class="fa fa-user mr-2"></i>
-                      <span class="media-body">Se faire incubé</span>
+                      <span class="media-body">Se faire incuber</span>
                     </span>
                 </a>
               </li>

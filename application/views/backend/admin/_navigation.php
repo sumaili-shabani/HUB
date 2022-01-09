@@ -55,6 +55,9 @@
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/province">Province</a>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/ville">Ville</a>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>admin/category_entreprise">Type entreprise</a>
+
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>admin/statPresenceEntreprise">Statistique sur présence</a>
                         
                         
                     </div>
@@ -156,7 +159,7 @@
                         <ul class="nav-list">
                             <li class="nav-item">
                                 <a href="javascript:void(0);" class="nk-menu-link text-muted nk-menu-toggle" data-original-title="" title="">
-                                    <span class="nk-menu-text"> Nos formation  </span>
+                                    <span class="nk-menu-text"> Nos formations  </span>
                                 </a>
                                 <ul class="nk-menu-sub">
                                     <li class="nk-menu-item text-muted">

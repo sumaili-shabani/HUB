@@ -2,15 +2,15 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="">
-<meta name="author" content="Hub">
+<meta name="author" content="Boutique">
 
 <title><?php echo($title) ?></title>
 
 <!-- Custom fonts for this template-->
 <link href="<?php echo(base_url())?>js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-<link
+<!-- <link
     href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-    rel="stylesheet">
+    rel="stylesheet"> -->
 
 <!-- Custom styles for this template-->
 <link href="<?php echo(base_url())?>js/css/sb-admin-2.min.css" rel="stylesheet">
@@ -31,14 +31,13 @@
 
 <!-- Custom styles for this template canavas-->
 <link href="<?php echo(base_url())?>js/css/canvas.css" rel="stylesheet">
+<link href="<?php echo(base_url())?>js/css/my_style.css" rel="stylesheet">
+<!-- select picker -->
+<link href="<?php echo(base_url())?>js/assets/bootstrap-select-1.13.14/dist/css/bootstrap-select.min.css" rel="stylesheet">
 
+<script type="text/javascript" src="<?php echo(base_url())?>js/external_api.js"></script>
 
-<!-- <script type="text/javascript" src="<?php echo(base_url())?>js/external_api.js"></script> -->
-
-
-<script src='https://meet.jit.si/external_api.js'></script>
-
-
+<!-- <script src='https://meet.jit.si/external_api.js'></script> -->
 
 <style>  
      body  
@@ -66,14 +65,47 @@
      .btn-hub{
       background-color: rgb(220, 68, 5);
       color:white;
-     } 
-    #loading
+     }
+     #loading
     {
      text-align:center; 
      background: url('<?php echo base_url(); ?>js/assets/loader.gif') no-repeat center; 
      height: 150px;
     } 
-</style>  
+</style> 
+
+<style type="text/css">
+.scanner-laser{
+    position: absolute;
+    margin: 40px;
+    height: 30px;
+    width: 30px;
+}
+.laser-leftTop{
+    top: 0;
+    left: 0;
+    border-top: solid red 5px;
+    border-left: solid red 5px;
+}
+.laser-leftBottom{
+    bottom: 0;
+    left: 0;
+    border-bottom: solid red 5px;
+    border-left: solid red 5px;
+}
+.laser-rightTop{
+    top: 0;
+    right: 0;
+    border-top: solid red 5px;
+    border-right: solid red 5px;
+}
+.laser-rightBottom{
+    bottom: 0;
+    right: 0;
+    border-bottom: solid red 5px;
+    border-right: solid red 5px;
+}
+</style> 
 
 <style>
     @-webkit-keyframes placeHolderShimmer {

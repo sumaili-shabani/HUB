@@ -17,6 +17,8 @@
     <div class="position-relative">
       <div class="bg-img-hero" style="background-image: url(<?php echo base_url(); ?>js/dev/assets/svg/components/abstract-shapes-12.svg);">
         <div class="container space-top-0 position-relative z-index-2">
+
+
           
           <?php include("component/_carousel.php") ?>
 
@@ -32,6 +34,9 @@
       </figure>
       <!-- End SVG Shape -->
     </div>
+
+
+    <?php include('component/_ujn.php') ?>
     
     <!-- End Hero Section -->
 
@@ -276,7 +281,7 @@
 	                      $('#idrole').val(data.idrole);
                         $('#bio').text(data.bio);
 
-	                      $('.modal-title').text("détail de profile et information de  "+data.first_name);
+	                      $('.modal-title').text("détail de profil et information de  "+data.first_name);
 	                      $('#user_uploaded_image').html(data.user_image); 
 	                      $('.media_social').html(data.media_social); 
 	                }  

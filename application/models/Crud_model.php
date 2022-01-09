@@ -36,11 +36,33 @@ class crud_model extends CI_Model{
   "first_name","last_name","telephone","id_user","link", "created_at");
   // fin profile_invite
 
+  // opertion edution
+  var $table6 = "profile_formation";  
+  var $select_column6 = array("idformation", "nom","edition","description","idedition","image", "created_at");  
+  var $order_column6 = array(null, "nom","description","edition","idedition", "created");
+  // fin de la edution
+
+  // opertion edution
+  var $table7 = "edition";  
+  var $select_column7 = array("idedition", "nom", "created_at");  
+  var $order_column7 = array(null, "nom", "created");
+  // fin de la edution
+
    //users
   var $table8 = "users";  
   var $select_column8 = array("id", "first_name", "last_name", "email","image","telephone","full_adresse","biographie","date_nais","facebook","twitter","linkedin","idrole","sexe");  
   var $order_column8 = array(null, "first_name", "last_name","telephone","sexe","id", null, null);
   // fin information
+
+  // opertion paie
+  var $table9 = "profile_presence";  
+  var $select_column9 = array("idp", "id_user","jour",
+      "first_name ","last_name","email","image","telephone","sexe",
+      "created_at");  
+  var $order_column9 = array(null, "jour",
+      "first_name ","last_name","email","image","telephone","sexe",
+      "created_at", null);
+  // fin de la paie
 
 
 
@@ -49,6 +71,18 @@ class crud_model extends CI_Model{
   var $select_column12 = array("id", "nom", "sujet","email", "message","fichier","created_at");  
   var $order_column12 = array(null, "nom", "sujet","email","fichier", null, null);
   // fin contact
+
+  // opertion rubrique
+  var $table13 = "profile_rubrique";  
+  var $select_column13 = array("idr", "nomr","token","active","idformation","idedition","nom_formation", "nom_edition");  
+  var $order_column13 = array(null, "nomr","token","active","idformation","idedition","nom_formation", "nom_edition",null,null);
+  // fin de la rubrique
+
+  // opertion rubrique
+  var $table14 = "profile_question";  
+  var $select_column14 = array("idq","nomq","idr", "nomr","token","active","idformation","idedition","nom_formation", "nom_edition");  
+  var $order_column14 = array(null, "nomq","nomr","token","active","idformation","idedition","nom_formation", "nom_edition",null,null);
+  // fin de la rubrique
 
   // opertion category information
   var $table15 = "profile_article";  
@@ -102,6 +136,13 @@ class crud_model extends CI_Model{
   var $select_column23 = array("idp", "nomp", "nomv","idv","created_at");  
   var $order_column23 = array("idv", "nomp","nomv",null);
   // fin de ces scripts
+
+
+  // opertion reponse
+  var $table24 = "profile_reponse";  
+  var $select_column24 = array("idrep","valeur","created_at", "idq","nomq","idr", "nomr","token","active","idformation","idedition","nom_formation", "nom_edition");  
+  var $order_column24 = array(null, "valeur","created_at","nomq","nomr","token","active","idformation","idedition","nom_formation", "nom_edition",null,null);
+  // fin de la reponse
 
 
   // script pour les pays
@@ -226,6 +267,13 @@ class crud_model extends CI_Model{
       $this->db->order_by('nom','ASC');
       $this->db->limit(50);
       return $this->db->get('role');
+  }
+
+  function Select_editions()
+  {
+      $this->db->order_by('nom','ASC');
+      $this->db->limit(50);
+      return $this->db->get('edition');
   }
 
   function fetch_single_message($code)  
@@ -1096,6 +1144,15 @@ class crud_model extends CI_Model{
           $nom = $this->db->get("users")->result_array();
           foreach ($nom as $key) {
             return $key["first_name"];
+          }
+
+      }
+
+      function get_name_entreprise($ceo){
+          $this->db->where("ceo", $ceo);
+          $nom = $this->db->get("profile_entreprise")->result_array();
+          foreach ($nom as $key) {
+            return $key["nom"];
           }
 
       }
@@ -7103,7 +7160,8 @@ class crud_model extends CI_Model{
          <h3>
          ";
 
-         $output = '<div align="right">';
+        
+         $output  = '<div align="right">';
          $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data" >';
          $output .= '
          <tr>
@@ -8271,6 +8329,8 @@ class crud_model extends CI_Model{
       $query = $this->db->query("SELECT * FROM formations");
       return $query->num_rows();
     }
+
+   
 
     function fetch_pagination_formations_latest()
     {
@@ -9695,6 +9755,1446 @@ class crud_model extends CI_Model{
     return $output;
   }
    // fin script galery de la page
+
+
+
+
+
+
+  /*
+  * mise à jour de ,es scripts de la présence
+  *===========================================
+  *===========================================
+  */
+
+  function Select_etreprise()
+  {
+      $this->db->order_by('first_name','ASC');
+      $this->db->limit(50);
+      return $this->db->get('profile_entreprise');
+  }
+  function fetch_categores_dates_presence()
+  {
+      $this->db->group_by('jour');
+      $this->db->order_by('jour','DESC');
+      return $this->db->get('presence');
+  }
+
+  // script pour presence 
+   function make_query_presence()  
+   {  
+          
+         $this->db->select($this->select_column9);  
+         $this->db->from($this->table9);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idp", $_POST["search"]["value"]);  
+              $this->db->or_like("first_name", $_POST["search"]["value"]);
+              $this->db->or_like("last_name", $_POST["search"]["value"]);
+              $this->db->or_like("telephone", $_POST["search"]["value"]);
+              $this->db->or_like("jour", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column9[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idp', 'DESC');  
+         }  
+    }
+
+   function make_datatables_presence(){  
+         $this->make_query_presence();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_presence(){  
+         $this->make_query_presence();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_presence()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table9);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_presence($data)  
+    {  
+         $this->db->insert('presence', $data);  
+    }
+
+    
+    function update_presence($idp, $data)  
+    {  
+         $this->db->where("idp", $idp);  
+         $this->db->update("presence", $data);  
+    }
+
+
+    function delete_presence($idp)  
+    {  
+         $this->db->where("idp", $idp);  
+         $this->db->delete("presence");  
+    }
+
+    function fetch_single_presence($idp)  
+    {  
+         $this->db->where("idp", $idp);  
+         $query=$this->db->get('profile_presence');  
+         return $query->result();  
+    } 
+  // fin de script presence
+
+    function tester_de_jour($jour)
+    {
+        $requete = $this->db->query("SELECT DAYNAME('".$jour."') AS nom_jour");
+        return $requete;
+    }
+
+    function show_day()
+    {
+      $jour;
+        $requete = $this->db->query("SELECT CURRENT_DATE() AS jour")->result_array();
+        foreach ($requete as $key) {
+          $jour = $key['jour'];
+        }
+        return $jour;
+    }
+
+    function tester_presence_de_jour($id_user,$jour)
+    {
+        $requete = $this->db->query("SELECT * FROM presence WHERE id_user=".$id_user." AND jour='".$jour."' ");
+        $nombre = $requete->num_rows();
+        return $nombre;
+    }
+
+    function tester_reponse($id_user,$idq)
+    {
+        $requete = $this->db->query("SELECT * FROM reponse WHERE id_user=".$id_user." AND idq=".$idq." ");
+        $nombre = $requete->num_rows();
+        return $nombre;
+    }
+
+    //impession presence
+    function fetch_single_presence_apprenant($id_user)
+    {
+
+      
+      $data = $this->db->query("SELECT * FROM profile_presence WHERE id_user=".$id_user." ORDER BY jour DESC");
+      $montant_total;
+      $nomCeo = $this->get_name_user($id_user);
+      $nomEntreprise = $this->get_name_entreprise($id_user);
+
+      
+      $tot = $this->db->query("SELECT COUNT(*) AS total FROM profile_presence WHERE id_user=".$id_user." ");
+      if ($tot->num_rows() > 0) {
+        foreach ($tot->result_array() as $key) {
+          $montant_total = $key['total'];
+        }
+      }
+      else{
+        $montant_total = 0;
+      }
+
+
+      $nom_site = '';
+      $icone    = '';
+      $email    = '';
+
+      $info = $this->db->get('tbl_info')->result_array();
+      foreach ($info as $key) {
+        $nom_site = $key['nom_site'];
+        $icone    = $key['icone'];
+        $email    = $key['email'];
+        
+      }
+
+      $output = '';
+      
+      $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br>
+         <h5>
+         LISTE ENTIERE DE PRESENCE DE CEO ". strtoupper($nomCeo)." DE LA START-UP ".strtoupper($nomEntreprise)."
+         <h5>
+      ";
+
+
+      $output .='
+
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <!-- Required meta tags -->
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+          <!-- Bootstrap CSS -->
+         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+          <title>Hello, world!</title>
+        </head>
+        <body>
+          
+
+
+      ';
+
+       $output .= '<link href="' . base_url() . 'js/css/style.css" rel="stylesheet">';
+
+       $output .= '<div align="right" class="col-md-12">';
+       $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data">';
+       $output .= '
+       <tr>
+        <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" class="img img-responsive"/></td>
+        <td width="50%" align="center">
+         <p><b>'.$message.' </b></p>
+         <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+         <hr>
+         
+        </td>
+
+        <td width="25%">
+        <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" class="img img-responsive"/>
+        </td>
+
+
+       </tr>
+       ';
+      
+      $output .= '</table>';
+
+       $output .= '</div>';
+
+       $output .= '
+          <div class="table-responsive col-md-12">
+           
+           <table class="table table-bordered table-striped">
+            <tr class="bg-warning">
+             <th>Image</th>
+             <th>Nom de ceo</th>
+             <th>Téléphone</th>
+             <th>Adresse e-mail</th>
+
+             <th>Jour</th>
+
+             
+             
+            </tr>
+
+        ';
+
+          foreach($data->result_array() as $items)
+          {
+            $image = $items["image"];
+
+            $nom_complet = $items["first_name"].' '.$items["last_name"];
+             $output .= '
+             <tr>
+              <td><img src="'.base_url().'upload/photo/'.$image.'" width="150" height="135" class="img img-responsive img-thumbnail"/></td> 
+              <td>'.$nom_complet.'</td>
+              <td><a class="text-primary" href="tel:'.$items["telephone"].'">'.$items["telephone"].'</a></td>
+              <td><a class="text-primary" href="mailto:'.$items["email"].'">'.$items["email"].'</a></td>
+              <td>'.nl2br(substr(date(DATE_RFC822, strtotime($items["jour"])), 0, 23)).'</td>
+
+              
+             </tr>
+             ';
+          }
+          $output .= '
+
+            <tr>
+              <td colspan="4"><div align="right">Nombre total des Présences Enregistrées: </div></td>
+              <td class="bg-warning"><a class="text-dark"><h4>'.$montant_total.' fois</h4></a></td>
+              
+
+            </tr>
+
+             
+             
+            </table>
+
+            </div>
+
+            
+            <!--<div class="col-md-12">
+                <div class="row">
+                   <div align="right" class="col-md-12 pull-right">
+
+                    <a href="'.base_url().'user/presence" style="text-decoration: none; color: black;">signature:</a>
+              
+                   </div>
+                </div>
+            </div>-->
+
+           
+        
+          ';
+
+        $output .='
+          
+          </body>
+        </html>
+        ';
+
+
+      
+        return $output;
+    }
+
+
+    function fetch_single_details_presence_filtre($dates1, $dates2)
+    {
+
+      
+      $data = $this->db->query("SELECT * FROM profile_presence WHERE jour BETWEEN '".$dates1."' AND '".$dates2."' ");
+      $montant_total;
+
+      $nombre_personne_m = $this->statistiques_nombre_m_plus_presence("profile_presence", $dates1,$dates2,"M");
+
+      $nombre_personne_f = $this->statistiques_nombre_m_plus_presence("profile_presence",$dates1,$dates2,"F");
+
+      $tot = $this->db->query("SELECT COUNT(*) AS total,sexe FROM profile_presence WHERE jour BETWEEN '".$dates1."' AND '".$dates2."'");
+      if ($tot->num_rows() > 0) {
+        foreach ($tot->result_array() as $key) {
+          $montant_total = $key['total'];
+        }
+      }
+      else{
+        $montant_total = 0;
+      }
+
+      $nom_site = '';
+      $icone    = '';
+      $email    = '';
+
+      $info = $this->db->get('tbl_info')->result_array();
+      foreach ($info as $key) {
+        $nom_site = $key['nom_site'];
+        $icone    = $key['icone'];
+        $email    = $key['email'];
+        
+      }
+
+      $output = '';
+      $created_at;
+      $nom;
+
+
+        $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br>
+         <h5>
+         LISTE ENTIERE DE PRESENCE DES ENTREPRISES DU ".nl2br(substr(date(DATE_RFC822, strtotime($dates1)), 0, 23))." AU ".nl2br(substr(date(DATE_RFC822, strtotime($dates2)), 0, 23))."
+         <h5>
+         ";
+
+        $output .='
+
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <!-- Required meta tags -->
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+            <!-- Bootstrap CSS -->
+           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+            <title>Hello, world!</title>
+          </head>
+          <body>
+            
+
+
+        ';
+
+       $output .= '<link href="' . base_url() . 'js/css/style.css" rel="stylesheet">';
+
+       $output .= '<div align="right">';
+       $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data">';
+       $output .= '
+       <tr>
+        <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" class="img img-responsive"/></td>
+        <td width="50%" align="center">
+         <p><b>'.$message.' </b></p>
+         <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+         <hr>
+         
+        </td>
+
+        <td width="25%">
+        <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" class="img img-responsive"/>
+        </td>
+
+
+       </tr>
+       ';
+      
+      $output .= '</table>';
+
+       $output .= '</div>';
+
+       $output .= '
+          <div class="table-responsive col-md-12">
+           
+           <table class="table table-bordered panier_table">
+            <tr class="bg-warning">
+             <th>Image</th>
+             <th>Nom de ceo</th>
+             <th>Téléphone</th>
+             <th>Adresse e-mail</th>
+
+             <th>Jour</th>
+
+             
+             
+            </tr>
+
+        ';
+
+          foreach($data->result_array() as $items)
+          {
+            $image = $items["image"];
+
+            $nom_complet = $items["first_name"].' '.$items["last_name"];
+             $output .= '
+             <tr>
+              <td><img src="'.base_url().'upload/photo/'.$image.'" width="150" height="135" class="img img-responsive img-thumbnail"/></td> 
+              <td>'.$nom_complet.'</td>
+              <td><a class="text-primary" href="tel:'.$items["telephone"].'">'.$items["telephone"].'</a></td>
+              <td><a class="text-primary" href="mailto:'.$items["email"].'">'.$items["email"].'</a></td>
+              <td>'.nl2br(substr(date(DATE_RFC822, strtotime($items["jour"])), 0, 23)).'</td>
+
+              
+             </tr>
+             ';
+          }
+          $output .= '
+
+            <tr>
+              <td colspan="4"><div align="right">Nombre des personnes présentes</div></td>
+              <td class="bg-warning">'.$montant_total.' Personne(s)</td>
+              
+
+            </tr>
+
+             <tr>
+              <td colspan="4"><div align="right">Dont le nombre des personnes présentes de sexe masculin est</div></td>
+              <td class="bg-warning">'.$nombre_personne_m.' Personne(s)</td>
+              
+
+            </tr>
+
+            <tr>
+              <td colspan="4"><div align="right">Dont le nombre des personnes présentes de sexe fiminin est</div></td>
+              <td class="bg-warning">'.$nombre_personne_f.' Personne(s)</td>
+              
+
+            </tr>
+             
+            </table>
+
+            </div>
+
+            <div align="center" style="
+
+             background-image: url('.base_url().'upload/tbl_info/'.$icone.'); background-repeat: no-repeat; background-size: 40%; background-position: center; height:100px;">
+            </div>
+
+             <!--<div class="col-md-12">
+                <div class="row">
+                   <div align="right" class="col-md-12 pull-right">
+
+                    <a href="'.base_url().'user/presence" style="text-decoration: none; color: black;">signature:</a>
+              
+                   </div>
+                </div>
+            </div>-->
+          ';
+
+           $output .='
+          
+          </body>
+        </html>
+        ';
+
+
+      
+        return $output;
+    }
+
+    function fetch_all_presence_ap($dates1, $dates2)
+    {
+
+        return $this->db->query("SELECT * FROM profile_presence WHERE jour BETWEEN '".$dates1."' 
+            AND '".$dates2."' LIMIT 40");
+    }
+
+    function statistiques_nombre_m_plus_presence($query, $dates1, $dates2, $sexe){
+        $my_nombre;
+
+        if ($dates1 < $dates2) {
+          $data_ok = $this->db->query("SELECT count(*) AS nombre from ".$query." WHERE sexe='".$sexe."' AND (jour BETWEEN '".$dates1."' 
+          AND '".$dates2."') ");
+
+            if ($data_ok->num_rows() > 0) {
+
+              foreach ($data_ok->result_array() as $key) {
+                $my_nombre = $key['nombre'];
+              }
+              # code...
+            }
+            else{
+                 $my_nombre = 0;
+            }
+        }
+        else{
+
+          $data_ok = $this->db->query("SELECT count(*) AS nombre from ".$query." WHERE sexe='".$sexe."' AND (jour BETWEEN '".$dates2."' 
+          AND '".$dates1."') ");
+
+            if ($data_ok->num_rows() > 0) {
+
+              foreach ($data_ok->result_array() as $key) {
+                $my_nombre = $key['nombre'];
+              }
+              # code...
+            }
+            else{
+                 $my_nombre = 0;
+            }
+        }
+        
+        
+
+        return $my_nombre;
+    }
+
+    function statistiques_nombre_fultrage_presence($query, $dates1,$dates2){
+        $my_nombre;
+        $data_ok = $this->db->query("SELECT count(*) AS nombre from ".$query." 
+          WHERE jour BETWEEN '".$dates1."' AND '".$dates2."' ");
+        if ($data_ok->num_rows() > 0) {
+
+          foreach ($data_ok->result_array() as $key) {
+            $my_nombre = $key['nombre'];
+          }
+          # code...
+        }
+        else{
+             $my_nombre = 0;
+        }
+
+        return $my_nombre;
+
+    }
+
+    // script pour formation du site
+   function make_query_formation()  
+   {  
+          
+         $this->db->select($this->select_column6);  
+         $this->db->from($this->table6);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idformation", $_POST["search"]["value"]);  
+              $this->db->or_like("nom", $_POST["search"]["value"]);
+              $this->db->or_like("description", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column6[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idformation', 'DESC');  
+         }  
+    }
+
+   function make_datatables_formation(){  
+         $this->make_query_formation();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_formation(){  
+         $this->make_query_formation();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_formation()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table6);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_formation($data)  
+    {  
+         $this->db->insert('formation', $data);  
+    }
+
+    
+    function update_formation($idformation, $data)  
+    {  
+         $this->db->where("idformation", $idformation);  
+         $this->db->update("formation", $data);  
+    }
+
+
+    function delete_formation($idformation)  
+    {  
+         $this->db->where("idformation", $idformation);  
+         $this->db->delete("formation");  
+    }
+
+    function fetch_single_formation($idformation)  
+    {  
+         $this->db->where("idformation", $idformation);  
+         $query=$this->db->get('formation');  
+         return $query->result();  
+    } 
+    // fin de script formation
+
+     // script pour edition 
+   function make_query_edition()  
+   {  
+          
+         $this->db->select($this->select_column7);  
+         $this->db->from($this->table7);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idedition", $_POST["search"]["value"]);  
+              $this->db->or_like("nom", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column7[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idedition', 'DESC');  
+         }  
+    }
+
+   function make_datatables_edition(){  
+         $this->make_query_edition();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_edition(){  
+         $this->make_query_edition();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_edition()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table7);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_edition($data)  
+    {  
+         $this->db->insert('edition', $data);  
+    }
+
+    
+    function update_edition($idedition, $data)  
+    {  
+         $this->db->where("idedition", $idedition);  
+         $this->db->update("edition", $data);  
+    }
+
+
+    function delete_edition($idedition)  
+    {  
+         $this->db->where("idedition", $idedition);  
+         $this->db->delete("edition");  
+    }
+
+    function fetch_single_edition($idedition)  
+    {  
+         $this->db->where("idedition", $idedition);  
+         $query=$this->db->get('edition');  
+         return $query->result();  
+    } 
+    // fin de script edition
+
+    function fetch_membre_formation()
+    {
+        $this->db->order_by('nom','ASC');
+        return $this->db->get('formation');
+    }
+
+    function fetch_membre_edition()
+    {
+        $this->db->order_by('nom','ASC');
+        return $this->db->get('edition');
+    }
+
+    function fetch_formations_requete($idedition)
+    {
+        $this->db->where('idedition', $idedition);
+        $this->db->order_by('nom', 'ASC');
+        $query = $this->db->get('formation');
+        $output = '<option value="">Selectionner une formation</option>';
+        foreach($query->result() as $row)
+        {
+         $output .= '<option value="'.$row->idformation.'">'.$row->nom.'</option>';
+        }
+        return $output;
+    }
+
+    function fetch_rubrique_requete($idformation)
+    {
+        $this->db->where('idformation', $idformation);
+        $this->db->order_by('nomr', 'ASC');
+        $query = $this->db->get('rubrique');
+        $output = '<option value="">Selectionner un rubrique</option>';
+        foreach($query->result() as $row)
+        {
+         $output .= '<option value="'.$row->idr.'">'.$row->nomr.'</option>';
+        }
+        return $output;
+    }
+
+
+      // script pour rubrique aux formations 
+   function make_query_rubrique()  
+   {  
+          
+         $this->db->select($this->select_column13);  
+         $this->db->from($this->table13);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idr", $_POST["search"]["value"]);  
+              $this->db->or_like("nomr", $_POST["search"]["value"]);
+              $this->db->or_like("token", $_POST["search"]["value"]);
+              $this->db->or_like("nom_edition ", $_POST["search"]["value"]);
+              $this->db->or_like("nom_formation", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column13[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idr', 'DESC');  
+         }  
+    }
+
+   function make_datatables_rubrique(){  
+         $this->make_query_rubrique();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_rubrique(){  
+         $this->make_query_rubrique();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_rubrique()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table13);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_rubrique($data)  
+    {  
+         $this->db->insert('rubrique', $data);  
+    }
+
+    
+    function update_rubrique($idr, $data)  
+    {  
+         $this->db->where("idr", $idr);  
+         $this->db->update("rubrique", $data);  
+    }
+
+
+    function delete_rubrique($idr)  
+    {  
+         $this->db->where("idr", $idr);  
+         $this->db->delete("rubrique");  
+    }
+
+    function fetch_single_rubrique($idr)  
+    {  
+         $this->db->where("idr", $idr);  
+         $query=$this->db->get('rubrique');  
+         return $query->result();  
+    } 
+    // fin de script rubrique aux formations
+    
+
+    function fetch_membre_rubrique()
+    {
+        $this->db->order_by('nomr','ASC');
+        return $this->db->get('rubrique');
+    }
+
+    // script pour question aux formations 
+   function make_query_question()  
+   {  
+          
+         $this->db->select($this->select_column14);  
+         $this->db->from($this->table14);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idr", $_POST["search"]["value"]); 
+              $this->db->or_like("nomq", $_POST["search"]["value"]); 
+              $this->db->or_like("nomr", $_POST["search"]["value"]);
+              $this->db->or_like("token", $_POST["search"]["value"]);
+              $this->db->or_like("nom_edition ", $_POST["search"]["value"]);
+              $this->db->or_like("nom_formation", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column14[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idq', 'DESC');  
+         }  
+    }
+
+   function make_datatables_question(){  
+         $this->make_query_question();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_question(){  
+         $this->make_query_question();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_question()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table14);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_question($data)  
+    {  
+         $this->db->insert('question', $data);  
+    }
+
+    
+    function update_question($idq, $data)  
+    {  
+         $this->db->where("idq", $idq);  
+         $this->db->update("question", $data);  
+    }
+
+
+    function delete_question($idq)  
+    {  
+         $this->db->where("idq", $idq);  
+         $this->db->delete("question");  
+    }
+
+    function fetch_single_question($idq)  
+    {  
+         $this->db->where("idq", $idq);  
+         $query=$this->db->get('question');  
+         return $query->result();  
+    } 
+    // fin de script question aux formations
+
+    // script pour information  des module 
+    function count_all_view_questions()
+    {
+
+      $this->db->limit(30);
+      $this->db->order_by("idq","DESC");
+      $query = $this->db->get("profile_question");
+      return $query->num_rows();
+    }
+
+     // script pour information  des module 
+    function count_all_view_reponses()
+    {
+
+      $this->db->limit(30);
+      $this->db->order_by("idrep","DESC");
+      $query = $this->db->get("profile_reponse");
+      return $query->num_rows();
+
+    }
+
+    function fetch_details_view_question($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_question");
+      $this->db->order_by("idq","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+            <thead>  
+                <tr> 
+                    <th width="35%">Nom de la question</th>
+                    <th width="15%">Nom de rubrique</th> 
+                    <th width="20%">Nom de la formation</th>
+                    <th width="10%">Nom de l\'édition</th>  
+
+                    <th width="10%">Mise à jour</th>  
+                    
+                    <th width="5%">Modifier</th> 
+                    <th width="5%">Supprimer</th>  
+                </tr>  
+           </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($query->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idq="'.$row->idq.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idq="'.$row->idq.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>'.substr($row->nomq, 0,40).'...</td>
+            <td>'.substr($row->nomr, 0,20).'...</td>
+            <td>'.substr($row->nom_formation, 0,20).'...</td>
+
+            <td>'.substr($row->nom_edition, 0,20).'...</td>
+             
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+            
+            <td>'.$btn1.'</td>
+            <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+          <tfoot>  
+            <tr>  
+                <th width="35%">Nom de la question</th>
+                <th width="15%">Nom de rubrique</th> 
+                <th width="20%">Nom de la formation</th>
+                <th width="10%">Nom de l\'édition</th>  
+
+                <th width="10%">Mise à jour</th>  
+                
+                <th width="5%">Modifier</th> 
+                <th width="5%">Supprimer</th>      
+            </tr>  
+          </tfoot>    
+            
+        </table>';
+      return $output;
+    }
+
+     // pour le paiement 
+    function fetch_data_search_question($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_question");
+       
+        $this->db->limit(10);
+        if($query != '')
+        {
+         $this->db->like('nomr', $query);
+         $this->db->or_like('nomq', $query);
+         $this->db->or_like('created_at', $query);
+         $this->db->or_like('nom_formation', $query);
+         $this->db->or_like('nom_edition', $query);
+        
+        }
+        return $this->db->get();
+    }
+
+    function fetch_data_limit_question($query)
+    {
+        $this->db->select("*");
+        $this->db->from("profile_question");
+       
+        if($query != '')
+        {
+          $this->db->limit($query);
+        }
+        return $this->db->get();
+    }
+
+    function fetch_membre_question()
+    {
+        $this->db->order_by('nomq','ASC');
+        return $this->db->get('question');
+    }
+
+    function fetch_membre_reponses()
+    {
+        $this->db->order_by('nomq','ASC');
+        return $this->db->get('profile_reponse');
+    }
+
+
+    // script pour reponse aux formations 
+   function make_query_reponse()  
+   {  
+          
+         $this->db->select($this->select_column24);  
+         $this->db->from($this->table24);  
+         if(isset($_POST["search"]["value"]))  
+         {  
+              $this->db->like("idrep", $_POST["search"]["value"]);
+              $this->db->like("valeur", $_POST["search"]["value"]);  
+              $this->db->or_like("nomq", $_POST["search"]["value"]); 
+              $this->db->or_like("nomr", $_POST["search"]["value"]);
+              $this->db->or_like("token", $_POST["search"]["value"]);
+              $this->db->or_like("nom_edition ", $_POST["search"]["value"]);
+              $this->db->or_like("nom_formation", $_POST["search"]["value"]);
+         }  
+         if(isset($_POST["order"]))  
+         {  
+              $this->db->order_by($this->order_column24[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+         }  
+         else  
+         {  
+              $this->db->order_by('idrep', 'DESC');  
+         }  
+    }
+
+   function make_datatables_reponse(){  
+         $this->make_query_reponse();  
+         if($_POST["length"] != -1)  
+         {  
+              $this->db->limit($_POST['length'], $_POST['start']);  
+         }  
+         $query = $this->db->get();  
+         return $query->result();  
+    }
+
+    function get_filtered_data_reponse(){  
+         $this->make_query_reponse();  
+         $query = $this->db->get();  
+         return $query->num_rows();  
+    }       
+    function get_all_data_reponse()  
+    {  
+         $this->db->select("*");  
+         $this->db->from($this->table24);  
+         return $this->db->count_all_results();  
+    }
+
+    function insert_reponse($data)  
+    {  
+         $this->db->insert('reponse', $data);  
+    }
+
+    
+    function update_reponse($idrep, $data)  
+    {  
+         $this->db->where("idrep", $idrep);  
+         $this->db->update("reponse", $data);  
+    }
+
+
+    function delete_reponse($idrep)  
+    {  
+         $this->db->where("idrep", $idrep);  
+         $this->db->delete("reponse");  
+    }
+
+    function fetch_single_reponse($idrep)  
+    {  
+         $this->db->where("idrep", $idrep);  
+         $query=$this->db->get('reponse');  
+         return $query->result();  
+    } 
+
+    function Delete_reponse_tag($idrep)
+    {
+       $this->db->where("idrep", $idrep);  
+       $this->db->delete("reponse"); 
+    }
+    // fin de script reponse aux formations
+
+
+      function statistiques_nombre_reponse_rubrique($valeur, $idr){
+          $my_nombre;
+
+          $data_ok = $this->db->query("SELECT COUNT(*) AS nombre FROM profile_reponse WHERE valeur='".$valeur."' AND idr=".$idr." ");
+
+        if ($data_ok->num_rows() > 0) {
+
+            foreach ($data_ok->result_array() as $key) {
+              $my_nombre = $key['nombre'];
+            }
+            # code...
+          }
+          else{
+              $my_nombre = 0;
+          }
+
+          return $my_nombre;
+      }
+
+      function statistiques_reponses_generale_rubrique($idr){
+          $my_nombre;
+
+          $data_ok = $this->db->query("SELECT COUNT(*) AS nombre FROM profile_reponse WHERE  idr=".$idr." ");
+
+          if ($data_ok->num_rows() > 0) {
+
+            foreach ($data_ok->result_array() as $key) {
+              $my_nombre = $key['nombre'];
+            }
+            # code...
+          }
+          else{
+              $my_nombre = 0;
+          }
+
+          return $my_nombre;
+      }
+
+     // impression pdf reponse  de tranches
+      function fetch_single_details_pdf_reponse($idr)
+      {
+          $this->db->where('idr', $idr);
+        $data = $this->db->get('profile_reponse');
+
+
+        $nombre_personne_tb       = $this->statistiques_nombre_reponse_rubrique("très bien",$idr);
+        $nombre_personne_b        = $this->statistiques_nombre_reponse_rubrique("bien", $idr);
+        $nombre_personne_mal      = $this->statistiques_nombre_reponse_rubrique("mal", $idr);
+        $nombre_personne_general  = $this->statistiques_reponses_generale_rubrique($idr);
+
+        $output = '';
+        $nomf;
+        $created_at;
+        $nom;
+        $icone;
+
+         
+
+        $nom_site = '';
+      $icone    = '';
+      $email    = '';
+
+      $info = $this->db->get('tbl_info')->result_array();
+      foreach ($info as $key) {
+        $nom_site = $key['nom_site'];
+        $icone    = $key['icone'];
+        $email    = $key['email'];
+        
+      }
+
+      $output = '';
+      $created_at;
+      $nom;
+
+
+        $message = "REPUBLIQUE DEMOCRATIQUE DU CONGO <br>
+         <h5>
+         EVALUATION ET SUIVI DE FORMATION 
+         <h5>
+         ";
+
+         $output  = '<div align="right">';
+         $output .= '<table width="100%" cellspacing="5" cellpadding="5" id="user_data" >';
+         $output .= '
+         <tr>
+          <td width="25%"><img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100"/></td>
+          <td width="50%" align="center">
+           <p><b>'.$message.' </b></p>
+           <p><b>Mise à jour : </b>'.date('d/m/Y').'</p>
+
+           <hr>
+           
+          </td>
+
+          <td width="25%">
+          <img src="'.base_url().'upload/tbl_info/'.$icone.'" width="150" height="100" />
+          </td>
+
+
+         </tr>
+         ';
+      
+        $output .= '</table>';
+
+        $output .= '</div>';
+
+        $output .='
+
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <!-- Required meta tags -->
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+            <!-- Bootstrap CSS -->
+           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+            <title>Hello, world!</title>
+          </head>
+          <body>
+            
+
+        ';
+
+       $output .= '<link href="' . base_url() . 'js/css/style.css" rel="stylesheet">';
+
+
+         $output .='
+            <div class="table-responsive">
+             
+             <br />
+             <table class="table table-bordered panier_table" width="100%" cellspacing="5" cellpadding="5"  id="user_data" border="0">
+              <tr>
+               <th width="30%">Question</th>
+               <th width="30%">Reponse</th>
+               <th width="20%">Formation</th>
+               <th width="20%">Edition</th>
+              </tr>
+
+          ';
+
+            foreach($data->result_array() as $items)
+            {
+              
+               $output .= '
+               <tr>
+                 
+                <td>'.$items["nomq"].'</td>
+                <td>'.$items["valeur"].'</td>
+                <td>'.$items["nom_formation"].'</td>
+                <td>'.$items["nom_edition"].'</td>
+                
+               </tr>
+               ';
+
+               
+            }
+
+            $output .= '
+               <tr>
+                 
+                <td colspan="3">Nombre total des réponses Très bien répondues</td>
+                <td>'.$nombre_personne_tb.' réponse(s)</td>
+                
+               </tr>
+               ';
+
+               $output .= '
+               <tr>
+                 
+                <td colspan="3">Nombre total des réponses Bien répondues</td>
+                <td>'.$nombre_personne_b.' réponse(s)</td>
+                
+               </tr>
+               ';
+
+               $output .= '
+               <tr>
+                 
+                <td colspan="3">Nombre total des réponses Mal répondues</td>
+                <td>'.$nombre_personne_mal.' réponse(s)</td>
+                
+               </tr>
+               ';
+
+                $output .= '
+               <tr>
+                 
+                <td colspan="3">Nombre total des réponses recceillues</td>
+                <td>'.$nombre_personne_general.' réponse(s)</td>
+                
+               </tr>
+               ';
+
+               
+            $output .= '
+             
+        </table>
+
+        </div>
+
+        
+        ';
+
+         $output .='
+          
+          </body>
+        </html>
+        ';
+
+
+      
+        return $output;
+
+        
+      }
+      // fin impression pdf reponse  de tranches
+
+
+    function fetch_membre_question_param_limit($token, $limit)
+    { 
+        $this->db->where('token',$token);
+        $this->db->order_by('nomq','ASC');
+        $this->db->limit($limit);
+        return $this->db->get('profile_question');
+    }
+
+    function fetch_membre_question_param_one($token)
+    { 
+        $this->db->order_by('nomq','ASC');
+        $this->db->limit(1);
+        return $this->db->get_where('profile_question', array(
+          'token'   => $token,
+          'active'  =>  1
+        ));
+    }
+
+    function fetch_membre_question_param($token)
+    { 
+      $this->db->order_by('nomq','ASC');
+        return $this->db->get_where('profile_question', array(
+          'token'   => $token,
+          'active'  =>  1
+        ));
+    }
+
+
+    function fetch_details_view_reponse($limit, $start)
+    {
+      $output = '';
+      $this->db->select("*");
+      $this->db->from("profile_reponse");
+      $this->db->order_by("idr","DESC");
+      $this->db->limit($limit, $start);
+      $query = $this->db->get();
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+            <thead>  
+                <tr> 
+                    <th width="5%">
+                      <button type="button" name="delete_all" id="delete_all" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> &nbsp;supprimer</button>
+                    </th>  
+                    <th width="30%">Nom de la question</th>
+                    <th width="20%">Réponse</th> 
+                    <th width="15%">Nom de rubrique</th>
+                     
+                    <th width="20%">Mise à jour</th>  
+                      
+                    <th width="5%">Modifier</th> 
+                    <th width="5%">Supprimer</th>  
+                </tr>  
+           </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($query->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($query->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idrep="'.$row->idrep.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idrep="'.$row->idrep.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td><input type="checkbox" class="delete_checkbox" value="'.$row->idrep.'" /> &nbsp;&nbsp;&nbsp; <a href="'.base_url().'user/pdf_reponse/'.$row->idr.'" class="btn btn-primary btn-sm print"><i class="fa fa-print"></i></a></td>
+            <td>'.nl2br(substr($row->nomq  , 0,50)).' ...</td>
+            <td>'.substr($row->valeur, 0,20).'...</td>
+
+            <td>'.substr($row->nomr, 0,20).'...</td>
+             
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+            
+            <td>'.$btn1.'</td>
+            <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+          <tfoot>  
+            <tr>  
+                <th width="5%">
+                  <button type="button" name="delete_all" id="delete_all" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> &nbsp;supprimer</button>
+                </th>  
+                <th width="30%">Nom de la question</th>
+                <th width="20%">Réponse</th> 
+                <th width="15%">Nom de rubrique</th>
+                 
+                <th width="20%">Mise à jour</th>  
+                  
+                <th width="5%">Modifier</th> 
+                <th width="5%">Supprimer</th>       
+            </tr>  
+          </tfoot>    
+            
+        </table>';
+      return $output;
+    }
+
+
+
+
+   
 
   
 

@@ -2,7 +2,7 @@
       <!-- Title -->
       <div class="w-lg-65 text-center mx-auto mb-5 mb-sm-9">
         <h4 class="h2">Pourquoi nous choisir?</h4>
-        <p>Entant que Partenaire et accompagnateur d'entreprises, Le hub un jour nouveau propose une offre complète qui se décompose en trois axes. Quelle que soit la situation de l'entrepreneur ou du projet, il y a une offre adaptée.</p>
+        <p>En tant que Partenaire et accompagnateur d'entreprises, Le hub un jour nouveau propose une offre complète qui se décompose en trois axes. Quelle que soit la situation de l'entrepreneur ou du projet, il y a une offre adaptée.</p>
       </div>
       <!-- End Title -->
 

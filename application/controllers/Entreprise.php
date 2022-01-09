@@ -39,6 +39,8 @@ class entreprise extends CI_Controller
   		// $this->load->view('backend/entreprise/templete_admin', $data);
 	}
 
+
+
    function joinmetting($param =''){
     $data['title']="Rejoindre la reunion";
     $data['domain']=$param;
@@ -2009,6 +2011,170 @@ class entreprise extends CI_Controller
         </table>';
     echo $output;
   }
+
+
+  function teste_suggestion(){
+      $data['title']       = "Paramétrage  des réponses";
+      $data['questions']   = $this->crud_model->fetch_membre_question();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+
+
+      if ($this->input->post('idedition')) {
+
+        $token = $this->input->post('idedition');
+        echo($token);
+        # code...
+      }
+      else{
+        $this->load->view('backend/entreprise/teste_suggestion', $data);
+      }
+
+  }
+
+
+  function teste_suggestion_param($param1=''){
+      $data['title']       = "Paramétrage  des réponses";
+      $data['questions']   = $this->crud_model->fetch_membre_question();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+
+      $param1 = $this->input->post('token');
+     
+      if ($param1 !='') {
+
+        $token = $param1;
+        // tester si existe
+        $question_one = $this->crud_model->fetch_membre_question_param_one($token);
+        // fin de tester
+        $data['questions'] = $this->crud_model->fetch_membre_question_param($token);
+        $data['question_one'] = $this->crud_model->fetch_membre_question_param_one($token);
+        $data['token'] = $token;
+        if ($question_one->num_rows() >0) {
+          $this->load->view('backend/entreprise/test_sugestion_valider', $data);
+        }
+        else{
+          $result ="Token incorect!!!";
+          $this->session->set_flashdata('message2',$result);
+          $this->load->view('backend/entreprise/teste_suggestion', $data);
+        }
+        
+      }
+      else{
+        $result ="Veillez completer le token!!!";
+        $this->session->set_flashdata('message2',$result);
+        $this->load->view('backend/entreprise/teste_suggestion', $data);
+      }
+
+
+  }
+
+  function operation_reponse(){
+
+      $idq = $this->input->post('idq');
+      $id_user = $this->connected;
+
+      $prsence_par_jour = $this->crud_model->tester_reponse($id_user,$idq);
+      if ($prsence_par_jour > 0) {
+        echo "🗽 vous avez déjà répondu à cette question!🗽";
+      }
+      else{
+
+          try {
+
+            $insert_data = array(  
+               'valeur'             =>     $this->input->post('valeur'),
+               'idq'                =>     $this->input->post('idq'),
+               'id_user'            =>     $this->connected  
+            ); 
+
+            $requete=$this->crud_model->insert_reponse($insert_data);
+            echo("Merci beaucoup pour votre sugestion");
+                    
+          } catch (PDOException $e) {
+            echo("impossible ".$e->getMessage());
+          }
+
+      }
+
+      
+    
+  }
+
+
+  function show_plus_question(){
+
+      $htmlData = '';
+      $token = $this->input->post('token');
+      $CommentNewCount = $this->input->post('CommentNewCount');
+      $data = $this->crud_model->fetch_membre_question_param_limit($token, $CommentNewCount);
+      foreach ($data->result_array() as $row ) {
+        $htmlData .='
+
+          <div class="card-header mb-2 mt-2">
+            <h5 class="card-title m-0" id="question_numerotation">
+
+              <table>
+                <thead>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                   <tr>
+                      <td>Veillez crocher un seul Choix et valider la réponse <i class="fa fa-check"></i></td>
+                      <td><a href="#" class="btn btn-primary valider_plus" idq="'.$row['idq'].'"><i class="fa fa-save"></i>Valider</a></td>
+                    </tr>
+                </tbody>
+                
+                <tr></tr>
+              </table>
+
+
+            </h5>
+          </div>
+
+          <div class="card-body>
+           <h6 class="card-title"> 
+              '.$row["nomq"].'
+            </h6>
+
+            <label class="control-label text-info">
+              
+              <a href="#" class="control-label text-info common_selector_reponse" idq="'.$row['idq'].'" valeur="très bien" ><input type="checkbox" class="common_selector brand" value="très bien"> très bien ;</a> 
+              
+            </label>
+
+
+            <label class="control-label text-info">
+             <a href="#" class="control-label text-info common_selector_reponse" idq="'.$row['idq'].'" valeur="bien" ><input type="checkbox" class="common_selector brand" value="bien"> bien ;</a> 
+
+              
+            </label>
+
+            <label class="control-label text-info">
+              <a href="#" class="control-label text-info common_selector_reponse" idq="'.$row['idq'].'" valeur="mal" ><input type="checkbox" class="common_selector brand" value="mal"> mal ;</a> 
+
+            </label>
+
+            <hr>
+          </div>
+
+          
+
+        ';
+      }
+
+      echo($htmlData);
+    }
+
+
+
+
+
+
+  
 
 
 

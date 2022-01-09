@@ -28,8 +28,23 @@
 <!-- fin -->
 <script src="<?= base_url('js/plugins/summernote/summernote-bs4.min.js')?>"></script>
 
-<!-- AdminLTE App -->
-<script src="<?= base_url('js/dist/js/adminlte.min.js')?>"></script>
+<script src="<?= base_url('js/js/toast/jquery.toast.min.js')?>"></script>
+
+
+<!-- auto complete search box -->
+<script src="<?= base_url('js/bootstrap3-typeahead.min.js')?>"></script>
+<script src="<?= base_url('js/handlebars.js')?>"></script>
+<script src="<?= base_url('js/typeahead.bundle.js')?>"></script>
+<!-- fin -->
+
+ <!-- AdminLTE App -->
+ <script src="<?= base_url('js/dist/js/adminlte.min.js')?>"></script>
+
+ <!-- Select picker -->
+  <script src="<?php echo(base_url())?>js/assets/bootstrap-select-1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+
+
 
 <script>
   $(function () {

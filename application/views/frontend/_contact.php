@@ -12,7 +12,7 @@
 	                <div class="row g-3">
 	                    <div class="col-md-12" align="center">
 	                        <div align="center" class="text-center" style="text-align: center;">
-	                         Que pouvons-nous vous aider?
+	                         Comment pouvons-nous vous aider?
 	                    	</div>
 	                        
 	                    </div>
@@ -105,8 +105,8 @@
 							<div class="col-12" style="font-size: 16px;">
 								<div class="form-group">
 									<div class="col-md-12">
-								        <h5>Nous sommes ravis de vous rencontrer et répondre à votre préoccupation. </h5>
-								        <p>Pour cela, servez-vous de nous contacter et n'hesitez pas surtout de poser des questions afin de savoir plus sur nous!</p>
+								        <h5>Nous serons ravis de vous rencontrer et de répondre à vos préoccupations. </h5>
+								        <!-- <p>Pour cela, servez-vous de nous contacter et n'hesitez pas surtout de poser des questions afin de savoir plus sur nous!</p> -->
 								     </div>
 								     <!-- End Title -->
 								   <div class="col-md-12">
@@ -124,7 +124,7 @@
 									    		<span class="text-info"><i class="fa fa-phone"></i> Autre Numéro de téléphone:</span>  <a href="tel:<?php echo($row['tel2']); ?>"><?php echo($row['tel2']); ?></a>
 									    	</li>
 									    	<li>
-									    		<span class="text-info"><i class="fa fa-map-marker"></i> Adresse domicile:</span>  <span class="text-soft"><?php echo(nl2br($row['adresse'])); ?></span>
+									    		<span class="text-info"><i class="fa fa-map-marker"></i> Adresse: </span>  <span class="text-soft"><?php echo(nl2br($row['adresse'])); ?></span>
 									    	</li>
 									    </ul>
 								    </div>

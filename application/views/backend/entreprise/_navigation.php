@@ -52,6 +52,8 @@
 
                         <div class="dropdown-divider"></div>
                         <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/calendrier">conférence zoom</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="collapse-item" href="<?php echo(base_url()) ?>entreprise/teste_suggestion">Teste de sugestion</a>
                        
                     </div>
                 </div>

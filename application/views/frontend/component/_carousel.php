@@ -31,7 +31,7 @@
 			        </div>
 			        <p class="lead">
 			        	
-			        	Avec notre programme de formation et accompagnement de 6 mois, nous t'offrons une possibilité de maitriser ton projet et devenir plus efficace dans le domaine entrepreneurial
+			        	Avec notre programme de formation et d'accompagnement de 6 mois, nous t'offrons une possibilité de maitriser ton projet et de devenir plus efficace dans le domaine entrepreneurial
 			        </p>
 			      </div>
 

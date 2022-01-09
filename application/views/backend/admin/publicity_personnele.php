@@ -89,7 +89,7 @@
 				                        	<div class="row">
 				                        		<div class="col-md-2"></div>
 				                        		<div class="col-md-8">
-				                        			 <div for="files" class="text-center"><i class="fa fa-picture-o"></i>&nbsp; Selectionnez multiples photos de partennaires</div>
+				                        			 <div for="files" class="text-center"><i class="fa fa-picture-o"></i>&nbsp; Selectionnez multiples photos de partenaires</div>
 							                         <input type="file" name="files" id="files" class="form-control" multiple />
 							                        <hr>
 				                        		</div>

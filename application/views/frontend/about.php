@@ -17,7 +17,7 @@
       <div class="bg-img-hero" style="background-image: url(<?php echo base_url(); ?>js/dev/assets/svg/components/abstract-shapes-12.svg);">
         <div class="container space-top-3 space-top-lg-4 space-bottom-2 position-relative z-index-2">
           <div class="w-md-80 w-lg-60 text-center mx-md-auto mb-5 mb-md-9">
-            <h1>APROPOS</h1>
+            <h1>À PROPOS</h1>
             <p>proposition de valeur</p>
            
           </div>

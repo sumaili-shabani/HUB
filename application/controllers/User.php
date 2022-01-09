@@ -18,7 +18,7 @@ class user extends CI_Controller
     }
     $this->load->library('form_validation');
     $this->load->library('encryption');
-      // $this->load->library('pdf');
+    $this->load->library('pdf');
     $this->load->model('crud_model'); 
 
     $this->load->helper('url');
@@ -3877,9 +3877,1190 @@ class user extends CI_Controller
 
 
 
+  /*
+  * mise à jour de ,es scripts de la présence
+  *===========================================
+  *===========================================
+  */
+
+  function presence(){
+    $data['title']="Gestion de présence pour les entreprises";
+    $data['users']  = $this->crud_model->Select_etreprise();
+    $data['dates']  = $this->crud_model->fetch_categores_dates_presence();
+    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+    $this->load->view('backend/user/presence', $data);
+  }
+
+  function qrcodepresence(){
+
+    $data['title']  = "Gestion de présence avec la technologie qrcode";
+    $data['users']  = $this->crud_model->Select_etreprise();
+    $data['dates']  = $this->crud_model->fetch_categores_dates_presence();
+    $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+    $this->load->view('backend/user/qrcodepresence', $data);
+  }
+
+  function filtrage_presence_ap(){
+        $param1 = $this->input->post('date1');
+        $param2 = $this->input->post('date2');
+
+        $data['title']="Filtre pour la gestion de présence des entreprises";
+        $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+
+        $data['users']  = $this->crud_model->Select_etreprise();
+        $data['dates']  = $this->crud_model->fetch_categores_dates_presence();
+
+        if ($param1 > $param2) {
+          $data['dates1'] = $param2;
+          $data['dates2'] = $param1;
+          $data['donnees'] = $this->crud_model->fetch_all_presence_ap($param2,$param1);
+
+          $data['nombre_personne_m'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence", $param1,$param2);
+
+          $data['nombre_personne_f'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence",$param1,$param2);
+
+          $data['nombre_total_presence'] = $this->crud_model->statistiques_nombre_fultrage_presence("profile_presence",$param1,$param2);
+
+        }
+        else{
+          $data['dates1'] = $param1;
+          $data['dates2'] = $param2;
+          $data['donnees'] = $this->crud_model->fetch_all_presence_ap($param1,$param2);
+
+          $data['nombre_personne_m'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence", $param1,$param2,"M");
+
+          $data['nombre_personne_f'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence",$param1,$param2,"F");
+
+          $data['nombre_total_presence'] = $this->crud_model->statistiques_nombre_fultrage_presence("profile_presence",$param1,$param2);
+        }
+
+        $this->load->view('backend/user/filtrage_presence_ap', $data);
+
+  }
+
+  function impression_pdf_presence_filtrage($param1='', $param2=''){
+       $customer_id = "liste de présence par fultrage du ".$param1."jusqu'au ".$param2;
+       
+       $html_content = $this->crud_model->fetch_single_details_presence_filtre($param1,$param2);
+
+       // echo($html_content);
+
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("liste".$customer_id.".pdf", array("Attachment"=>0));
+  }
+
+  function statPresenceEntreprise(){
+        $param1 = $this->input->post('date1');
+        $param2 = $this->input->post('date2');
+         $data['title']="Statistique sur la présence des entreprises";
+
+        
+
+        $data['users']  = $this->crud_model->Select_etreprise();
+        $data['dates']  = $this->crud_model->fetch_categores_dates_presence();
+
+        if ($param1 > $param2) {
+          $data['dates1'] = $param2;
+          $data['dates2'] = $param1;
+
+          $data['title']="Statistique sur la présence des entreprises du ".nl2br(substr(date(DATE_RFC822, strtotime($param1)), 0, 23))." au ".nl2br(substr(date(DATE_RFC822, strtotime($param2)), 0, 23));
+          $data['donnees'] = $this->crud_model->fetch_all_presence_ap($param2,$param1);
+
+          $data['nombre_personne_m'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence", $param1,$param2);
+
+          $data['nombre_personne_f'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence",$param1,$param2);
+
+          $data['nombre_total_presence'] = $this->crud_model->statistiques_nombre_fultrage_presence("profile_presence",$param1,$param2);
+
+        }
+        else{
+          $data['dates1'] = $param1;
+          $data['dates2'] = $param2;
+
+          $data['title']="Statistique sur la présence des entreprises";
+          $data['donnees'] = $this->crud_model->fetch_all_presence_ap($param1,$param2);
+
+          $data['nombre_personne_m'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence", $param1,$param2,"M");
+
+          $data['nombre_personne_f'] = $this->crud_model->statistiques_nombre_m_plus_presence("profile_presence",$param1,$param2,"F");
+
+          $data['nombre_total_presence'] = $this->crud_model->statistiques_nombre_fultrage_presence("profile_presence",$param1,$param2);
+        }
+
+        $this->load->view('backend/user/statPresenceEntreprise', $data);
+    }
+
+
+  // script de presence
+    function fetch_presence(){  
+
+         $fetch_data = $this->crud_model->make_datatables_presence();  
+         $data = array();  
+         foreach($fetch_data as $row)  
+         {  
+              $sub_array = array();  
+
+              $sub_array[] = '
+              <input type="checkbox" class="delete_checkbox2" value="'.$row->id_user.'" />
+              ';  
+             
+              $sub_array[] = nl2br(substr($row->first_name .' '.$row->last_name, 0,50)).' 
+              ...'; 
+              $sub_array[] = nl2br(substr($row->sexe, 0,10)).'';  
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->jour)), 0, 23)); 
+              
+              $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23));
+             
+              $sub_array[] = '<a href="'.base_url().'user/pdf_presence_entreprise/'.$row->id_user.'" type="button" name="pdf"  class="btn btn-primary btn-sm pdf"><i class="fa fa-print"></i></a>'; 
+
+              $sub_array[] = '<button type="button" name="delete" id="'.$row->id_user.'" class="btn btn-warning btn-sm update"><i class="fa fa-user"></i></button>'; 
+               
+              $sub_array[] = '<button type="button" name="delete" idp="'.$row->idp.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+              $data[] = $sub_array;  
+         }  
+         $output = array(  
+              "draw"                =>     intval($_POST["draw"]),  
+              "recordsTotal"        =>     $this->crud_model->get_all_data_presence(),  
+              "recordsFiltered"     =>     $this->crud_model->get_filtered_data_presence(),  
+              "data"                =>     $data  
+         );  
+         echo json_encode($output);  
+    }
+
+    function fetch_single_presence()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_presence($_POST["idp"]);  
+         foreach($data as $row)  
+         {  
+              $output['jour']         = $row->jour;
+              $output['id_user']      = $row->id_user; 
+              $output['id']           = $row->id; 
+             
+         }  
+         echo json_encode($output);  
+    }  
+
+
+    function operation_presence(){
+        
+        
+        $id_user  = $this->input->post('id_user');
+        if ($id_user !='') {
+          # code...
+
+          $this->AjoutPresence($id_user);
+        }
+        else{
+          echo("Impossible de faire l'opération");
+        }
+        
+    }
+
+    function operation_presence_qrcode(){
+        $id_user  = $this->input->post('id_user');
+        if ($id_user !='') {
+          # code...
+
+          $this->AjoutPresence($id_user);
+        }
+        else{
+          echo("Impossible de faire l'opération");
+        }
+    }
+
+    function AjoutPresence($id_user_presence){
+        
+        $to_day =  $this->crud_model->show_day();
+        $name_day;
+        $jour = $this->crud_model->tester_de_jour($to_day);
+
+        $id_user  = $id_user_presence;
+
+        foreach ($jour->result_array() as $key) {
+            $name_day= $key['nom_jour'];
+
+            if ($name_day=="Saturday" || $name_day=="Sunday") {
+
+              echo "le samedi et le dimanche sont exclus pour faire les opérations";            
+            }
+            else{
+
+                  // echo($name_day.' id_user:'.$id_user);
+                  // echo("Ajourd'hui le ".$to_day);
+
+                  $prsence_par_jour = $this->crud_model->tester_presence_de_jour($id_user,$to_day);
+                  if ($prsence_par_jour > 0) {
+                    echo "🗽 la présence existe déjà 🗽";
+                  }
+                  else{
+
+                      try {
+
+                        $insert_data = array(  
+                           'id_user'     =>     $id_user,
+                           'jour'        =>     $to_day
+                        );
+
+                        $requete=$this->crud_model->insert_presence($insert_data);
+                        echo("Présence ajoutée avec succès");
+                                
+                      } catch (PDOException $e) {
+                        echo("impossible ".$e->getMessage());
+                      }
+
+                  }
+              
+            }
+        }
+       
+        
+    }
 
 
 
+
+   
+
+    function supression_presence(){
+
+        $this->crud_model->delete_presence($this->input->post("idp"));
+        echo("suppression avec succès");
+      
+    }
+ 
+    // fin script presence 
+
+    function fetch_single_users()  
+    {  
+         $output = array();  
+         $data = $this->crud_model->fetch_single_users($this->input->post('id'));  
+         foreach($data as $row)  
+         {  
+              $output['first_name'] = $row->first_name;  
+              $output['last_name'] = $row->last_name; 
+
+              $output['email'] = $row->email;
+              $output['telephone'] = $row->telephone;
+              $output['full_adresse'] = $row->full_adresse;
+              $output['biographie'] = $row->biographie;
+              $output['date_nais'] = nl2br(substr(date(DATE_RFC822, strtotime($row->date_nais)), 0, 23)); 
+              $output['sexe'] = $row->sexe;
+              $output['idrole'] = $row->idrole;
+
+              $output['facebook'] = $row->facebook;
+              $output['linkedin'] = $row->linkedin;
+              $output['twitter'] = $row->twitter;
+              $output['image'] = $row->image;
+
+              if($row->image != '')  
+              {  
+                   $output['user_image'] = '<img src="'.base_url().'upload/photo/'.$row->image.'" class="img-thumbnail" width="300" height="250" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+              }  
+              else  
+              {  
+                   $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+              }  
+
+              
+         }  
+         echo json_encode($output);  
+    }
+
+    function multiplePresence()
+    {
+        if($this->input->post('checkbox_value'))
+        {
+           $id = $this->input->post('checkbox_value');
+           for($count = 0; $count < count($id); $count++)
+           {
+
+                $id_user =$id[$count];
+                //appel de la fonction pour insertion opération
+                $this->AjoutPresence($id_user);
+                
+               
+           }
+
+        }
+    }
+
+    function pdf_presence_entreprise($id_user){
+       $customer_id = "liste de présence de la start-up";
+       $html_content = "";
+       $html_content .= $this->crud_model->fetch_single_presence_apprenant($id_user);
+
+       // echo($html_content);
+
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("liste de presence de la start-up".$customer_id.".pdf", array("Attachment"=>0));
+    }
+
+    function edition(){
+      $data['title']="Paramétrage  des éditions pour formation";
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+      $this->load->view('backend/user/edition', $data);  
+    }
+
+    function formation(){
+      $data['title']="Paramétrage  des formations";
+      $data['editions']  = $this->crud_model->Select_editions();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+      $this->load->view('backend/user/formation', $data);  
+    }
+
+     function rubrique(){
+      $data['title']        = "Paramétrage  des rubriques";
+      $data['formations']   = $this->crud_model->fetch_membre_formation();
+      $data['editions']     = $this->crud_model->fetch_membre_edition();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+      $this->load->view('backend/user/rubrique', $data);
+    }
+
+    function question(){
+      $data['title']      ="Paramétrage  des questions";
+      $data['editions']  = $this->crud_model->Select_editions();
+      $data['formations']   = $this->crud_model->fetch_membre_formation();
+      $data['rubriques']   = $this->crud_model->fetch_membre_rubrique();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+      $this->load->view('backend/user/question', $data);
+    }
+
+    function reponse(){
+      $data['title']       = "Paramétrage  des réponses";
+      $data['questions']   = $this->crud_model->fetch_membre_question();
+      $data['reponses']   = $this->crud_model->fetch_membre_reponses();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+      $this->load->view('backend/user/reponse', $data);
+    }
+
+    function teste_suggestion(){
+      $data['title']       = "Paramétrage  des réponses";
+      $data['questions']   = $this->crud_model->fetch_membre_question();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+
+
+      if ($this->input->post('idedition')) {
+
+        $token = $this->input->post('idedition');
+        echo($token);
+        # code...
+      }
+      else{
+        $this->load->view('backend/admin/teste_suggestion', $data);
+      }
+
+    }
+
+    // requete de cours
+    function fetch_formation_requete(){
+      if($this->input->post('idedition'))
+      {
+        echo $this->crud_model->fetch_formations_requete($this->input->post('idedition'));
+      }
+
+    }
+
+     // requete de cours
+    function fetch_rubriques_requete(){
+      if($this->input->post('idformation'))
+      {
+        echo $this->crud_model->fetch_rubrique_requete($this->input->post('idformation'));
+      }
+
+    }
+
+    function teste_suggestion_param($param1=''){
+      $data['title']       = "Paramétrage  des réponses";
+      $data['questions']   = $this->crud_model->fetch_membre_question();
+      $data['contact_info_site']  = $this->crud_model->Select_contact_info_site();
+
+
+      $param1 = $this->input->post('token');
+     
+      if ($param1 !='') {
+
+        $token = $param1;
+        // tester si existe
+        $question_one = $this->crud_model->fetch_membre_question_param_one($token);
+        // fin de tester
+        $data['questions'] = $this->crud_model->fetch_membre_question_param($token);
+        $data['question_one'] = $this->crud_model->fetch_membre_question_param_one($token);
+        $data['token'] = $token;
+        if ($question_one->num_rows() >0) {
+          $this->load->view('backend/admin/test_sugestion_valider', $data);
+        }
+        else{
+          $result ="Token incorect!!!";
+          $this->session->set_flashdata('message2',$result);
+          $this->load->view('backend/admin/teste_suggestion', $data);
+        }
+        
+      }
+      else{
+        $result ="Veillez completer le token!!!";
+        $this->session->set_flashdata('message2',$result);
+        $this->load->view('backend/admin/teste_suggestion', $data);
+      }
+
+
+    }
+
+
+
+    // script de formation
+      function fetch_formation(){  
+
+           $fetch_data = $this->crud_model->make_datatables_formation();  
+           $data = array();  
+           foreach($fetch_data as $row)  
+           {  
+                $sub_array = array();  
+               
+                 $sub_array[] = '<img src="'.base_url().'upload/tbl_info/'.$row->image.'" class="img-thumbnail" width="50" height="35" />'; 
+                $sub_array[] = nl2br(substr($row->nom, 0,50)).'...';
+                $sub_array[] = nl2br(substr($row->edition, 0,35)).'...';
+                $sub_array[] = nl2br(substr($row->description, 0,50));  
+                $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+               
+ 
+                $sub_array[] = '<button type="button" name="update" idformation="'.$row->idformation.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';  
+                $sub_array[] = '<button type="button" name="delete" idformation="'.$row->idformation.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+                $data[] = $sub_array;  
+           }  
+           $output = array(  
+                "draw"                =>     intval($_POST["draw"]),  
+                "recordsTotal"        =>     $this->crud_model->get_all_data_formation(),  
+                "recordsFiltered"     =>     $this->crud_model->get_filtered_data_formation(),  
+                "data"                =>     $data  
+           );  
+           echo json_encode($output);  
+      }
+
+      function fetch_single_formation()  
+      {  
+           $output = array();  
+           $data = $this->crud_model->fetch_single_formation($_POST["idformation"]);  
+           foreach($data as $row)  
+           {  
+                $output['nom']            = $row->nom;
+                $output['idedition']        = $row->idedition;
+                  
+                $output['description']    = $row->description;  
+                if($row->image != '')  
+                {  
+                     $output['user_image'] = '<img src="'.base_url().'upload/tbl_info/'.$row->image.'" class="img-thumbnail" width="70" height="70" /><input type="hidden" name="hidden_user_image" value="'.$row->image.'" />';  
+                }  
+                else  
+                {  
+                     $output['user_image'] = '<input type="hidden" name="hidden_user_image" value="" />';  
+                }  
+               
+           }  
+           echo json_encode($output);  
+      }  
+
+
+      function operation_formation(){
+
+          if($_FILES["user_image"]["size"] > 0)  
+          {  
+               $insert_data = array(  
+               'nom'            =>     $this->input->post('nom'),  
+               'idedition'      =>     $this->input->post('idedition'),  
+               'description'    =>     $this->input->post("description"), 
+               'image'          =>     $this->upload_image_tbl_info()
+          );    
+          }  
+          else  
+          {  
+               $user_image = "icone-user.png";  
+               $insert_data = array(  
+               'nom'            =>     $this->input->post('nom'),
+               'idedition'      =>     $this->input->post('idedition'),   
+               'description'    =>     $this->input->post("description"), 
+               'image'          =>     $user_image
+          );   
+          }
+
+        $requete=$this->crud_model->insert_formation($insert_data);
+        echo("Ajout information avec succès");
+        
+      }
+
+      function modification_formation(){
+
+          if($_FILES["user_image"]["size"] > 0)  
+          {  
+               $updated_data = array(  
+               'nom'            =>     $this->input->post('nom'),
+               'idedition'      =>     $this->input->post('idedition'),   
+               'description'    =>     $this->input->post("description"), 
+               'image'          =>     $this->upload_image_tbl_info()
+          );    
+          }  
+          else  
+          {   
+               $updated_data = array(  
+               'nom'            =>     $this->input->post('nom'),
+               'idedition'      =>     $this->input->post('idedition'),   
+               'description'    =>     $this->input->post("description")
+          );   
+          }
+  
+          
+          $this->crud_model->update_formation($this->input->post("idformation"), $updated_data);
+
+          echo("modification avec succès");
+      }
+
+      function supression_formation(){
+ 
+          $this->crud_model->delete_formation($this->input->post("idformation"));
+          echo("suppression avec succès");
+        
+      }
+
+      function upload_image_tbl_info()  
+      {  
+           if(isset($_FILES["user_image"]))  
+           {  
+                $extension = explode('.', $_FILES['user_image']['name']);  
+                $new_name = rand() . '.' . $extension[1];  
+                $destination = './upload/tbl_info/' . $new_name;  
+                move_uploaded_file($_FILES['user_image']['tmp_name'], $destination);  
+                return $new_name;  
+           }  
+      }
+
+    // fin script formation 
+
+
+    // script de edition
+      function fetch_edition(){  
+
+           $fetch_data = $this->crud_model->make_datatables_edition();  
+           $data = array();  
+           foreach($fetch_data as $row)  
+           {  
+                $sub_array = array();  
+               
+                $sub_array[] = nl2br(substr($row->nom, 0,35)).'...'; 
+               
+                $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+               
+ 
+                $sub_array[] = '<button type="button" name="update" idedition="'.$row->idedition.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';  
+                $sub_array[] = '<button type="button" name="delete" idedition="'.$row->idedition.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+                $data[] = $sub_array;  
+           }  
+           $output = array(  
+                "draw"                =>     intval($_POST["draw"]),  
+                "recordsTotal"        =>     $this->crud_model->get_all_data_edition(),  
+                "recordsFiltered"     =>     $this->crud_model->get_filtered_data_edition(),  
+                "data"                =>     $data  
+           );  
+           echo json_encode($output);  
+      }
+
+      function fetch_single_edition()  
+      {  
+           $output = array();  
+           $data = $this->crud_model->fetch_single_edition($_POST["idedition"]);  
+           foreach($data as $row)  
+           {  
+                $output['nom']    = $row->nom; 
+
+               
+           }  
+           echo json_encode($output);  
+      }  
+
+
+      function operation_edition(){
+
+          $insert_data = array(  
+             'nom'            =>     $this->input->post('nom')
+      );  
+
+        $requete=$this->crud_model->insert_edition($insert_data);
+        echo("Ajout information avec succès");
+        
+      }
+
+      function modification_edition(){
+  
+          $updated_data = array(  
+             'nom'            =>     $this->input->post('nom')
+      );
+  
+          $this->crud_model->update_edition($this->input->post("idedition"), $updated_data);
+
+          echo("modification avec succès");
+      }
+
+      function supression_edition(){
+ 
+          $this->crud_model->delete_edition($this->input->post("idedition"));
+          echo("suppression avec succès");
+        
+      }
+    // fin script edition
+
+      // script de rubrique
+      function fetch_rubrique(){  
+
+           $fetch_data = $this->crud_model->make_datatables_rubrique();  
+           $data = array();  
+           foreach($fetch_data as $row)  
+           {  
+                $sub_array = array(); 
+
+                if ($row->active == 1) {
+                  $etat = '<a href="javascript:void(0);" type="button" name="pdf" idr="'.$row->idr.'" class="btn btn-success btn-sm desactiver"><i class="fa fa-check"></i> Activé</a>';
+                }
+                else{
+
+                    $etat = '<a href="javascript:void(0);" type="button" name="pdf" idr="'.$row->idr.'" class="btn btn-danger btn-sm  activer"><i class="fa fa-close"></i> Desactivé</a>';
+                }
+
+                $sub_array[] = $etat;  
+
+                $sub_array[] = nl2br(substr($row->nomr  , 0,30)).' ...'; 
+                
+                $sub_array[] = nl2br(substr($row->nom_formation, 0,30)).' ...'; 
+                $sub_array[] = nl2br(substr($row->nom_edition, 0,20)).' ...'; 
+                $sub_array[] = nl2br(substr($row->token , 0,20)).' ...';
+
+                $sub_array[] = '<button type="button" name="update" idr="'.$row->idr.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';  
+                $sub_array[] = '<button type="button" name="delete" idr="'.$row->idr.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+                $data[] = $sub_array;  
+           }  
+           $output = array(  
+                "draw"                =>     intval($_POST["draw"]),  
+                "recordsTotal"        =>     $this->crud_model->get_all_data_rubrique(),  
+                "recordsFiltered"     =>     $this->crud_model->get_filtered_data_rubrique(),  
+                "data"                =>     $data  
+           );  
+           echo json_encode($output);  
+      }
+
+      function fetch_single_rubrique()  
+      {  
+           $output = array();  
+           $data = $this->crud_model->fetch_single_rubrique($_POST["idr"]);  
+           foreach($data as $row)  
+           {  
+                $output['idedition']        = $row->idedition;
+                $output['idformation']      = $row->idformation;
+                $output['nomr']             = $row->nomr;
+                $output['token']          = $row->token;
+               
+           }  
+           echo json_encode($output);  
+      }  
+
+
+      function operation_rubrique(){
+
+          $insert_data = array(  
+             'idedition'            =>     $this->input->post('idedition'),
+             'idformation'          =>     $this->input->post('idformation'),
+             'nomr'                 =>     $this->input->post('nomr'),
+             'token'                =>     $this->input->post('token')   
+          ); 
+
+        $requete=$this->crud_model->insert_rubrique($insert_data);
+        echo("Ajout information avec succès");
+        
+      }
+
+      function modification_rubrique(){
+
+          $updated_data = array(  
+             'idedition'            =>     $this->input->post('idedition'),
+             'idformation'          =>     $this->input->post('idformation'),
+             'nomr'                 =>     $this->input->post('nomr'),
+             'token'                =>     $this->input->post('token') 
+          ); 
+
+          $this->crud_model->update_rubrique($this->input->post("idr"), $updated_data);
+          echo("modification avec succès");
+      }
+
+      function activation_rubrique(){
+
+          $updated_data = array(  
+             'active'  =>     1
+          ); 
+
+          $this->crud_model->update_rubrique($this->input->post("idr"), $updated_data);
+          echo("l'opération est activée avec succès 👌");
+      }
+
+      function desactivation_rubrique(){
+
+          $updated_data = array(  
+             'active'  =>     0
+          ); 
+
+          $this->crud_model->update_rubrique($this->input->post("idr"), $updated_data);
+          echo("🏧l'opération est desactivée avec succès🏧");
+      }
+
+      function supression_rubrique(){
+ 
+          $this->crud_model->delete_rubrique($this->input->post("idr"));
+          echo("suppression avec succès");
+        
+      }
+      // fin de script des rubrique 
+
+
+      // script de question
+      function fetch_question(){  
+
+           $fetch_data = $this->crud_model->make_datatables_question();  
+           $data = array();  
+           foreach($fetch_data as $row)  
+           {  
+                $sub_array = array(); 
+
+                
+                $sub_array[] = nl2br(substr($row->nomq  , 0,50)).' ...';
+                $sub_array[] = nl2br(substr($row->nomr  , 0,25)).' ...'; 
+                
+                $sub_array[] = nl2br(substr($row->nom_formation, 0,30)).' ...'; 
+                $sub_array[] = nl2br(substr($row->nom_edition, 0,20)).' ...'; 
+
+                $sub_array[] = '<button type="button" name="update" idq="'.$row->idq.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';  
+                $sub_array[] = '<button type="button" name="delete" idq="'.$row->idq.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+                $data[] = $sub_array;  
+           }  
+
+           $output = array(  
+                "draw"                =>     intval($_POST["draw"]),  
+                "recordsTotal"        =>     $this->crud_model->get_all_data_question(),  
+                "recordsFiltered"     =>     $this->crud_model->get_filtered_data_question(),  
+                "data"                =>     $data  
+           );  
+           echo json_encode($output);  
+      }
+
+      function fetch_single_question()  
+      {  
+           $output = array();  
+           $data = $this->crud_model->fetch_single_question($_POST["idq"]);  
+           foreach($data as $row)  
+           {  
+                $output['idr']        = $row->idr;
+                $output['nomq']       = $row->nomq;
+               
+           }  
+           echo json_encode($output);  
+      }  
+
+
+      function operation_question(){
+
+          $insert_data = array(  
+             'nomq'               =>     $this->input->post('nomq'),
+             'idr'                =>     $this->input->post('idr')   
+          ); 
+
+        $requete=$this->crud_model->insert_question($insert_data);
+        echo("Ajout information avec succès");
+        
+      }
+
+      function modification_question(){
+
+          $updated_data = array(  
+              'nomq'               =>     $this->input->post('nomq'),
+              'idr'                =>     $this->input->post('idr') 
+          ); 
+
+          $this->crud_model->update_question($this->input->post("idq"), $updated_data);
+          echo("modification avec succès");
+      }
+
+      function supression_question(){
+ 
+          $this->crud_model->delete_question($this->input->post("idq"));
+          echo("suppression avec succès");
+        
+      }
+
+      function pagination_questions()
+      {
+
+        $this->load->library("pagination");
+        $config = array();
+        $config["base_url"] = "#";
+        $config["total_rows"] = $this->crud_model->count_all_view_questions();
+        $config["per_page"] = 4;
+        $config["uri_segment"] = 3;
+        $config["use_page_numbers"] = TRUE;
+        $config["full_tag_open"] = '<ul class="nav pagination">';
+        $config["full_tag_close"] = '</ul>';
+        $config["first_tag_open"] = '<li class="page-item">';
+        $config["first_tag_close"] = '</li>';
+        $config["last_tag_open"] = '<li class="page-item">';
+        $config["last_tag_close"] = '</li>';
+        $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+        $config["next_tag_open"] = '<li class="page-item">';
+        $config["next_tag_close"] = '</li>';
+        $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+        $config["prev_tag_open"] = "<li class='page-item'>";
+        $config["prev_tag_close"] = "</li>";
+        $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+        $config["cur_tag_close"] = "</a></li>";
+        $config["num_tag_open"] = "<li class='page-item'>";
+        $config["num_tag_close"] = "</li>";
+        $config["num_links"] = 1;
+        $this->pagination->initialize($config);
+        $page = $this->uri->segment(3);
+        $start = ($page - 1) * $config["per_page"];
+
+        $output = array(
+         'pagination_link'  => $this->pagination->create_links(),
+         'country_table'   => $this->crud_model->fetch_details_view_question($config["per_page"], $start)
+        );
+        echo json_encode($output);
+      }
+
+
+    function fetch_search_view_questions()
+    {
+      $output = '';
+      $query = '';
+      if($this->input->post('query'))
+      {
+       $query = $this->input->post('query');
+      }
+      $data = $this->crud_model->fetch_data_search_question($query);
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+            <thead>  
+                <tr> 
+                    <th width="35%">Nom de la question</th>
+                    <th width="15%">Nom de rubrique</th> 
+                    <th width="20%">Nom de la formation</th>
+                    <th width="10%">Nom de l\'édition</th>  
+
+                    <th width="10%">Mise à jour</th>  
+                    
+                    <th width="5%">Modifier</th> 
+                    <th width="5%">Supprimer</th>  
+                </tr>  
+           </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idq="'.$row->idq.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idq="'.$row->idq.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>'.substr($row->nomq, 0,40).'...</td>
+            <td>'.substr($row->nomr, 0,20).'...</td>
+            <td>'.substr($row->nom_formation, 0,20).'...</td>
+
+            <td>'.substr($row->nom_edition, 0,20).'...</td>
+             
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+            
+            <td>'.$btn1.'</td>
+            <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+          <tfoot>  
+            <tr>  
+                <th width="35%">Nom de la question</th>
+                <th width="15%">Nom de rubrique</th> 
+                <th width="20%">Nom de la formation</th>
+                <th width="10%">Nom de l\'édition</th>  
+
+                <th width="10%">Mise à jour</th>  
+                
+                <th width="5%">Modifier</th> 
+                <th width="5%">Supprimer</th>      
+            </tr>  
+          </tfoot>    
+            
+        </table>';
+      echo $output;
+    }
+
+    function fetch_limit_view_questions()
+    {
+      $output = '';
+      $query = '';
+      if($this->input->post('limit'))
+      {
+       $query = $this->input->post('limit');
+      }
+      $data = $this->crud_model->fetch_data_limit_question($query);
+      $output .= '
+      <table class="table-striped  nk-tb-list nk-tb-ulist dataTable no-footer" data-auto-responsive="false" id="user_data" role="grid" aria-describedby="DataTables_Table_1_info">
+            <thead>  
+                <tr> 
+                    <th width="35%">Nom de la question</th>
+                    <th width="15%">Nom de rubrique</th> 
+                    <th width="20%">Nom de la formation</th>
+                    <th width="10%">Nom de l\'édition</th>  
+
+                    <th width="10%">Mise à jour</th>  
+                    
+                    <th width="5%">Modifier</th> 
+                    <th width="5%">Supprimer</th>  
+                </tr>  
+           </thead>
+         <tbody id="example-tbody">
+      ';
+      if ($data->num_rows() < 0) {
+        
+      }
+      else{
+        $btn1 = '';
+        $btn2 ='';
+        $evenement = '';
+        $etat_paiement ='';
+        $etat = '';
+
+        foreach($data->result() as $row)
+        {
+
+          $btn1 = '<button type="button" name="update" idq="'.$row->idq.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';
+
+          $btn2 = '<button type="button" name="delete" idq="'.$row->idq.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+
+         $output .= '
+        
+         <tr role="row" class="odd">
+            <td>'.substr($row->nomq, 0,40).'...</td>
+            <td>'.substr($row->nomr, 0,20).'...</td>
+            <td>'.substr($row->nom_formation, 0,20).'...</td>
+
+            <td>'.substr($row->nom_edition, 0,20).'...</td>
+             
+            <td>'.nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)).'</td>
+            
+            <td>'.$btn1.'</td>
+            <td>'.$btn2.'</td>
+
+          </tr>
+
+         ';
+        }
+      }
+      $output .= '
+        </tbody>
+          <tfoot>  
+            <tr>  
+                <th width="35%">Nom de la question</th>
+                <th width="15%">Nom de rubrique</th> 
+                <th width="20%">Nom de la formation</th>
+                <th width="10%">Nom de l\'édition</th>  
+
+                <th width="10%">Mise à jour</th>  
+                
+                <th width="5%">Modifier</th> 
+                <th width="5%">Supprimer</th>      
+            </tr>  
+          </tfoot>    
+            
+        </table>';
+      echo $output;
+    }
+
+      // fin de script des question
+
+
+      // script de reponse
+      function fetch_reponse(){  
+
+           $fetch_data = $this->crud_model->make_datatables_reponse();  
+           $data = array();  
+           foreach($fetch_data as $row)  
+           {  
+                $sub_array = array(); 
+
+                
+               
+                $sub_array[] = '<input type="checkbox" class="delete_checkbox" value="'.$row->idrep.'" /> &nbsp;&nbsp;&nbsp; <a href="'.base_url().'user/pdf_reponse/'.$row->idr.'" class="btn btn-primary btn-sm print"><i class="fa fa-print"></i></a>'; 
+
+                $sub_array[] = nl2br(substr($row->nomq  , 0,50)).' ...';
+                $sub_array[] = nl2br(substr($row->valeur  , 0,20)).' ...';
+                $sub_array[] = nl2br(substr($row->nomr  , 0,25)).' ...'; 
+                
+               
+                $sub_array[] = nl2br(substr(date(DATE_RFC822, strtotime($row->created_at)), 0, 23)); 
+
+                $sub_array[] = '<button type="button" name="update" idrep="'.$row->idrep.'" class="btn btn-warning btn-sm update"><i class="fa fa-edit"></i></button>';  
+                $sub_array[] = '<button type="button" name="delete" idrep="'.$row->idrep.'" class="btn btn-danger btn-sm delete"><i class="fa fa-trash"></i></button>';  
+                $data[] = $sub_array;  
+           }  
+           $output = array(  
+                "draw"                =>     intval($_POST["draw"]),  
+                "recordsTotal"        =>     $this->crud_model->get_all_data_reponse(),  
+                "recordsFiltered"     =>     $this->crud_model->get_filtered_data_reponse(),  
+                "data"                =>     $data  
+           );  
+           echo json_encode($output);  
+      }
+
+      function fetch_single_reponse()  
+      {  
+           $output = array();  
+           $data = $this->crud_model->fetch_single_reponse($_POST["idrep"]);  
+           foreach($data as $row)  
+           {  
+                $output['idq']        = $row->idq;
+                $output['valeur']     = $row->valeur;
+               
+           }  
+           echo json_encode($output);  
+      }  
+
+
+      function operation_reponse(){
+
+          $idq = $this->input->post('idq');
+          $id_user = $this->connected;
+
+          $prsence_par_jour = $this->crud_model->tester_reponse($id_user,$idq);
+          if ($prsence_par_jour > 0) {
+            echo "🗽 vous avez déjà répondu à cette question!🗽";
+          }
+          else{
+
+              try {
+
+                $insert_data = array(  
+                   'valeur'             =>     $this->input->post('valeur'),
+                   'idq'                =>     $this->input->post('idq'),
+                   'id_user'            =>     $this->connected  
+                ); 
+
+                $requete=$this->crud_model->insert_reponse($insert_data);
+                echo("Merci beaucoup pour votre sugestion");
+                        
+              } catch (PDOException $e) {
+                echo("impossible ".$e->getMessage());
+              }
+
+          }
+
+          
+        
+      }
+
+      function modification_reponse(){
+
+          $updated_data = array(  
+              'valeur'             =>     $this->input->post('valeur'),
+              'idq'                =>     $this->input->post('idq') 
+          ); 
+
+          $this->crud_model->update_reponse($this->input->post("idrep"), $updated_data);
+          echo("modification avec succès");
+      }
+
+      function supression_reponse(){
+ 
+          $this->crud_model->delete_reponse($this->input->post("idrep"));
+          echo("suppression avec succès");
+        
+      }
+
+      function Delete_multiple_reponse()
+     {
+        if($this->input->post('checkbox_value'))
+        {
+         $id = $this->input->post('checkbox_value');
+         for($count = 0; $count < count($id); $count++)
+         {
+          $this->crud_model->Delete_reponse_tag($id[$count]);
+         }
+         echo("suppression avec succès");
+        }
+
+     }
+      // fin de script des reponse
+
+    function pdf_reponse($param1=''){
+       $customer_id = "pdf reponses pour les apprenants de rubrique formation_".$param1;
+       $html_content = '';
+       $html_content .= $this->crud_model->fetch_single_details_pdf_reponse($param1);
+
+       // echo($html_content);
+       $this->pdf->loadHtml($html_content);
+       $this->pdf->render();
+       $this->pdf->stream("pdf reponses pour les apprenants de rubrique formation_".$customer_id.".pdf", array("Attachment"=>0));
+    }
+
+    function pagination_reponses()
+    {
+
+        $this->load->library("pagination");
+        $config = array();
+        $config["base_url"] = "#";
+        $config["total_rows"] = $this->crud_model->count_all_view_reponses();
+        $config["per_page"] = 4;
+        $config["uri_segment"] = 3;
+        $config["use_page_numbers"] = TRUE;
+        $config["full_tag_open"] = '<ul class="nav pagination">';
+        $config["full_tag_close"] = '</ul>';
+        $config["first_tag_open"] = '<li class="page-item">';
+        $config["first_tag_close"] = '</li>';
+        $config["last_tag_open"] = '<li class="page-item">';
+        $config["last_tag_close"] = '</li>';
+        $config['next_link'] = '<li class="page-item active"><i class="btn btn-info">&gt;&gt;</i>';
+        $config["next_tag_open"] = '<li class="page-item">';
+        $config["next_tag_close"] = '</li>';
+        $config["prev_link"] = '<li class="page-item active"><i class="btn btn-info">&lt;&lt;</i>';
+        $config["prev_tag_open"] = "<li class='page-item'>";
+        $config["prev_tag_close"] = "</li>";
+        $config["cur_tag_open"] = "<li class='page-item active'><a href='#' class='page-link'>";
+        $config["cur_tag_close"] = "</a></li>";
+        $config["num_tag_open"] = "<li class='page-item'>";
+        $config["num_tag_close"] = "</li>";
+        $config["num_links"] = 1;
+        $this->pagination->initialize($config);
+        $page = $this->uri->segment(3);
+        $start = ($page - 1) * $config["per_page"];
+
+        $output = array(
+         'pagination_link'  => $this->pagination->create_links(),
+         'country_table'   => $this->crud_model->fetch_details_view_reponse($config["per_page"], $start)
+        );
+        echo json_encode($output);
+      }
 
 
 

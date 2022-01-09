@@ -3,7 +3,7 @@
       <div class="container space-2">
         <div class="row justify-content-lg-center">
           <div class="col-md-12 text-center">
-            <h4>Nous essayons toujours comprendre les attentes  des utilisateurs</h4>
+            <h4>Nous essayons de toujours comprendre les attentes  des utilisateurs</h4>
            
             <hr>
           </div>
@@ -12,7 +12,7 @@
             <a class="d-block text-center px-md-3" href="#">
               <img class="clients mb-3" src="<?php echo base_url(); ?>js/dev/assets/svg/icons/mortgage.svg" alt="Image Description">
               <span class="d-block h2">+200</span>
-              <p class="text-body">Start-ups formées</p>
+              <p class="text-body">Entreprises Formalisées</p>
             </a>
             <!-- End Stats -->
           </div>
@@ -31,8 +31,8 @@
             <!-- Stats -->
             <a class="d-block text-center column-divider-md column-divider-20deg px-md-3" href="#">
               <img class="clients mb-3" src="<?php echo base_url(); ?>js/dev/assets/svg/icons/loan.svg" alt="Image Description">
-              <span class="d-block h2">+500</span>
-              <p class="text-body">Acompagements aux différents</p>
+              <span class="d-block h2">+120,000$</span>
+              <p class="text-body">Investis dans des projets</p>
             </a>
             <!-- End Stats -->
           </div>

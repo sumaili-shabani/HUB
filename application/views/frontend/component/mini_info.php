@@ -3,7 +3,7 @@
       <div class="col-md-12 text-center">
         <span class="font-weight-bold text-center">Nous sommes là pour vous!</span>
       </div>
-      « Partenaire des entrepreneurs en RDC, <?php echo($nom_site_info) ?> propose une offre complète. Quelle que soit la situation de l'entrepreneur ou du projet, il y a une offre adaptée.. ».
+      « Partenaire des entrepreneurs en RDC, le <?php echo($nom_site_info) ?> propose une offre complète. Quelle que soit la situation de l'entrepreneur ou du projet, il y a une offre adaptée.. ».
     </div>
   </div>
 
@@ -18,7 +18,7 @@
               <img src="<?php echo base_url(); ?>js/dev/assets/img/avatar/home.png" style="width: 100px; text-align: center;">
             </div>
             <h5 class="card-title">BESOIN DE CONSEIL</h5>
-            <p class="card-text">Cliquez Ici si Vous Voulez Entrer en Contact avec Un Agent de <?php echo($nom_site_info) ?>.</p>
+            <p class="card-text">Cliquez Ici si Vous Voulez Entrer en Contact avec Un Agent du <?php echo($nom_site_info) ?>.</p>
             <a href="<?php echo(base_url()) ?>home/contact" class="card-link">Nous contacter</a>
             
           </div>
@@ -40,6 +40,7 @@
               <a href="tel:<?php echo($tel1_info) ?>" class="text-warning"><?php echo($tel1_info) ?></a>
               <br>
               <a href="tel:<?php echo($tel2_info) ?>" class="text-warning"><?php echo($tel2_info) ?></a>
+               <br>
               <a href="mailto:<?php echo($email_info) ?>"><?php echo($email_info) ?></a>
             </p>
             <a href="<?php echo(base_url()) ?>home/contact" class="card-link">Nous contacter</a>
@@ -59,7 +60,7 @@
               <img src="<?php echo base_url(); ?>js/dev/assets/img/avatar/map.png" style="width: 100px; text-align: center; background-color: white;">
             </div>
             <h5 class="card-title">BESOIN D'AIDE?</h5>
-            <p class="card-text">Cliquez Ici si vous avez Besoin de discuter avec Nous ?</p>
+            <p class="card-text">Cliquez Ici si vous avez Besoin de discuter avec Nous </p>
             <a href="<?php echo(base_url()) ?>home/contact" class="card-link">Nous contacter</a>
             <br><br>
             
